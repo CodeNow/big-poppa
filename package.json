@@ -1,0 +1,37 @@
+{
+  "name": "cream",
+  "version": "0.0.1",
+  "description": "User management and billing",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard --verbose",
+    "test": "npm run lint && NODE_ENV=test mocha test",
+    "init-db": "createuser -s -d cream; createdb cream; createdb cream-test",
+    "drop-db": "dropdb cream && dropdb cream-test",
+    "migrate": "npm run migrate-dev && npm run migrate-test",
+    "rollback": "npm run rollback-dev && npm run rollback-test",
+    "migrate-dev": "knex migrate:latest",
+    "rollback-dev": "knex migrate:rollback",
+    "migrate-test": "NODE_ENV=test knex migrate:latest",
+    "rollback-test": "NODE_ENV=test knex migrate:rollback"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "it",
+      "before",
+      "after",
+      "beforeEach",
+      "afterEach"
+    ]
+  },
+  "author": "",
+  "dependencies": {
+    "knex": "^0.11.7",
+    "loadenv": "^2.2.0",
+    "pg": "^6.0.0"
+  }
+}
