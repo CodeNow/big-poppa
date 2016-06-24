@@ -7,7 +7,7 @@ var debug = require('debug')('cream:migration')
  */
 
 exports.up = function (knex, Promise) {
-  var createTable = knex.schema.createTable('users', function (table) {
+  var createTable = knex.schema.createTable('user', function (table) {
     table.integer('github_id')
       .primary()
     table.timestamps(true) // Adds default `created_at` `updated_at` timestamps
@@ -17,7 +17,7 @@ exports.up = function (knex, Promise) {
 }
 
 exports.down = function (knex, Promise) {
-  var dropTable = knex.schema.dropTable('users')
+  var dropTable = knex.schema.dropTable('user')
   debug(dropTable.toString())
   return dropTable
 }
