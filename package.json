@@ -13,10 +13,16 @@
     "migrate-dev": "knex migrate:latest",
     "rollback-dev": "knex migrate:rollback",
     "migrate-test": "NODE_ENV=test knex migrate:latest",
-    "rollback-test": "NODE_ENV=test knex migrate:rollback"
+    "rollback-test": "NODE_ENV=test knex migrate:rollback",
+    "start-users-worker": "node lib/user-management/worker",
+    "start-users-worker-dev": "node lib/user-management/worker | bunyan"
   },
   "directories": {
     "test": "test"
+  },
+  "engines": {
+    "node": ">=4.4.5 <5",
+    "npm": ">=2.14.7"
   },
   "standard": {
     "globals": [
@@ -30,8 +36,16 @@
   },
   "author": "",
   "dependencies": {
+    "101": "^1.6.0",
+    "bookshelf": "^0.9.5",
+    "bunyan": "^1.8.1",
+    "github": "^1.4.0",
+    "joi": "^8.4.2",
     "knex": "^0.11.7",
     "loadenv": "^2.2.0",
-    "pg": "^6.0.0"
+    "moment": "^2.13.0",
+    "pg": "^6.0.0",
+    "ponos": "^4.0.0",
+    "runnable-hermes": "^6.6.0"
   }
 }
