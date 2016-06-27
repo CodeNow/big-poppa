@@ -47,5 +47,8 @@
     "pg": "^6.0.0",
     "ponos": "^4.0.0",
     "runnable-hermes": "^6.6.0"
+  },
+  "devDependencies": {
+    "standard": "^7.1.2"
   }
 }

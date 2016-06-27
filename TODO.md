@@ -1,13 +1,16 @@
 # TODO
 
-- [ ] Add get routes
-- [ ] Add class methods for models?
+- [x] Add class methods for models?
+- [ ] Remove all references to astral/drake/etc
+- [ ] When deleting user, also delete relationship
+
 - [ ] Write unit tests for workers
 - [ ] Write 1 integration test for each worker
-- [ ] When deleting user, also delete relationship
+
+- [ ] Add get routes
 - [ ] Publish events when things happen (4)
-- [ ] Remove all references to astral/drake/etc
+
 - [ ] Add JSDoc everywhere
 - [ ] Add README
-	- [ ] Add definition of unit tests
-  - [ ] Add definition of integration tests
+ - [ ] Add definition of unit tests
+ - [ ] Add definition of integration tests
