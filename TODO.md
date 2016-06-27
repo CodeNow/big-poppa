@@ -1,8 +1,8 @@
 # TODO
 
 - [x] Add class methods for models?
+- [x] When deleting user, also delete relationship
 - [ ] Remove all references to astral/drake/etc
-- [ ] When deleting user, also delete relationship
 
 - [ ] Write unit tests for workers
 - [ ] Write 1 integration test for each worker
@@ -12,5 +12,5 @@
 
 - [ ] Add JSDoc everywhere
 - [ ] Add README
- - [ ] Add definition of unit tests
- - [ ] Add definition of integration tests
+- [ ] README: Add definition of unit tests
+- [ ] README: Add definition of integration tests
