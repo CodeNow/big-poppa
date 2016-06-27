@@ -1,6 +1,6 @@
 'use strict'
 
-var debug = require('debug')('cream:migration')
+var debug = require('debug')('big-poppa:migration')
 
 /**
  * Creates the `users` table.

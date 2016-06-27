@@ -2,7 +2,7 @@
 
 - [x] Add class methods for models?
 - [x] When deleting user, also delete relationship
-- [ ] Remove all references to astral/drake/etc
+- [x] Remove all references to astral/drake/etc
 
 - [ ] Write unit tests for workers
 - [ ] Write 1 integration test for each worker

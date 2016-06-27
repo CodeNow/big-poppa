@@ -1,6 +1,6 @@
 'use strict'
 
-let debug = require('debug')('cream:migration')
+let debug = require('debug')('big-poppa:migration')
 
 /**
  * Creates the `organization_user` table.
