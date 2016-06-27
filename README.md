@@ -1,4 +1,9 @@
-# C.R.E.A.M.
+# Big Poppa
+
+Container repo/service for two microservices that share models:
+
+- Hooray: user management
+- CREAM: billing
 
 ### Setup
 
