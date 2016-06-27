@@ -4,8 +4,8 @@
 - [x] When deleting user, also delete relationship
 - [x] Remove all references to astral/drake/etc
 
-- [ ] Write unit tests for workers
-- [ ] Write 1 integration test for each worker
+- [ ] Write unit tests for workers, models, .etc
+- [ ] Write 1 functional test for model method
 
 - [ ] Add get routes
 - [ ] Publish events when things happen (4)
