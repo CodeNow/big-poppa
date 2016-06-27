@@ -37,10 +37,12 @@
   "author": "",
   "dependencies": {
     "101": "^1.6.0",
+    "bluebird": "^3.4.1",
     "bookshelf": "^0.9.5",
     "bunyan": "^1.8.1",
     "github": "^1.4.0",
     "joi": "^8.4.2",
+    "keypather": "^2.0.0",
     "knex": "^0.11.7",
     "loadenv": "^2.2.0",
     "moment": "^2.13.0",
