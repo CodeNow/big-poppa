@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "standard --verbose",
-    "test": "npm run lint && NODE_ENV=test mocha test",
+    "test": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha test",
     "init-db": "createuser -s -d big-poppa; createdb big-poppa; createdb big-poppa-test",
     "drop-db": "dropdb big-poppa && dropdb big-poppa-test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
@@ -14,8 +14,10 @@
     "rollback-dev": "knex migrate:rollback",
     "migrate-test": "NODE_ENV=test knex migrate:latest",
     "rollback-test": "NODE_ENV=test knex migrate:rollback",
-    "start-hooray-worker": "node lib/hooray/worker",
-    "start-hooray-worker-dev": "NODE_ENV=development node lib/hooray/worker | bunyan"
+    "test-common": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha test/common/unit/user.js",
+    "start-hooray-worker": "NODE_PATH=./lib node lib/hooray/worker",
+    "start-hooray-worker-dev": "NODE_PATH=./lib NODE_ENV=development node lib/hooray/worker | bunyan",
+    "test-hooray": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha test/hooray"
   },
   "directories": {
     "test": "test"
@@ -40,6 +42,7 @@
     "bluebird": "^3.4.1",
     "bookshelf": "^0.9.5",
     "bunyan": "^1.8.1",
+    "chai": "^3.5.0",
     "github": "^1.4.0",
     "joi": "^8.4.2",
     "keypather": "^2.0.0",
@@ -51,6 +54,8 @@
     "runnable-hermes": "^6.6.0"
   },
   "devDependencies": {
+    "sinon": "^1.17.4",
+    "sinon-as-promised": "^4.0.0",
     "standard": "^7.1.2"
   }
 }
