@@ -7,8 +7,6 @@ Container repo/service for two microservices that share models:
 
 ### Setup
 
-(Copied from [astral](https://github.com/CodeNow/astral))
-
 #### Postgresql
 
 The first step is to install postgres. From the command-line (on Mac OSX) run
