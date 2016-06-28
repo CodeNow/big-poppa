@@ -8,8 +8,10 @@ var debug = require('debug')('big-poppa:migration')
 
 exports.up = function (knex, Promise) {
   var createTable = knex.schema.createTable('user', function (table) {
-    table.integer('github_id')
+    table.increments('id')
       .primary()
+    table.integer('github_id')
+      .unique()
     table.timestamps(true) // Adds default `created_at` `updated_at` timestamps
   })
   debug(createTable.toString())

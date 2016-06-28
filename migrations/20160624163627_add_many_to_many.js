@@ -7,11 +7,11 @@ let debug = require('debug')('big-poppa:migration')
  */
 exports.up = function (knex, Promise) {
   let createTable = knex.schema.createTable('organization_user', function (table) {
-    table.integer('organization_github_id')
-      .references('organization.github_id')
-    table.integer('user_github_id')
-      .references('user.github_id')
-    table.unique(['organization_github_id', 'user_github_id'])
+    table.integer('organization_id')
+      .references('organization.id')
+    table.integer('user_id')
+      .references('user.id')
+    table.unique(['organization_id', 'user_id'])
   })
   debug(createTable.toString())
   return createTable
