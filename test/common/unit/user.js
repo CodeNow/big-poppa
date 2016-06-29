@@ -1,4 +1,5 @@
 'use strict'
+
 const Promise = require('bluebird')
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
