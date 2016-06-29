@@ -19,7 +19,6 @@
     "test-common": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha --recursive test/common/",
 
     "start-hooray-worker": "NODE_PATH=./lib node lib/hooray/workers",
-    "start-hooray-worker-dev": "NODE_PATH=./lib NODE_ENV=development node lib/hooray/workers | bunyan",
     "test-hooray": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/hooray"
   },
   "directories": {
