@@ -16,7 +16,7 @@
     "rollback-dev": "knex migrate:rollback",
     "migrate-test": "NODE_ENV=test knex migrate:latest",
     "rollback-test": "NODE_ENV=test knex migrate:rollback",
-    "test-common": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha --recursive test/common/",
+    "test-common": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/common/",
     "start-hooray-worker": "NODE_PATH=./lib node lib/hooray/workers",
     "init-start-hooray-worker": "npm run migrate && NODE_PATH=./lib node lib/hooray/workers",
     "test-hooray": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/hooray"
