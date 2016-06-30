@@ -1,6 +1,8 @@
 'use strict'
 
 const expect = require('chai').expect
+const sinon = require('sinon')
+require('sinon-as-promised')
 
 const testUtil = require('../../../util')
 const githubOrganizationFixture = require('../../../fixtures/github/organization')
@@ -9,6 +11,7 @@ const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const bookshelf = require('common/models').bookshelf
+const NoRowsDeletedError = require('common/errors/no-rows-deleted-error')
 const knex = bookshelf.knex
 
 const User = require('common/models/user')
@@ -75,5 +78,45 @@ describe('user.delete', () => {
         expect(res[0].count).to.have.equal('0')
       })
       .asCallback(done)
+  })
+
+  describe('Transactions', () => {
+    beforeEach(() => {
+      sinon.stub(bookshelf.Model.prototype, 'destroy').rejects(new NoRowsDeletedError())
+    })
+
+    afterEach(() => {
+      bookshelf.Model.prototype.destroy.restore()
+    })
+
+    it('should not commit any database changes if there\'s an error', done => {
+      let userId
+      User.fetchByGithubId(userGithubId)
+        .then((user) => {
+          userId = user.get(user.idAttribute)
+          return DeleteUser({ githubId: userGithubId })
+            .then(() => { throw new Error('`DeleteUser` should fail') })
+        })
+        .catch(() => {
+          // Check database for entry
+          return Promise.all([
+            knex('user').where('id', userId),
+            knex('organization_user').where('user_id', userId)
+          ])
+        })
+        .spread((userRes, relRes) => {
+          // Entry for user in database
+          expect(userRes).to.be.an('array')
+          expect(userRes).to.have.lengthOf(1)
+          expect(userRes[0]).to.be.an('object')
+          expect(userRes[0].github_id).to.equal(userGithubId)
+          // Entry for many-to-many relationship in database
+          expect(relRes).to.be.an('array')
+          expect(relRes).to.have.lengthOf(1)
+          expect(relRes[0]).to.be.an('object')
+          expect(relRes[0].user_id).to.equal(userId)
+        })
+        .asCallback(done)
+    })
   })
 })
