@@ -3,9 +3,8 @@
 - [x] Add class methods for models?
 - [x] When deleting user, also delete relationship
 - [x] Remove all references to astral/drake/etc
-
 - [ ] Write unit tests for workers, models, .etc
-- [ ] Write 1 functional test for model method
+- [x] Write 1 functional test for model method
 
 - [ ] Add get routes
 - [ ] Publish events when things happen (4)
