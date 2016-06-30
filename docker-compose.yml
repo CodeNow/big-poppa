@@ -1,0 +1,20 @@
+rabbitmq:
+  image: rabbitmq
+  environment:
+    RABBITMQ_DEFAULT_USER: guest
+    RABBITMQ_DEFAULT_PASS: guest
+
+postgres:
+  image: postgres
+  environment:
+    POSTGRES_USER: big-poppa
+    POSTGRES_DB: big-poppa
+
+worker:
+  build: .
+  environment:
+    NODE_ENV: docker-development
+
+  links:
+    - postgres
+    - rabbitmq
