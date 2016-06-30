@@ -10,12 +10,14 @@ const Organization = require('common/models/organization')
 module.exports = class TestUtil {
 
   static trundateAllTables () {
-    return Promise.all([
-      knex('organization_user').truncate(),
-      // Cannot truncate because of foreign key constraint
-      knex('organization').del(),
-      knex('user').del()
-    ])
+    return knex('organization_user').truncate()
+      .then(() => {
+        return Promise.all([
+          // Cannot truncate because of foreign key constraint
+          knex('organization').del(),
+          knex('user').del()
+        ])
+      })
   }
 
   static createUserAndOrg (orgGithubId, userGithubId) {
