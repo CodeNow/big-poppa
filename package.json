@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "standard --verbose",
     "test": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha --recursive test/",
-
+    "test-integration": "npm run lint && NODE_PATH=./lib NODE_ENV=test-integration mocha --recursive test/",
     "init-db": "createuser -s -d big-poppa; createdb big-poppa; createdb big-poppa-test",
     "drop-db": "dropdb big-poppa && dropdb big-poppa-test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
@@ -15,9 +15,7 @@
     "rollback-dev": "knex migrate:rollback",
     "migrate-test": "NODE_ENV=test knex migrate:latest",
     "rollback-test": "NODE_ENV=test knex migrate:rollback",
-
     "test-common": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha --recursive test/common/",
-
     "start-hooray-worker": "NODE_PATH=./lib node lib/hooray/workers",
     "test-hooray": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/hooray"
   },
@@ -56,8 +54,10 @@
     "runnable-hermes": "^6.6.0"
   },
   "devDependencies": {
+    "debug": "^2.2.0",
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
+    "mehpi": "git+ssh://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
     "standard": "^7.1.2"
   }
 }

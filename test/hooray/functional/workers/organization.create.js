@@ -1,30 +1,36 @@
 'use strict'
 
-const Promise = require('bluebird')
-const sinon = require('sinon')
-require('sinon-as-promised')(Promise)
 const expect = require('chai').expect
 
 const testUtil = require('../../../util')
-const GithubAPI = require('common/github')
+const githubOrganizationFixture = require('../../../fixtures/github/organization')
+const MockAPI = require('mehpi')
+const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
+
 const bookshelf = require('common/models').bookshelf
 const knex = bookshelf.knex
 
 const CreateOrganization = require('hooray/workers/organization.create')
 
 describe('organization.create', () => {
+  let githubId = 2828361
+
+  before(done => githubAPI.start(done))
+  after(done => githubAPI.stop(done))
+
   beforeEach(done => {
-    sinon.stub(GithubAPI, 'getOrganization').resolves({ type: 'Organization' })
     testUtil.trundateAllTables()
      .asCallback(done)
   })
 
-  afterEach(() => {
-    GithubAPI.getOrganization.restore()
+  beforeEach(() => {
+    githubAPI.stub('GET', `/user/${githubId}?access_token=testing`).returns({
+      status: 200,
+      body: githubOrganizationFixture
+    })
   })
 
   it('should create an organization', done => {
-    let githubId = 1981198
     CreateOrganization({ githubId: githubId }).then((organization) => {
       expect(organization.get('github_id')).to.equal(githubId)
       // Check database for entry
