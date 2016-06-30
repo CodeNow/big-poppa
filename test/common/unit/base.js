@@ -3,16 +3,62 @@
 const Promise = require('bluebird')
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
-const expect = require('chai').expect
+const chai = require('chai')
+chai.use(require('chai-as-promised'))
+const expect = chai.expect
 
 const bookshelf = require('common/models').bookshelf
 const BaseModel = require('common/models/base')
-const User = require('common/models/user')
 
+const DatabaseError = require('common/errors/database-error')
 const NotNullError = require('common/errors/not-null-error')
+const NotFoundError = require('common/errors/not-found-error')
+const NoRowsUpdatedError = require('common/errors/no-rows-updated-error')
 const NoRowsDeletedError = require('common/errors/no-rows-deleted-error')
 
 describe('Base', () => {
+  let TestModel
+
+  before(() => {
+    // Create a test model to ensure nothing gets overwritten
+    TestModel = BaseModel.extend('TestModel')
+  })
+
+  describe('#extend', () => {
+    let StubModel
+    let stubInstance
+
+    before(() => {
+      StubModel = BaseModel.extend('StubModel')
+      stubInstance = new StubModel()
+    })
+
+    it('should set the `modelName` on prototype and static methods', () => {
+      console.log(StubModel)
+      expect(StubModel.modelName).to.equal('StubModel')
+      expect(stubInstance.modelName).to.equal('StubModel')
+    })
+
+    it('should create an empty model if no prototype/static methods are passed', () => {
+      expect(StubModel.fetchById).to.be.a('function')
+      expect(StubModel.fetchById).to.equal(BaseModel.staticMethods.fetchById)
+      expect(stubInstance.save).to.be.a('function')
+      expect(stubInstance.save).to.equal(BaseModel.prototypeMethods.save)
+    })
+
+    it('should overwrite base behavior', () => {
+      let save = () => {}
+      let fetchById = () => {}
+      StubModel = BaseModel.extend('StubModel2', { save: save }, { fetchById: fetchById })
+      stubInstance = new StubModel()
+
+      expect(StubModel.fetchById).to.be.a('function')
+      expect(StubModel.fetchById).to.equal(fetchById)
+      expect(stubInstance.save).to.be.a('function')
+      expect(stubInstance.save).to.equal(save)
+    })
+  })
+
   describe('Prototype Methods', () => {
     describe('#initialize', () => {
       let model
@@ -65,9 +111,8 @@ describe('Base', () => {
           bookshelf.Model.prototype.save.rejects(error)
 
           let githubId = 1
-          let user = new User({ github_id: githubId })
-          expect(user.save).to.equal(BaseModel.prototypeMethods.save)
-          user.save().asCallback(err => {
+          let testModel = new TestModel({ github_id: githubId })
+          testModel.save().asCallback(err => {
             sinon.assert.calledOnce(bookshelf.Model.prototype.save)
             expect(err).to.be.an.instanceOf(NotNullError)
             done()
@@ -78,9 +123,8 @@ describe('Base', () => {
       describe('Success', () => {
         it('should save the model if no errors are thrown', (done) => {
           let githubId = 1
-          let user = new User({ github_id: githubId })
-          expect(user.save).to.equal(BaseModel.prototypeMethods.save)
-          user.save().asCallback(err => {
+          let testModel = new TestModel({ github_id: githubId })
+          testModel.save().asCallback(err => {
             expect(err).to.not.exist
             sinon.assert.calledOnce(bookshelf.Model.prototype.save)
             let model = bookshelf.Model.prototype.save.thisValues[0]
@@ -107,9 +151,8 @@ describe('Base', () => {
           bookshelf.Model.prototype.destroy.rejects(error)
 
           let githubId = 1
-          let user = new User({ github_id: githubId })
-          expect(user.destroy).to.equal(BaseModel.prototypeMethods.destroy)
-          user.destroy().asCallback(err => {
+          let testModel = new TestModel({ github_id: githubId })
+          testModel.destroy().asCallback(err => {
             sinon.assert.calledOnce(bookshelf.Model.prototype.destroy)
             expect(err).to.be.an.instanceOf(NotNullError)
             done()
@@ -118,13 +161,12 @@ describe('Base', () => {
 
         it('should correctly cast a NoRowsDeletedError', (done) => {
           // http://bookshelfjs.org/#section-Model-static-NoRowsDeletedError
-          let error = new User.NoRowsDeletedError('super error')
+          let error = new TestModel.NoRowsDeletedError('super error')
           bookshelf.Model.prototype.destroy.rejects(error)
 
           let githubId = 1
-          let user = new User({ github_id: githubId })
-          expect(user.destroy).to.equal(BaseModel.prototypeMethods.destroy)
-          user.destroy().asCallback(err => {
+          let testModel = new TestModel({ github_id: githubId })
+          testModel.destroy().asCallback(err => {
             sinon.assert.calledOnce(bookshelf.Model.prototype.destroy)
             expect(err).to.be.an.instanceOf(NoRowsDeletedError)
             done()
@@ -135,9 +177,8 @@ describe('Base', () => {
       describe('Success', () => {
         it('should destroy the model if no errors are thrown', (done) => {
           let githubId = 1
-          let user = new User({ github_id: githubId })
-          expect(user.destroy).to.equal(BaseModel.prototypeMethods.destroy)
-          user.destroy().asCallback(err => {
+          let testModel = new TestModel({ github_id: githubId })
+          testModel.destroy().asCallback(err => {
             expect(err).to.not.exist
             sinon.assert.calledOnce(bookshelf.Model.prototype.destroy)
             let model = bookshelf.Model.prototype.destroy.thisValues[0]
@@ -148,16 +189,305 @@ describe('Base', () => {
       })
     })
 
-    describe('#getAllUserOrgsIds', () => {
+    describe('Loggers', () => {
+      let model
+      let attrs
+      let opts
+      let modelName
+      let queryString
+      beforeEach(() => {
+        modelName = 'WOW'
+        queryString = 'select * from "testModel"'
+        model = {
+          modelName: modelName,
+          log: {
+            info: sinon.stub()
+          }
+        }
+        attrs = {}
+        opts = {
+          method: 'insert',
+          query: {
+            toString: sinon.stub().returns(queryString)
+          }
+        }
+      })
 
+      describe('#logSaving', () => {
+        it('should call the logger', () => {
+          BaseModel.prototypeMethods.logSaving(model, attrs, opts)
+          sinon.assert.calledOnce(model.log.info)
+          sinon.assert.calledWithExactly(
+            model.log.info,
+            {
+              attrs: attrs,
+              method: opts.method,
+              query: queryString
+            },
+            'Saving ' + modelName
+          )
+          sinon.assert.calledOnce(opts.query.toString)
+        })
+      })
+
+      describe('#logSaved', () => {
+        it('should call the logger', () => {
+          BaseModel.prototypeMethods.logSaved(model, attrs, opts)
+          sinon.assert.calledOnce(model.log.info)
+          sinon.assert.calledWithExactly(
+            model.log.info,
+            {
+              attrs: attrs,
+              method: opts.method,
+              query: queryString
+            },
+            'Saved ' + modelName
+          )
+          sinon.assert.calledOnce(opts.query.toString)
+        })
+      })
+
+      describe('#logDestroying', () => {
+        it('should call the logger', () => {
+          BaseModel.prototypeMethods.logDestroying(model, opts)
+          sinon.assert.calledOnce(model.log.info)
+          sinon.assert.calledWithExactly(
+            model.log.info,
+            {
+              method: opts.method,
+              query: queryString
+            },
+            'Destroying ' + modelName
+          )
+          sinon.assert.calledOnce(opts.query.toString)
+        })
+      })
+
+      describe('#logDestroyed', () => {
+        it('should call the logger', () => {
+          BaseModel.prototypeMethods.logDestroyed(model, attrs, opts)
+          sinon.assert.calledOnce(model.log.info)
+          sinon.assert.calledWithExactly(
+            model.log.info,
+            {
+              method: opts.method,
+              query: queryString
+            },
+            'Destroyed ' + modelName
+          )
+          sinon.assert.calledOnce(opts.query.toString)
+        })
+      })
     })
   })
 
   describe('Static Methods', () => {
     describe('#fetchById', () => {
+      let modelId = 123
+      let fetchById = BaseModel.staticMethods.fetchById
+      let testModel = {}
+      let fetchStub
+      beforeEach(() => {
+        sinon.stub(bookshelf.Model.prototype, 'fetch').resolves(testModel)
+        fetchStub = bookshelf.Model.prototype.fetch
+      })
+
+      afterEach(() => {
+        bookshelf.Model.prototype.fetch.restore()
+        fetchStub = null
+      })
+
+      it('should return the model', done => {
+        TestModel.fetchById(modelId)
+          .asCallback((err, res) => {
+            expect(err).to.not.exist
+            expect(res).to.equal(testModel)
+            done()
+          })
+      })
+
+      it('should fetch the model with `require`', done => {
+        TestModel.fetchById(modelId)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            expect(fetchStub.thisValues[0].get('id')).to.equal(modelId)
+            sinon.assert.calledWithExactly(fetchStub, { require: true })
+            done()
+          })
+      })
+
+      it('should pass opts (like a transaction) into fetch', done => {
+        let t = {} // transaction
+        TestModel.fetchById(modelId, { transacting: t })
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            expect(fetchStub.thisValues[0].get('id')).to.equal(modelId)
+            sinon.assert.calledWithExactly(fetchStub, { require: true, transacting: t })
+            done()
+          })
+      })
+
+      it('should should not override the `require` opt', done => {
+        TestModel.fetchById(modelId, { require: false })
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            expect(fetchStub.thisValues[0].get('id')).to.equal(modelId)
+            sinon.assert.calledWithExactly(fetchStub, { require: true })
+            done()
+          })
+      })
+
+      it('should throw a database error if `fetch` throws an error', done => {
+        let err = new Error()
+        fetchStub.rejects(err)
+
+        TestModel.fetchById(modelId)
+          .asCallback(err => {
+            expect(err).to.exist
+            sinon.assert.calledOnce(fetchStub)
+            expect(fetchStub.thisValues[0].get('id')).to.equal(modelId)
+            sinon.assert.calledWithExactly(fetchStub, { require: true })
+            done()
+          })
+      })
     })
 
-    describe('#fetchById', () => {
+    describe('#fetchByGithubId', () => {
+      let githubId = 123
+      let fetchByGithubId = BaseModel.staticMethods.fetchByGithubId
+      let testModel = {}
+      let fetchStub
+      beforeEach(() => {
+        sinon.stub(bookshelf.Model.prototype, 'fetch').resolves(testModel)
+        fetchStub = bookshelf.Model.prototype.fetch
+      })
+
+      afterEach(() => {
+        bookshelf.Model.prototype.fetch.restore()
+        fetchStub = null
+      })
+
+      it('should return the model', done => {
+        TestModel.fetchByGithubId(githubId)
+          .asCallback((err, res) => {
+            expect(err).to.not.exist
+            expect(res).to.equal(testModel)
+            done()
+          })
+      })
+
+      it('should fetch the model with `require`', done => {
+        TestModel.fetchByGithubId(githubId)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
+            sinon.assert.calledWithExactly(fetchStub, { require: true })
+            done()
+          })
+      })
+
+      it('should pass opts (like a transaction) into fetch', done => {
+        let t = {} // transaction
+        TestModel.fetchByGithubId(githubId, { transacting: t })
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
+            sinon.assert.calledWithExactly(fetchStub, { require: true, transacting: t })
+            done()
+          })
+      })
+
+      it('should should not override the `require` opt', done => {
+        TestModel.fetchByGithubId(githubId, { require: false })
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
+            sinon.assert.calledWithExactly(fetchStub, { require: true })
+            done()
+          })
+      })
+
+      it('should throw a database error if `fetch` throws an error', done => {
+        let err = new Error()
+        fetchStub.rejects(err)
+
+        TestModel.fetchByGithubId(githubId)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(Error)
+            sinon.assert.calledOnce(fetchStub)
+            expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
+            sinon.assert.calledWithExactly(fetchStub, { require: true })
+            done()
+          })
+      })
+    })
+
+    describe('#castDatabaseError', () => {
+      it('should cast a `Model.NotFoundError` as a `NotFoundError`', done => {
+        let thrownError = new TestModel.NotFoundError()
+        Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(NotFoundError)
+            expect(err.message).to.match(/testmodel/i)
+            expect(err.data.err).to.equal(thrownError)
+            done()
+          })
+      })
+
+      it('should cast a `Model.NoRowsUpdatedError` as a `NoRowsUpdatedError`', done => {
+        let thrownError = new TestModel.NoRowsUpdatedError()
+        Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(NoRowsUpdatedError)
+            expect(err.message).to.match(/testmodel/i)
+            expect(err.data.err).to.equal(thrownError)
+            done()
+          })
+      })
+
+      it('should cast a `Model.NoRowsDeletedError` as a `NoRowsDeletedError`', done => {
+        let thrownError = new TestModel.NoRowsDeletedError()
+        Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(NoRowsDeletedError)
+            expect(err.message).to.match(/testmodel/i)
+            expect(err.data.err).to.equal(thrownError)
+            done()
+          })
+      })
+
+      it('should cast an error with a code as a database error', done => {
+        let thrownError = new Error('yo')
+        thrownError.code = '12345'
+        Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(DatabaseError)
+            expect(err.data.err).to.equal(thrownError)
+            done()
+          })
+      })
+
+      it('should cast any other error as a `DatabaseError`', done => {
+        let thrownError = new Error('yo')
+        Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(Error)
+            expect(err).to.equal(thrownError)
+            done()
+          })
+      })
     })
   })
 })
