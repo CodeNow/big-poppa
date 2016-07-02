@@ -276,12 +276,81 @@ describe('Base', () => {
         })
       })
     })
+
+    describe('#getAllIdsForRelated', () => {
+      let fetchStub
+      let models
+      let orgId1 = 1
+      let orgId2 = 6
+      let testModel
+
+      beforeEach(() => {
+        models = {
+          toJSON: sinon.stub().returns({
+            organizations: [{ id: orgId1 }, { id: orgId2 }]
+          })
+        }
+        sinon.stub(TestModel.prototype, 'fetch').resolves(models)
+        fetchStub = TestModel.prototype.fetch
+        testModel = new TestModel()
+      })
+
+      afterEach(() => {
+        TestModel.prototype.fetch.restore()
+        fetchStub = null
+      })
+
+      it('should fetch the models', done => {
+        testModel.getAllIdsForRelated('organizations')
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            sinon.assert.calledWithExactly(fetchStub, sinon.match.object)
+            done()
+          })
+      })
+
+      it('should not allow you to ovewrite the `withRelated` property', done => {
+        let opts = { withRelated: ['not-organizations'], hello: 'world' }
+        testModel.getAllIdsForRelated('organizations', opts)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            sinon.assert.calledWithExactly(fetchStub, {
+              hello: 'world',
+              withRelated: ['organizations']
+            })
+            done()
+          })
+      })
+
+      it('should map over the entries and return their ids', done => {
+        testModel.getAllIdsForRelated('organizations')
+          .asCallback((err, res) => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(fetchStub)
+            expect(res).to.deep.equal([orgId1, orgId2])
+            done()
+          })
+      })
+
+      it('should throw an error if fetch fails', done => {
+        let err = new Error()
+        fetchStub.rejects(err)
+
+        testModel.getAllIdsForRelated('organizations')
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.equal(err)
+            done()
+          })
+      })
+    })
   })
 
   describe('Static Methods', () => {
     describe('#fetchById', () => {
       let modelId = 123
-      let fetchById = BaseModel.staticMethods.fetchById
       let testModel = {}
       let fetchStub
       beforeEach(() => {
@@ -354,7 +423,6 @@ describe('Base', () => {
 
     describe('#fetchByGithubId', () => {
       let githubId = 123
-      let fetchByGithubId = BaseModel.staticMethods.fetchByGithubId
       let testModel = {}
       let fetchStub
       beforeEach(() => {
