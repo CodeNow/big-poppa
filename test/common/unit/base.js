@@ -3,9 +3,7 @@
 const Promise = require('bluebird')
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
-const chai = require('chai')
-chai.use(require('chai-as-promised'))
-const expect = chai.expect
+const expect = require('chai').expect
 
 const bookshelf = require('common/models').bookshelf
 const BaseModel = require('common/models/base')
@@ -34,7 +32,6 @@ describe('Base', () => {
     })
 
     it('should set the `modelName` on prototype and static methods', () => {
-      console.log(StubModel)
       expect(StubModel.modelName).to.equal('StubModel')
       expect(stubInstance.modelName).to.equal('StubModel')
     })
