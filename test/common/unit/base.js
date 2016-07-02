@@ -59,9 +59,10 @@ describe('Base', () => {
   describe('Prototype Methods', () => {
     describe('#initialize', () => {
       let model
-      let initialize = sinon.spy(BaseModel.prototypeMethods.initialize)
+      let initialize
 
       beforeEach(() => {
+        initialize = sinon.spy(BaseModel.prototypeMethods, 'initialize')
         model = {
           on: sinon.stub(),
           logSaving: sinon.stub(),
@@ -69,6 +70,10 @@ describe('Base', () => {
           logDestroying: sinon.stub(),
           logDestroyed: sinon.stub()
         }
+      })
+
+      afterEach(() => {
+        BaseModel.prototypeMethods.initialize.restore()
       })
 
       it('should add all listeners', () => {
@@ -92,9 +97,12 @@ describe('Base', () => {
         expect(model.log).to.be.an('object')
       })
     })
+
     describe('#save', () => {
+      let saveStub
+
       beforeEach(() => {
-        sinon.stub(bookshelf.Model.prototype, 'save').resolves()
+        saveStub = sinon.stub(bookshelf.Model.prototype, 'save').resolves()
       })
 
       afterEach(() => {
@@ -105,12 +113,12 @@ describe('Base', () => {
         it('should correctly cast a NotNullError', (done) => {
           let error = new Error()
           error.code = '23502'
-          bookshelf.Model.prototype.save.rejects(error)
+          saveStub.rejects(error)
 
           let githubId = 1
           let testModel = new TestModel({ github_id: githubId })
           testModel.save().asCallback(err => {
-            sinon.assert.calledOnce(bookshelf.Model.prototype.save)
+            sinon.assert.calledOnce(saveStub)
             expect(err).to.be.an.instanceOf(NotNullError)
             done()
           })
@@ -123,8 +131,8 @@ describe('Base', () => {
           let testModel = new TestModel({ github_id: githubId })
           testModel.save().asCallback(err => {
             expect(err).to.not.exist
-            sinon.assert.calledOnce(bookshelf.Model.prototype.save)
-            let model = bookshelf.Model.prototype.save.thisValues[0]
+            sinon.assert.calledOnce(saveStub)
+            let model = saveStub.thisValues[0]
             expect(model.get('github_id')).to.equal(githubId)
           })
           .asCallback(done)
@@ -133,8 +141,10 @@ describe('Base', () => {
     })
 
     describe('#destroy', () => {
+      let destroyStub
+
       beforeEach(() => {
-        sinon.stub(bookshelf.Model.prototype, 'destroy').resolves()
+        destroyStub = sinon.stub(bookshelf.Model.prototype, 'destroy').resolves()
       })
 
       afterEach(() => {
@@ -145,12 +155,12 @@ describe('Base', () => {
         it('should correctly cast a NotNullError', (done) => {
           let error = new Error('super error')
           error.code = '23502'
-          bookshelf.Model.prototype.destroy.rejects(error)
+          destroyStub.rejects(error)
 
           let githubId = 1
           let testModel = new TestModel({ github_id: githubId })
           testModel.destroy().asCallback(err => {
-            sinon.assert.calledOnce(bookshelf.Model.prototype.destroy)
+            sinon.assert.calledOnce(destroyStub)
             expect(err).to.be.an.instanceOf(NotNullError)
             done()
           })
@@ -159,12 +169,12 @@ describe('Base', () => {
         it('should correctly cast a NoRowsDeletedError', (done) => {
           // http://bookshelfjs.org/#section-Model-static-NoRowsDeletedError
           let error = new TestModel.NoRowsDeletedError('super error')
-          bookshelf.Model.prototype.destroy.rejects(error)
+          destroyStub.rejects(error)
 
           let githubId = 1
           let testModel = new TestModel({ github_id: githubId })
           testModel.destroy().asCallback(err => {
-            sinon.assert.calledOnce(bookshelf.Model.prototype.destroy)
+            sinon.assert.calledOnce(destroyStub)
             expect(err).to.be.an.instanceOf(NoRowsDeletedError)
             done()
           })
@@ -177,8 +187,8 @@ describe('Base', () => {
           let testModel = new TestModel({ github_id: githubId })
           testModel.destroy().asCallback(err => {
             expect(err).to.not.exist
-            sinon.assert.calledOnce(bookshelf.Model.prototype.destroy)
-            let model = bookshelf.Model.prototype.destroy.thisValues[0]
+            sinon.assert.calledOnce(destroyStub)
+            let model = destroyStub.thisValues[0]
             expect(model.get('github_id')).to.equal(githubId)
           })
           .asCallback(done)
@@ -290,14 +300,12 @@ describe('Base', () => {
             organizations: [{ id: orgId1 }, { id: orgId2 }]
           })
         }
-        sinon.stub(TestModel.prototype, 'fetch').resolves(models)
-        fetchStub = TestModel.prototype.fetch
+        fetchStub = sinon.stub(TestModel.prototype, 'fetch').resolves(models)
         testModel = new TestModel()
       })
 
       afterEach(() => {
         TestModel.prototype.fetch.restore()
-        fetchStub = null
       })
 
       it('should fetch the models', done => {
@@ -353,14 +361,13 @@ describe('Base', () => {
       let modelId = 123
       let testModel = {}
       let fetchStub
+
       beforeEach(() => {
-        sinon.stub(bookshelf.Model.prototype, 'fetch').resolves(testModel)
-        fetchStub = bookshelf.Model.prototype.fetch
+        fetchStub = sinon.stub(bookshelf.Model.prototype, 'fetch').resolves(testModel)
       })
 
       afterEach(() => {
         bookshelf.Model.prototype.fetch.restore()
-        fetchStub = null
       })
 
       it('should return the model', done => {
@@ -425,14 +432,13 @@ describe('Base', () => {
       let githubId = 123
       let testModel = {}
       let fetchStub
+
       beforeEach(() => {
-        sinon.stub(bookshelf.Model.prototype, 'fetch').resolves(testModel)
-        fetchStub = bookshelf.Model.prototype.fetch
+        fetchStub = sinon.stub(bookshelf.Model.prototype, 'fetch').resolves(testModel)
       })
 
       afterEach(() => {
         bookshelf.Model.prototype.fetch.restore()
-        fetchStub = null
       })
 
       it('should return the model', done => {

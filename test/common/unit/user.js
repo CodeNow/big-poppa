@@ -26,10 +26,8 @@ describe('User', () => {
       let onStub
 
       beforeEach(() => {
-        sinon.stub(BaseModel.prototypeMethods, 'initialize')
-        initializeStub = BaseModel.prototypeMethods.initialize
-        sinon.stub(bookshelf.Model.prototype, 'on')
-        onStub = bookshelf.Model.prototype.on
+        initializeStub = sinon.stub(BaseModel.prototypeMethods, 'initialize')
+        onStub = sinon.stub(bookshelf.Model.prototype, 'on')
       })
 
       afterEach(() => {

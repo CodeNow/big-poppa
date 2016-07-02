@@ -8,6 +8,7 @@ const expect = require('chai').expect
 const bookshelf = require('common/models').bookshelf
 const BaseModel = require('common/models/base')
 const Organization = require('common/models/organization')
+const User = require('common/models/user')
 
 const GithubAPI = require('common/github')
 const GithubEntityNotFoundError = require('common/errors/github-entity-not-found-error')
@@ -26,10 +27,8 @@ describe('Organization', () => {
       let onStub
 
       beforeEach(() => {
-        sinon.stub(BaseModel.prototypeMethods, 'initialize')
-        initializeStub = BaseModel.prototypeMethods.initialize
-        sinon.stub(bookshelf.Model.prototype, 'on')
-        onStub = bookshelf.Model.prototype.on
+        initializeStub = sinon.stub(BaseModel.prototypeMethods, 'initialize')
+        onStub = sinon.stub(bookshelf.Model.prototype, 'on')
       })
 
       afterEach(() => {
@@ -93,17 +92,236 @@ describe('Organization', () => {
     })
 
     describe('#addUser', () => {
+      let user
+      let usersStub
+      let attachStub
+      let collectionStub
+
+      beforeEach(() => {
+        attachStub = sinon.stub().resolves()
+        collectionStub = {
+          attach: attachStub
+        }
+        usersStub = sinon.stub(Organization.prototype, 'users').returns(collectionStub)
+        user = new User({ id: Math.floor(Math.random() * 100) })
+      })
+
+      afterEach(() => {
+        Organization.prototype.users.restore()
+      })
+
+      it('should throw a TypeError if no user is passed', done => {
+        org.addUser(undefined)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(TypeError)
+            expect(err.message).to.match(/user.*instance/i)
+            sinon.assert.notCalled(usersStub)
+            sinon.assert.notCalled(attachStub)
+            done()
+          })
+      })
+
+      it('should `attach` the user using its id', done => {
+        let userId = user.get('id')
+
+        org.addUser(user)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(usersStub)
+            expect(usersStub.thisValues[0]).to.equal(org)
+            sinon.assert.calledOnce(attachStub)
+            sinon.assert.calledWithExactly(attachStub, userId, undefined)
+            done()
+          })
+      })
+
+      it('should pass the `opts` to `attach`', done => {
+        let userId = user.get('id')
+        let opts = { transacting: {} }
+
+        org.addUser(user, opts)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(usersStub)
+            sinon.assert.calledOnce(attachStub)
+            sinon.assert.calledWithExactly(attachStub, userId, opts)
+            done()
+          })
+      })
+
+      it('should throw any errors thrown by `attach`', done => {
+        let err = new Error()
+        attachStub.rejects(err)
+
+        org.addUser(user)
+          .asCallback(err => {
+            expect(err).to.exist
+            sinon.assert.calledOnce(usersStub)
+            sinon.assert.calledOnce(attachStub)
+            expect(err).to.equal(err)
+            done()
+          })
+      })
     })
 
     describe('#removeUser', () => {
-    })
+      let user
+      let usersStub
+      let detachStub
+      let collectionStub
 
-    describe('#getAllUserIds', () => {
+      beforeEach(() => {
+        detachStub = sinon.stub().resolves()
+        collectionStub = {
+          detach: detachStub
+        }
+        usersStub = sinon.stub(Organization.prototype, 'users').returns(collectionStub)
+        user = new User({ id: Math.floor(Math.random() * 100) })
+      })
+
+      afterEach(() => {
+        Organization.prototype.users.restore()
+      })
+
+      it('should throw a TypeError if no user is passed', done => {
+        org.removeUser(undefined)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(TypeError)
+            expect(err.message).to.match(/user.*instance/i)
+            sinon.assert.notCalled(usersStub)
+            sinon.assert.notCalled(detachStub)
+            done()
+          })
+      })
+
+      it('should `detach` the user using its id', done => {
+        let userId = user.get('id')
+
+        org.removeUser(user)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(usersStub)
+            expect(usersStub.thisValues[0]).to.equal(org)
+            sinon.assert.calledOnce(detachStub)
+            sinon.assert.calledWithExactly(detachStub, userId, undefined)
+            done()
+          })
+      })
+
+      it('should pass the `opts` to `detach`', done => {
+        let userId = user.get('id')
+        let opts = { transacting: {} }
+
+        org.removeUser(user, opts)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(usersStub)
+            sinon.assert.calledOnce(detachStub)
+            sinon.assert.calledWithExactly(detachStub, userId, opts)
+            done()
+          })
+      })
+
+      it('should throw any errors thrown by `detach`', done => {
+        let err = new Error()
+        detachStub.rejects(err)
+
+        org.removeUser(user)
+          .asCallback(err => {
+            expect(err).to.exist
+            sinon.assert.calledOnce(usersStub)
+            sinon.assert.calledOnce(detachStub)
+            expect(err).to.equal(err)
+            done()
+          })
+      })
     })
   })
 
   describe('Static Methods', () => {
     describe('#create', () => {
+      let githubId = 123
+      let saveStub
+
+      beforeEach(() => {
+        saveStub = sinon.stub(bookshelf.Model.prototype, 'save').resolves()
+      })
+
+      afterEach(() => {
+        bookshelf.Model.prototype.save.restore()
+      })
+
+      it('should save the new organization', done => {
+        Organization.create(githubId)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(saveStub)
+            done()
+          })
+      })
+
+      it('should save the new organization with the github id', done => {
+        Organization.create(githubId)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(saveStub)
+            sinon.assert.calledWithExactly(
+              saveStub,
+              sinon.match.has('github_id', githubId),
+              undefined
+            )
+            done()
+          })
+      })
+
+      it('should save the new organization with timestamps for current time', done => {
+        let createCompareTime = (before, after) => {
+          return time => (before <= time && time <= after)
+        }
+        let beforeTime = (new Date()).getTime()
+        Organization.create(githubId)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(saveStub)
+            let dateTypeMatch = sinon.match.instanceOf(Date)
+            sinon.assert.calledWithExactly(
+              saveStub,
+              sinon.match.has('trial_end', dateTypeMatch)
+                .and(sinon.match.has('active_period_end', dateTypeMatch))
+                .and(sinon.match.has('grace_period_end', dateTypeMatch)),
+              undefined
+            )
+            // Assert timestamps were created now
+            let afterTime = (new Date()).getTime()
+            let compareTime = createCompareTime(beforeTime, afterTime)
+            let timeMatch = sinon.match(compareTime)
+            sinon.assert.calledWithExactly(
+              saveStub,
+              sinon.match.has('trial_end', timeMatch)
+                .and(sinon.match.has('active_period_end', timeMatch))
+                .and(sinon.match.has('grace_period_end', timeMatch)),
+              undefined
+            )
+            done()
+          })
+      })
+
+      it('should call `save` with the passed options', done => {
+        let opts = { transacting: {} }
+        Organization.create(githubId, opts)
+          .asCallback(err => {
+            expect(err).to.not.exist
+            sinon.assert.calledOnce(saveStub)
+            sinon.assert.calledWithExactly(
+              saveStub,
+              sinon.match.object,
+              opts
+            )
+            done()
+          })
+      })
     })
   })
 })
