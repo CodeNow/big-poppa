@@ -4,32 +4,32 @@ const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')
 
-const Organization = require('common/models/organization')
+const User = require('common/models/user')
 
 const GithubEntityError = require('common/errors/github-entity-error')
 const UniqueError = require('common/errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
-const CreateOrganization = require('hooray/workers/organization.create')
+const CreateUser = require('hooray/workers/user.create')
 
-describe('#orgnization.create', () => {
-  let createStub
-  let newOrg
+describe('#user.create', () => {
+  let saveStub
+  let newUser
   let validJob
 
   beforeEach(() => {
     validJob = { githubId: 123 }
-    newOrg = {}
-    createStub = sinon.stub(Organization, 'create').resolves(newOrg)
+    newUser = {}
+    saveStub = sinon.stub(User.prototype, 'save').resolves(newUser)
   })
 
   afterEach(() => {
-    Organization.create.restore()
+    User.prototype.save.restore()
   })
 
   describe('Validation', () => {
     it('should throw a validation error if no `githubId` is passed', done => {
-      CreateOrganization({ hello: 'World' })
+      CreateUser({ hello: 'World' })
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -39,7 +39,7 @@ describe('#orgnization.create', () => {
     })
 
     it('should throw a validation error if the `githubId` is not a number', done => {
-      CreateOrganization({ githubId: 'hello' })
+      CreateUser({ githubId: 'hello' })
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -49,7 +49,7 @@ describe('#orgnization.create', () => {
     })
 
     it('should not throw a validation error if a valid job is passed', done => {
-      CreateOrganization(validJob)
+      CreateUser(validJob)
         .asCallback(err => {
           expect(err).to.not.exist
           done()
@@ -58,39 +58,39 @@ describe('#orgnization.create', () => {
   })
 
   describe('Errors', () => {
-    it('should throw a `WorkerStopError` if a `Organization.create` throws a `GithubEntityError`', done => {
+    it('should throw a `WorkerStopError` if a `User.save` throws a `GithubEntityError`', done => {
       let originalErr = new GithubEntityError('hello')
-      createStub.rejects(originalErr)
+      saveStub.rejects(originalErr)
 
-      CreateOrganization(validJob)
+      CreateUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.data.err).to.equal(originalErr)
-          expect(err.message).to.match(/fetching.*org.*github/i)
+          expect(err.message).to.match(/fetching.*user.*github/i)
           done()
         })
     })
 
-    it('should throw a `WorkerStopError` if a `Organization.create` throws a `UniqueError`', done => {
+    it('should throw a `WorkerStopError` if a `User.save` throws a `UniqueError`', done => {
       let originalErr = new UniqueError('hello')
-      createStub.rejects(originalErr)
+      saveStub.rejects(originalErr)
 
-      CreateOrganization(validJob)
+      CreateUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.data.err).to.equal(originalErr)
-          expect(err.message).to.match(/already.*exists/i)
+          expect(err.message).to.match(/user.*already.*exists/i)
           done()
         })
     })
 
     it('should not throw a `WorkerStopError` if a normal error is thrown', done => {
       let originalErr = new Error('hello')
-      createStub.rejects(originalErr)
+      saveStub.rejects(originalErr)
 
-      CreateOrganization(validJob)
+      CreateUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.not.be.an.instanceof(WorkerStopError)
@@ -101,25 +101,25 @@ describe('#orgnization.create', () => {
   })
 
   describe('Main Functionality', done => {
-    it('should call `Organization.create`', done => {
-      CreateOrganization(validJob)
+    it('should call `save`', done => {
+      CreateUser(validJob)
         .asCallback(err => {
           expect(err).to.not.exist
-          sinon.assert.calledOnce(createStub)
+          sinon.assert.calledOnce(saveStub)
           sinon.assert.calledWithExactly(
-            createStub,
-            validJob.githubId
+            saveStub,
+            { github_id: validJob.githubId }
           )
           done()
         })
     })
 
-    it('should return an organization', done => {
-      CreateOrganization(validJob)
+    it('should return a user', done => {
+      CreateUser(validJob)
         .asCallback((err, res) => {
           expect(err).to.not.exist
-          sinon.assert.calledOnce(createStub)
-          expect(res).to.equal(newOrg)
+          sinon.assert.calledOnce(saveStub)
+          expect(res).to.equal(newUser)
           done()
         })
     })
