@@ -1,8 +1,9 @@
 'use strict'
 
+const Promise = require('bluebird')
 const expect = require('chai').expect
 const sinon = require('sinon')
-require('sinon-as-promised')
+require('sinon-as-promised')(Promise)
 
 const testUtil = require('../../../util')
 const githubOrganizationFixture = require('../../../fixtures/github/organization')
