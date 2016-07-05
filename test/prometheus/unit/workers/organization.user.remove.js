@@ -12,7 +12,7 @@ const NotFoundError = require('common/errors/not-found-error')
 const NoRowsDeletedError = require('common/errors/no-rows-deleted-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
-const RemoveUserFromOrganization = require('hooray/workers/organization.user.remove')
+const RemoveUserFromOrganization = require('prometheus/workers/organization.user.remove')
 
 describe('#organization.user.remove', () => {
   let user

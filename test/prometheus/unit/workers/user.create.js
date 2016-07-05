@@ -11,7 +11,7 @@ const GithubEntityError = require('common/errors/github-entity-error')
 const UniqueError = require('common/errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
-const CreateUser = require('hooray/workers/user.create')
+const CreateUser = require('prometheus/workers/user.create')
 
 describe('#user.create', () => {
   let saveStub

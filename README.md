@@ -2,7 +2,7 @@
 
 Container repo/service for two microservices that share models:
 
-- Hooray: user management
+- Prometheus: user management
 - CREAM: billing
 
 ## Setup
@@ -95,7 +95,7 @@ There are several testing commands:
 - `npm test`: Lints code and runs unit and functional test for all services
 - `npm run test-integration`: Lints code and runs unit and functional test for all services with real GithubAPI calls (`test-integration` ENV)
 - `npm run test-common`: Runs unit and functional tests for `common` library
-- `npm run test-hooray`: Runs unit and functional tests for `hooray`
+- `npm run test-prometheus`: Runs unit and functional tests for `prometheus`
 
 ### Testing Definitions
 

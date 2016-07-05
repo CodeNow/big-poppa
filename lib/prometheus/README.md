@@ -1,3 +1,3 @@
-# Hooray
+# Prometheus
 
 User management mircoservice for Runnable

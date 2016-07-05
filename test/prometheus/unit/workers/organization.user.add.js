@@ -12,7 +12,7 @@ const NotFoundError = require('common/errors/not-found-error')
 const UniqueError = require('common/errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
-const AddUserToOrganization = require('hooray/workers/organization.user.add')
+const AddUserToOrganization = require('prometheus/workers/organization.user.add')
 
 describe('#organization.user.add', () => {
   let user

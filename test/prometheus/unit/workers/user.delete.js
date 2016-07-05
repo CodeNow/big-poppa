@@ -14,42 +14,42 @@ const NoRowsDeletedError = require('common/errors/no-rows-deleted-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const WorkerError = require('error-cat/errors/worker-error')
 
-const DeleteOrganization = require('hooray/workers/organization.delete')
+const DeleteUser = require('prometheus/workers/user.delete')
 
-describe('#organization.delete', () => {
+describe('#user.delete', () => {
   let githubId = 123
-  let org
+  let user
   let validJob
-  let userIds
-  let users
+  let orgIds
+  let orgs
   let fetchByGithubIdStub
 
   let destroyStub
   let transactionStub
   let getAllIdsForRelatedStub
-  let fetchUserByIdStub
+  let fetchOrgByIdStub
   let removeUserStub
   let transaction
 
   beforeEach(() => {
-    userIds = [456, 789]
+    orgIds = [456, 789]
     validJob = { githubId: githubId }
-    org = new Organization()
-    users = [new User({ id: userIds[0] }), new User({ id: userIds[1] })]
+    user = new User()
+    orgs = [new Organization({ id: orgIds[0] }), new Organization({ id: orgIds[1] })]
     transaction = {}
     transactionStub = sinon.stub(bookshelf, 'transaction', (cb) => {
       return Promise.resolve(cb(transaction))
     })
 
-    fetchByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(org)
-    getAllIdsForRelatedStub = sinon.stub(Organization.prototype, 'getAllIdsForRelated').resolves(userIds)
-    destroyStub = sinon.stub(Organization.prototype, 'destroy').resolves(org)
+    fetchByGithubIdStub = sinon.stub(User, 'fetchByGithubId').resolves(user)
+    getAllIdsForRelatedStub = sinon.stub(User.prototype, 'getAllIdsForRelated').resolves(orgIds)
+    destroyStub = sinon.stub(User.prototype, 'destroy').resolves(user)
 
-    fetchUserByIdStub = sinon.stub(User, 'fetchById')
-    fetchUserByIdStub
-      .onFirstCall().resolves(users[0])
-      .onSecondCall().resolves(users[1])
-    removeUserStub = sinon.stub(Organization.prototype, 'removeUser').resolves(org)
+    fetchOrgByIdStub = sinon.stub(Organization, 'fetchById')
+    fetchOrgByIdStub
+      .onFirstCall().resolves(orgs[0])
+      .onSecondCall().resolves(orgs[1])
+    removeUserStub = sinon.stub(Organization.prototype, 'removeUser').resolves(user)
   })
 
   afterEach(() => {
@@ -57,13 +57,13 @@ describe('#organization.delete', () => {
     fetchByGithubIdStub.restore()
     getAllIdsForRelatedStub.restore()
     destroyStub.restore()
-    fetchUserByIdStub.restore()
+    fetchOrgByIdStub.restore()
     removeUserStub.restore()
   })
 
   describe('Validation', () => {
     it('should not validate if a `githubId` is not passed', done => {
-      DeleteOrganization({ hello: 'world' })
+      DeleteUser({ hello: 'world' })
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -73,7 +73,7 @@ describe('#organization.delete', () => {
     })
 
     it('should not validate if the `githubId` is not a number', done => {
-      DeleteOrganization({ githubId: 'world' })
+      DeleteUser({ githubId: 'world' })
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -83,22 +83,22 @@ describe('#organization.delete', () => {
     })
 
     it('should validate if a valid job is passed', done => {
-      DeleteOrganization(validJob)
+      DeleteUser(validJob)
         .asCallback(done)
     })
   })
 
   describe('Errors', () => {
-    it('should throw a `WorkerStopError` if a `Organization.fetchByGithubId` throws a `NotFoundError`', done => {
-      let originalErr = new NotFoundError('No org found')
+    it('should throw a `WorkerStopError` if a `User.fetchByGithubId` throws a `NotFoundError`', done => {
+      let originalErr = new NotFoundError('No user found')
       fetchByGithubIdStub.rejects(originalErr)
 
-      DeleteOrganization(validJob)
+      DeleteUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.data.err).to.equal(originalErr)
-          expect(err.message).to.match(/org.*not.*deleted/i)
+          expect(err.message).to.match(/user.*not.*deleted/i)
           sinon.assert.calledOnce(fetchByGithubIdStub)
           done()
         })
@@ -106,14 +106,14 @@ describe('#organization.delete', () => {
 
     it('should throw a `WorkerError` if a `Organization.fetchById` throws an error', done => {
       let originalErr = new NoRowsDeletedError()
-      fetchUserByIdStub.onFirstCall().rejects(originalErr)
+      fetchOrgByIdStub.onFirstCall().rejects(originalErr)
 
-      DeleteOrganization(validJob)
+      DeleteUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerError)
           expect(err.data.err).to.equal(originalErr)
-          expect(err.message).to.match(/error.*removing.*org/i)
+          expect(err.message).to.match(/error.*removing.*user/i)
           sinon.assert.calledOnce(fetchByGithubIdStub)
           done()
         })
@@ -123,27 +123,27 @@ describe('#organization.delete', () => {
       let originalErr = new NoRowsDeletedError()
       removeUserStub.rejects(originalErr)
 
-      DeleteOrganization(validJob)
+      DeleteUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerError)
           expect(err.data.err).to.equal(originalErr)
-          expect(err.message).to.match(/error.*removing.*org/i)
+          expect(err.message).to.match(/error.*removing.*user/i)
           sinon.assert.calledOnce(fetchByGithubIdStub)
           done()
         })
     })
 
-    it('should throw a `WorkerStopError` if `Organization.destroy` returns a `NoRowsDeletedError`', done => {
+    it('should throw a `WorkerStopError` if `User.destroy` returns a `NoRowsDeletedError`', done => {
       let originalErr = new NoRowsDeletedError()
       destroyStub.rejects(originalErr)
 
-      DeleteOrganization(validJob)
+      DeleteUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.data.err).to.equal(originalErr)
-          expect(err.message).to.match(/org.*not.*deleted/i)
+          expect(err.message).to.match(/user.*not.*deleted/i)
           sinon.assert.calledOnce(fetchByGithubIdStub)
           done()
         })
@@ -152,7 +152,7 @@ describe('#organization.delete', () => {
 
   describe('Main Functionality', () => {
     it('should start a transaction', done => {
-      DeleteOrganization(validJob)
+      DeleteUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(transactionStub)
           sinon.assert.calledWithExactly(transactionStub, sinon.match.func)
@@ -160,8 +160,8 @@ describe('#organization.delete', () => {
         .asCallback(done)
     })
 
-    it('should fetch the org by its github id', done => {
-      DeleteOrganization(validJob)
+    it('should fetch the user by its github id', done => {
+      DeleteUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(fetchByGithubIdStub)
           sinon.assert.calledWithExactly(
@@ -173,54 +173,47 @@ describe('#organization.delete', () => {
         .asCallback(done)
     })
 
-    it('should get all the related users for that org', done => {
-      DeleteOrganization(validJob)
+    it('should get all the related organizations for that user', done => {
+      DeleteUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(getAllIdsForRelatedStub)
           sinon.assert.calledWithExactly(
             getAllIdsForRelatedStub,
-            'users',
+            'organizations',
             { transacting: transaction }
           )
         })
         .asCallback(done)
     })
 
-    it('should fetch the user\'s organizations and remove then', done => {
-      DeleteOrganization(validJob)
+    it('should fetch those organizations and remove then', done => {
+      DeleteUser(validJob)
         .then(() => {
-          sinon.assert.calledTwice(fetchUserByIdStub)
+          sinon.assert.calledTwice(fetchOrgByIdStub)
           sinon.assert.calledWithExactly(
-            fetchUserByIdStub.firstCall,
-            userIds[0],
+            fetchOrgByIdStub.firstCall,
+            orgIds[0],
             { transacting: transaction }
           )
           sinon.assert.calledWithExactly(
-            fetchUserByIdStub.secondCall,
-            userIds[1],
+            fetchOrgByIdStub.secondCall,
+            orgIds[1],
             { transacting: transaction }
           )
           sinon.assert.calledTwice(removeUserStub)
-          let firstCall = removeUserStub.firstCall
-          let secondCall = removeUserStub.secondCall
           sinon.assert.calledWithExactly(
-            firstCall,
-            users[0],
+            removeUserStub,
+            user,
             { transacting: transaction }
           )
-          sinon.assert.calledWithExactly(
-            secondCall,
-            users[1],
-            { transacting: transaction }
-          )
-          expect(firstCall.thisValue).to.equal(org)
-          expect(secondCall.thisValue).to.equal(org)
+          expect(removeUserStub.firstCall.thisValue).to.equal(orgs[0])
+          expect(removeUserStub.secondCall.thisValue).to.equal(orgs[1])
         })
         .asCallback(done)
     })
 
-    it('should `destroy` the org', done => {
-      DeleteOrganization(validJob)
+    it('should `destroy` the user', done => {
+      DeleteUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(destroyStub)
           let firstCall = destroyStub.firstCall
@@ -228,7 +221,7 @@ describe('#organization.delete', () => {
             firstCall,
             { require: true, transacting: transaction }
           )
-          expect(firstCall.thisValue).to.equal(org)
+          expect(firstCall.thisValue).to.equal(user)
         })
         .asCallback(done)
     })

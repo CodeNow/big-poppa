@@ -15,11 +15,11 @@ const bookshelf = require('common/models').bookshelf
 const NoRowsDeletedError = require('common/errors/no-rows-deleted-error')
 const knex = bookshelf.knex
 
-const Organization = require('common/models/organization')
+const User = require('common/models/user')
 
-const DeleteOrganization = require('hooray/workers/Organization.delete')
+const DeleteUser = require('prometheus/workers/user.delete')
 
-describe('organization.delete', () => {
+describe('user.delete', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
 
@@ -44,11 +44,11 @@ describe('organization.delete', () => {
       .asCallback(done)
   })
 
-  it('should delete an organization', done => {
-    DeleteOrganization({ githubId: orgGithubId }).then((org) => {
-      expect(org.get('github_id')).to.be.undefined
+  it('should delete a user', done => {
+    DeleteUser({ githubId: userGithubId }).then((user) => {
+      expect(user.get('github_id')).to.be.undefined
       // Check database for entry
-      return knex('organization').where('github_id', orgGithubId)
+      return knex('user').where('github_id', userGithubId)
     })
     .then(res => {
       expect(res).to.have.lengthOf(0)
@@ -56,23 +56,23 @@ describe('organization.delete', () => {
       .asCallback(done)
   })
 
-  it('should delete an organization with its corresponding associated orgs', done => {
-    let orgId
-    Organization.fetchByGithubId(orgGithubId)
-      .then(org => {
-        orgId = org.get(org.idAttribute)
-        return knex('organization_user').where('organization_id', orgId).count()
+  it('should delete a user with its corresponding associated orgs', done => {
+    let userId
+    User.fetchByGithubId(userGithubId)
+      .then(user => {
+        userId = user.get(user.idAttribute)
+        return knex('organization_user').where('user_id', userId).count()
       })
       .then(res => {
         expect(res).to.be.an('array')
         expect(res[0]).to.be.an('object')
         expect(res[0].count).to.have.equal('1')
       })
-      .then(() => DeleteOrganization({ githubId: orgGithubId }))
-      .then(deletedOrg => {
-        expect(deletedOrg.get('github_id')).to.be.undefined
+      .then(() => DeleteUser({ githubId: userGithubId }))
+      .then(deletedUser => {
+        expect(deletedUser.get('github_id')).to.be.undefined
       })
-      .then(() => knex('organization_user').where('organization_id', orgId).count())
+      .then(() => knex('organization_user').where('user_id', userId).count())
       .then(res => {
         expect(res).to.be.an('array')
         expect(res[0]).to.be.an('object')
@@ -91,31 +91,31 @@ describe('organization.delete', () => {
     })
 
     it('should not commit any database changes if there\'s an error', done => {
-      let orgId
-      Organization.fetchByGithubId(orgGithubId)
-        .then((org) => {
-          orgId = org.get(org.idAttribute)
-          return DeleteOrganization({ githubId: orgGithubId })
-            .then(() => { throw new Error('`DeleteOrganization` should fail') })
+      let userId
+      User.fetchByGithubId(userGithubId)
+        .then((user) => {
+          userId = user.get(user.idAttribute)
+          return DeleteUser({ githubId: userGithubId })
+            .then(() => { throw new Error('`DeleteUser` should fail') })
         })
         .catch(() => {
           // Check database for entry
           return Promise.all([
-            knex('organization').where('id', orgId),
-            knex('organization_user').where('organization_id', orgId)
+            knex('user').where('id', userId),
+            knex('organization_user').where('user_id', userId)
           ])
         })
-        .spread((orgRes, relRes) => {
-          // Entry for org in database
-          expect(orgRes).to.be.an('array')
-          expect(orgRes).to.have.lengthOf(1)
-          expect(orgRes[0]).to.be.an('object')
-          expect(orgRes[0].github_id).to.equal(orgGithubId)
+        .spread((userRes, relRes) => {
+          // Entry for user in database
+          expect(userRes).to.be.an('array')
+          expect(userRes).to.have.lengthOf(1)
+          expect(userRes[0]).to.be.an('object')
+          expect(userRes[0].github_id).to.equal(userGithubId)
           // Entry for many-to-many relationship in database
           expect(relRes).to.be.an('array')
           expect(relRes).to.have.lengthOf(1)
           expect(relRes[0]).to.be.an('object')
-          expect(relRes[0].organization_id).to.equal(orgId)
+          expect(relRes[0].user_id).to.equal(userId)
         })
         .asCallback(done)
     })

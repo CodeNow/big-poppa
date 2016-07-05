@@ -15,9 +15,9 @@ const knex = bookshelf.knex
 const User = require('common/models/user')
 const Organization = require('common/models/organization')
 
-const RemoveUserFromOrganization = require('hooray/workers/organization.user.remove')
+const AddUserToOrganization = require('prometheus/workers/organization.user.add')
 
-describe('organization.user.remove', () => {
+describe('organization.user.add', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
 
@@ -38,11 +38,11 @@ describe('organization.user.remove', () => {
       status: 200,
       body: githubOrganizationFixture
     })
-    testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
+    testUtil.createUserAndOrg(orgGithubId, userGithubId)
       .asCallback(done)
   })
 
-  it('should remove a user from an organization', done => {
+  it('should add a user to an organization', done => {
     let userId
     let orgId
     Promise.all([
@@ -52,24 +52,23 @@ describe('organization.user.remove', () => {
       .spread((user, organization) => {
         userId = user.get(user.idAttribute)
         orgId = organization.get(organization.idAttribute)
-        return knex('organization_user').where('user_id', userId)
+        return knex('organization_user').where('user_id', userId).count()
       })
-      .then(res => {
-        expect(res).to.be.an('array')
-        expect(res).to.have.lengthOf(1)
-        expect(res[0]).to.be.an('object')
-        expect(res[0].organization_id).to.equal(orgId)
-        expect(res[0].user_id).to.equal(userId)
-      })
-      .then(() => RemoveUserFromOrganization({
-        userGithubId: userGithubId,
-        organizationGithubId: orgGithubId
-      }))
-      .then(() => knex('organization_user').where('user_id', userId).count())
       .then(res => {
         expect(res).to.be.an('array')
         expect(res[0]).to.be.an('object')
         expect(res[0].count).to.have.equal('0')
+      })
+      .then(() => AddUserToOrganization({
+        userGithubId: userGithubId,
+        organizationGithubId: orgGithubId
+      }))
+      .then(() => knex('organization_user').where('user_id', userId))
+      .then(res => {
+        expect(res).to.be.an('array')
+        expect(res[0]).to.be.an('object')
+        expect(res[0].organization_id).to.equal(orgId)
+        expect(res[0].user_id).to.equal(userId)
       })
       .asCallback(done)
   })

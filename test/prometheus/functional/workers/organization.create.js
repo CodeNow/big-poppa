@@ -10,7 +10,7 @@ const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 const bookshelf = require('common/models').bookshelf
 const knex = bookshelf.knex
 
-const CreateOrganization = require('hooray/workers/organization.create')
+const CreateOrganization = require('prometheus/workers/organization.create')
 
 describe('organization.create', () => {
   let githubId = 2828361

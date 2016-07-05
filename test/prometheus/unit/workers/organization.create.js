@@ -11,7 +11,7 @@ const GithubEntityError = require('common/errors/github-entity-error')
 const UniqueError = require('common/errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
-const CreateOrganization = require('hooray/workers/organization.create')
+const CreateOrganization = require('prometheus/workers/organization.create')
 
 describe('#orgnization.create', () => {
   let createStub

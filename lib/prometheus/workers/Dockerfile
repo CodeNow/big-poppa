@@ -6,4 +6,4 @@ RUN npm install
 
 COPY ./ /app/
 
-CMD ["npm", "run", "init-start-hooray-worker"]
+CMD ["npm", "run", "init-start-prometheus-worker"]
