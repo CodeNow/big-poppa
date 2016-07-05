@@ -20,18 +20,18 @@ the following:
    start postgres on your computer.
 
 Once you have installed postgres you'll need to run the following from the
-astral project repository directory:
+big-poppa project repository directory:
 
 1. `npm run init-db`
 
-This script creates a super user named `astral` and two databases on your machine:
-`astral` (used for local development) and `astral-test` (used by the test suite).
+This script creates a super user named `big-poppa` and two databases on your machine:
+`big-poppa` (used for local development) and `big-poppa-test` (used by the test suite).
 
 #### Running Migrations
 
-Astral uses [knex](https://www.npmjs.com/package/knex) to access the postgresql
+big-poppa uses [knex](https://www.npmjs.com/package/knex) to access the postgresql
 database. The first thing you'll need to do after installing postgres is to
-run the knex migrations to create the database schema. From the astral project
+run the knex migrations to create the database schema. From the big-poppa project
 repository directory run the following:
 
 1. `npm install` - Install required libraries
