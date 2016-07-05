@@ -5,9 +5,9 @@ Container repo/service for two microservices that share models:
 - Hooray: user management
 - CREAM: billing
 
-### Setup
+## Setup
 
-#### Postgresql
+### Postgresql
 
 The first step is to install postgres. From the command-line (on Mac OSX) run
 the following:
@@ -27,7 +27,7 @@ big-poppa project repository directory:
 This script creates a super user named `big-poppa` and two databases on your machine:
 `big-poppa` (used for local development) and `big-poppa-test` (used by the test suite).
 
-#### Running Migrations
+### Running Migrations
 
 big-poppa uses [knex](https://www.npmjs.com/package/knex) to access the postgresql
 database. The first thing you'll need to do after installing postgres is to
@@ -37,7 +37,7 @@ repository directory run the following:
 1. `npm install` - Install required libraries
 2. `npm run migrate` - Migrates the test and local development databases.
 
-#### RabbitMQ
+### RabbitMQ
 In order to fully test the codebase you will need to install RabbitMQ locally
 on your machine. Run the following commands to do so:
 
@@ -51,7 +51,7 @@ them on your machine.
 For more information see:
 [RabbitMQ Homebrew Install Instructions](https://www.rabbitmq.com/install-homebrew.html)
 
-### Creating Migrations
+## Creating Migrations
 
 The infrastructure data model may change over time due to new constraints. When
 the schema needs to change you'll have to write your own migrations in order to
@@ -78,3 +78,28 @@ Note that the `production` environment is not available when developing.
 For more information on how to build migrations, take a look at the source code
 for the existing migrations in the `migrations/` directory and read the
 [knex schema documentation](http://knexjs.org/#Schema).
+
+## Testing
+
+### Testing Environments
+
+There are two testing environments:
+
+- `test`: Routes all Github API requests through [mehpi](https://github.com/Runnable/mehpi)
+- `test-integration`: Uses a token to make real Github API calls
+
+### Testing commands
+
+There are several testing commands:
+
+- `npm test`: Lints code and runs unit and functional test for all services
+- `npm run test-integration`: Lints code and runs unit and functional test for all services with real GithubAPI calls (`test-integration` ENV)
+- `npm run test-common`: Runs unit and functional tests for `common` library
+- `npm run test-hooray`: Runs unit and functional tests for `hooray`
+
+### Testing Definitions
+
+There are three types of tests in this project:
+
+- Unit tests: Tests units of codes and stubs out any external code.
+- Functional tests: Tests the complete functionality of a method and only stubs out HTTP calls. Should interact with the database.
