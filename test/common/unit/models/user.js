@@ -11,7 +11,7 @@ const User = require('common/models/user')
 
 const GithubAPI = require('common/github')
 const GithubEntityNotFoundError = require('common/errors/github-entity-not-found-error')
-const githubUserFixture = require('../../fixtures/github/user')
+const githubUserFixture = require('../../../fixtures/github/user')
 
 describe('User', () => {
   describe('Prototype Methods', () => {
