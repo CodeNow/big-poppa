@@ -9,10 +9,12 @@ const bookshelf = require('common/models').bookshelf
 const BaseModel = require('common/models/base')
 
 const DatabaseError = require('common/errors/database-error')
+const ForeignKeyError = require('common/errors/foreign-key-error')
 const NotNullError = require('common/errors/not-null-error')
 const NotFoundError = require('common/errors/not-found-error')
 const NoRowsUpdatedError = require('common/errors/no-rows-updated-error')
 const NoRowsDeletedError = require('common/errors/no-rows-deleted-error')
+const UniqueError = require('common/errors/unique-error')
 
 describe('Base', () => {
   let TestModel
@@ -537,7 +539,43 @@ describe('Base', () => {
           })
       })
 
-      it('should cast an error with a code as a database error', done => {
+      it('should cast an error with code `23502` as a `NotNullError` error', done => {
+        let thrownError = new Error('yo')
+        thrownError.code = '23502'
+        Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(NotNullError)
+            expect(err.data.err).to.equal(thrownError)
+            done()
+          })
+      })
+
+      it('should cast an error with code `23503` as a `ForeignKeyError` error', done => {
+        let thrownError = new Error('yo')
+        thrownError.code = '23503'
+        Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(ForeignKeyError)
+            expect(err.data.err).to.equal(thrownError)
+            done()
+          })
+      })
+
+      it('should cast an error with code `23505` as a `UniqueError` error', done => {
+        let thrownError = new Error('yo')
+        thrownError.code = '23505'
+        Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err).to.be.an.instanceOf(UniqueError)
+            expect(err.data.err).to.equal(thrownError)
+            done()
+          })
+      })
+
+      it('should cast any other error with a code as a database error', done => {
         let thrownError = new Error('yo')
         thrownError.code = '12345'
         Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
@@ -549,7 +587,7 @@ describe('Base', () => {
           })
       })
 
-      it('should cast any other error as a `DatabaseError`', done => {
+      it('should rethrow any other error', done => {
         let thrownError = new Error('yo')
         Promise.method(TestModel.castDatabaseError.bind(TestModel))(thrownError)
           .asCallback(err => {
