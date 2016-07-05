@@ -84,10 +84,7 @@ describe('#organization.user.remove', () => {
 
     it('should validate if a valid job is passed', done => {
       RemoveUserFromOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.not.exist
-          done()
-        })
+        .asCallback(done)
     })
   })
 

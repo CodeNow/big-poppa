@@ -67,12 +67,11 @@ describe('Organization', () => {
 
       it('should check if the github id exists and is for a org', done => {
         org.validateCreate({}, attrs)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(GithubAPI.getOrganization)
             sinon.assert.calledWithExactly(GithubAPI.getOrganization, githubId)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should throw an error if the org does not exist', done => {
@@ -126,14 +125,13 @@ describe('Organization', () => {
         let userId = user.get('id')
 
         org.addUser(user)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(usersStub)
             expect(usersStub.thisValues[0]).to.equal(org)
             sinon.assert.calledOnce(attachStub)
             sinon.assert.calledWithExactly(attachStub, userId, undefined)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should pass the `opts` to `attach`', done => {
@@ -141,13 +139,12 @@ describe('Organization', () => {
         let opts = { transacting: {} }
 
         org.addUser(user, opts)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(usersStub)
             sinon.assert.calledOnce(attachStub)
             sinon.assert.calledWithExactly(attachStub, userId, opts)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should throw any errors thrown by `attach`', done => {
@@ -200,14 +197,13 @@ describe('Organization', () => {
         let userId = user.get('id')
 
         org.removeUser(user)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(usersStub)
             expect(usersStub.thisValues[0]).to.equal(org)
             sinon.assert.calledOnce(detachStub)
             sinon.assert.calledWithExactly(detachStub, userId, undefined)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should pass the `opts` to `detach`', done => {
@@ -215,13 +211,12 @@ describe('Organization', () => {
         let opts = { transacting: {} }
 
         org.removeUser(user, opts)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(usersStub)
             sinon.assert.calledOnce(detachStub)
             sinon.assert.calledWithExactly(detachStub, userId, opts)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should throw any errors thrown by `detach`', done => {
@@ -255,25 +250,23 @@ describe('Organization', () => {
 
       it('should save the new organization', done => {
         Organization.create(githubId)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(saveStub)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should save the new organization with the github id', done => {
         Organization.create(githubId)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(saveStub)
             sinon.assert.calledWithExactly(
               saveStub,
               sinon.match.has('github_id', githubId),
               undefined
             )
-            done()
           })
+          .asCallback(done)
       })
 
       it('should save the new organization with timestamps for current time', done => {
@@ -282,8 +275,7 @@ describe('Organization', () => {
         }
         let beforeTime = (new Date()).getTime()
         Organization.create(githubId)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(saveStub)
             let dateTypeMatch = sinon.match.instanceOf(Date)
             sinon.assert.calledWithExactly(
@@ -304,23 +296,22 @@ describe('Organization', () => {
                 .and(sinon.match.has('grace_period_end', timeMatch)),
               undefined
             )
-            done()
           })
+          .asCallback(done)
       })
 
       it('should call `save` with the passed options', done => {
         let opts = { transacting: {} }
         Organization.create(githubId, opts)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(saveStub)
             sinon.assert.calledWithExactly(
               saveStub,
               sinon.match.object,
               opts
             )
-            done()
           })
+          .asCallback(done)
       })
     })
   })

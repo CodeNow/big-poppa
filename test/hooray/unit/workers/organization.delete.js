@@ -84,10 +84,7 @@ describe('#organization.delete', () => {
 
     it('should validate if a valid job is passed', done => {
       DeleteOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.not.exist
-          done()
-        })
+        .asCallback(done)
     })
   })
 
@@ -156,26 +153,24 @@ describe('#organization.delete', () => {
   describe('Main Functionality', () => {
     it('should start a transaction', done => {
       DeleteOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.not.exist
+        .then(() => {
           sinon.assert.calledOnce(transactionStub)
           sinon.assert.calledWithExactly(transactionStub, sinon.match.func)
-          done()
         })
+        .asCallback(done)
     })
 
     it('should fetch the org by its github id', done => {
       DeleteOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.not.exist
+        .then(() => {
           sinon.assert.calledOnce(fetchByGithubIdStub)
           sinon.assert.calledWithExactly(
             fetchByGithubIdStub,
             githubId,
             { transacting: transaction }
           )
-          done()
         })
+        .asCallback(done)
     })
 
     it('should get all the related users for that org', done => {

@@ -131,13 +131,13 @@ describe('Base', () => {
         it('should save the model if no errors are thrown', (done) => {
           let githubId = 1
           let testModel = new TestModel({ github_id: githubId })
-          testModel.save().asCallback(err => {
-            expect(err).to.not.exist
-            sinon.assert.calledOnce(saveStub)
-            let model = saveStub.thisValues[0]
-            expect(model.get('github_id')).to.equal(githubId)
-          })
-          .asCallback(done)
+          testModel.save()
+            .then(() => {
+              sinon.assert.calledOnce(saveStub)
+              let model = saveStub.thisValues[0]
+              expect(model.get('github_id')).to.equal(githubId)
+            })
+            .asCallback(done)
         })
       })
     })
@@ -187,13 +187,13 @@ describe('Base', () => {
         it('should destroy the model if no errors are thrown', (done) => {
           let githubId = 1
           let testModel = new TestModel({ github_id: githubId })
-          testModel.destroy().asCallback(err => {
-            expect(err).to.not.exist
-            sinon.assert.calledOnce(destroyStub)
-            let model = destroyStub.thisValues[0]
-            expect(model.get('github_id')).to.equal(githubId)
-          })
-          .asCallback(done)
+          testModel.destroy()
+            .then(() => {
+              sinon.assert.calledOnce(destroyStub)
+              let model = destroyStub.thisValues[0]
+              expect(model.get('github_id')).to.equal(githubId)
+            })
+            .asCallback(done)
         })
       })
     })
@@ -312,36 +312,33 @@ describe('Base', () => {
 
       it('should fetch the models', done => {
         testModel.getAllIdsForRelated('organizations')
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(fetchStub)
             sinon.assert.calledWithExactly(fetchStub, sinon.match.object)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should not allow you to ovewrite the `withRelated` property', done => {
         let opts = { withRelated: ['not-organizations'], hello: 'world' }
         testModel.getAllIdsForRelated('organizations', opts)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(fetchStub)
             sinon.assert.calledWithExactly(fetchStub, {
               hello: 'world',
               withRelated: ['organizations']
             })
-            done()
           })
+          .asCallback(done)
       })
 
       it('should map over the entries and return their ids', done => {
         testModel.getAllIdsForRelated('organizations')
-          .asCallback((err, res) => {
-            expect(err).to.not.exist
+          .then(res => {
             sinon.assert.calledOnce(fetchStub)
             expect(res).to.deep.equal([orgId1, orgId2])
-            done()
           })
+          .asCallback(done)
       })
 
       it('should throw an error if fetch fails', done => {
@@ -374,45 +371,41 @@ describe('Base', () => {
 
       it('should return the model', done => {
         TestModel.fetchById(modelId)
-          .asCallback((err, res) => {
-            expect(err).to.not.exist
+          .then(res => {
             expect(res).to.equal(testModel)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should fetch the model with `require`', done => {
         TestModel.fetchById(modelId)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(fetchStub)
             expect(fetchStub.thisValues[0].get('id')).to.equal(modelId)
             sinon.assert.calledWithExactly(fetchStub, { require: true })
-            done()
           })
+          .asCallback(done)
       })
 
       it('should pass opts (like a transaction) into fetch', done => {
         let t = {} // transaction
         TestModel.fetchById(modelId, { transacting: t })
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(fetchStub)
             expect(fetchStub.thisValues[0].get('id')).to.equal(modelId)
             sinon.assert.calledWithExactly(fetchStub, { require: true, transacting: t })
-            done()
           })
+          .asCallback(done)
       })
 
       it('should should not override the `require` opt', done => {
         TestModel.fetchById(modelId, { require: false })
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(fetchStub)
             expect(fetchStub.thisValues[0].get('id')).to.equal(modelId)
             sinon.assert.calledWithExactly(fetchStub, { require: true })
-            done()
           })
+          .asCallback(done)
       })
 
       it('should throw a database error if `fetch` throws an error', done => {
@@ -445,45 +438,41 @@ describe('Base', () => {
 
       it('should return the model', done => {
         TestModel.fetchByGithubId(githubId)
-          .asCallback((err, res) => {
-            expect(err).to.not.exist
+          .then(res => {
             expect(res).to.equal(testModel)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should fetch the model with `require`', done => {
         TestModel.fetchByGithubId(githubId)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(fetchStub)
             expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
             sinon.assert.calledWithExactly(fetchStub, { require: true })
-            done()
           })
+          .asCallback(done)
       })
 
       it('should pass opts (like a transaction) into fetch', done => {
         let t = {} // transaction
         TestModel.fetchByGithubId(githubId, { transacting: t })
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(fetchStub)
             expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
             sinon.assert.calledWithExactly(fetchStub, { require: true, transacting: t })
-            done()
           })
+          .asCallback(done)
       })
 
       it('should should not override the `require` opt', done => {
         TestModel.fetchByGithubId(githubId, { require: false })
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(fetchStub)
             expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
             sinon.assert.calledWithExactly(fetchStub, { require: true })
-            done()
           })
+          .asCallback(done)
       })
 
       it('should throw a database error if `fetch` throws an error', done => {

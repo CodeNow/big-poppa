@@ -66,12 +66,11 @@ describe('User', () => {
 
       it('should check if the github id exists and is for a user', done => {
         user.validateCreate({}, attrs)
-          .asCallback(err => {
-            expect(err).to.not.exist
+          .then(() => {
             sinon.assert.calledOnce(GithubAPI.getUser)
             sinon.assert.calledWithExactly(GithubAPI.getUser, githubId)
-            done()
           })
+          .asCallback(done)
       })
 
       it('should throw an error if the user does not exist', done => {

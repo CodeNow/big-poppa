@@ -51,10 +51,7 @@ describe('#orgnization.create', () => {
 
     it('should not throw a validation error if a valid job is passed', done => {
       CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.not.exist
-          done()
-        })
+        .asCallback(done)
     })
   })
 
@@ -104,25 +101,23 @@ describe('#orgnization.create', () => {
   describe('Main Functionality', done => {
     it('should call `Organization.create`', done => {
       CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.not.exist
+        .then(() => {
           sinon.assert.calledOnce(createStub)
           sinon.assert.calledWithExactly(
             createStub,
             validJob.githubId
           )
-          done()
         })
+        .asCallback(done)
     })
 
     it('should return an organization', done => {
       CreateOrganization(validJob)
-        .asCallback((err, res) => {
-          expect(err).to.not.exist
+        .then(res => {
           sinon.assert.calledOnce(createStub)
           expect(res).to.equal(newOrg)
-          done()
         })
+        .asCallback(done)
     })
   })
 })

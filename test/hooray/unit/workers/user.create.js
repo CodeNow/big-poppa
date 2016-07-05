@@ -51,10 +51,7 @@ describe('#user.create', () => {
 
     it('should not throw a validation error if a valid job is passed', done => {
       CreateUser(validJob)
-        .asCallback(err => {
-          expect(err).to.not.exist
-          done()
-        })
+        .asCallback(done)
     })
   })
 
@@ -104,25 +101,23 @@ describe('#user.create', () => {
   describe('Main Functionality', done => {
     it('should call `save`', done => {
       CreateUser(validJob)
-        .asCallback(err => {
-          expect(err).to.not.exist
+        .then(() => {
           sinon.assert.calledOnce(saveStub)
           sinon.assert.calledWithExactly(
             saveStub,
             { github_id: validJob.githubId }
           )
-          done()
         })
+        .asCallback(done)
     })
 
     it('should return a user', done => {
       CreateUser(validJob)
-        .asCallback((err, res) => {
-          expect(err).to.not.exist
+        .then(res => {
           sinon.assert.calledOnce(saveStub)
           expect(res).to.equal(newUser)
-          done()
         })
+        .asCallback(done)
     })
   })
 })
