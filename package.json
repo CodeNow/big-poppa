@@ -10,6 +10,8 @@
     "coverage-check": "istanbul check-coverage && echo 'Coverage check successful!'",
     "init": "npm run init-db && npm run migrate",
     "test-integration": "npm run lint && NODE_PATH=./lib NODE_ENV=test-integration mocha --recursive test/",
+    "test-unit": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/",
+    "test-functional": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/functional/",
     "init-db": "createuser -s -d big-poppa; createdb big-poppa; createdb big-poppa-test",
     "drop-db": "dropdb big-poppa && dropdb big-poppa-test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
@@ -18,10 +20,6 @@
     "rollback-dev": "knex migrate:rollback",
     "migrate-test": "NODE_ENV=test knex migrate:latest",
     "rollback-test": "NODE_ENV=test knex migrate:rollback",
-    "test-common": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/common/",
-    "start-prometheus-worker": "NODE_PATH=./lib node lib/prometheus/workers",
-    "init-start-prometheus-worker": "npm run migrate && NODE_PATH=./lib node lib/prometheus/workers",
-    "test-prometheus": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/prometheus"
   },
   "directories": {
     "test": "test"

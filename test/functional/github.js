@@ -15,8 +15,6 @@ const githubNotFoundFixture = require('../fixtures/github/not-found')
 const GithubEntityNotFoundError = require('errors/github-entity-not-found-error')
 const GithubEntityTypeError = require('errors/github-entity-type-error')
 
-console.log(GithubAPI.getUser, Object.keys(GithubAPI), typeof GithubAPI, new GithubAPI(), Object.keys(new GithubAPI()))
-
 describe('GithubAPI', () => {
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
