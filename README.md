@@ -1,6 +1,6 @@
 # Big Poppa
 
-*User management mircoservice for Runnable*
+*Big Poppa is a notorious manager who keeps track of all his users. He knows who owes him money and when it is due. He also stores other attributes for his users and only give out this information to those he deems worthy.*
 
 ## Setup
 
@@ -89,10 +89,10 @@ There are two testing environments:
 
 There are several testing commands:
 
-- `npm test`: Lints code and runs unit and functional test for all services
+- `npm test`: Lints code and runs unit and functional tests
+- `npm run test-unit`: Runs only unit tests.
+- `npm run test-functional`: Runs only functional tests.
 - `npm run test-integration`: Lints code and runs unit and functional test for all services with real GithubAPI calls (`test-integration` ENV)
-- `npm run test-common`: Runs unit and functional tests for `common` library
-- `npm run test-big-poppa`: Runs unit and functional tests for `big-poppa`
 
 ### Testing Definitions
 
