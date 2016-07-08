@@ -1,11 +1,11 @@
 'use strict'
 
 const Promise = require('bluebird')
-const bookshelf = require('common/models').bookshelf
+const bookshelf = require('models').bookshelf
 const knex = bookshelf.knex
 
-const User = require('common/models/user')
-const Organization = require('common/models/organization')
+const User = require('models/user')
+const Organization = require('models/organization')
 
 module.exports = class TestUtil {
 
