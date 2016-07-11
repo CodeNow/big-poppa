@@ -1,6 +1,6 @@
 # Big Poppa
 
-*Big Poppa is a notorious manager who keeps track of all his users. He knows who owes him money and when it is due. He also stores other attributes for his users and only give out this information to those he deems worthy.*
+*Big Poppa is a notorious manager who keeps track of all his users. He knows who owes him money and when it is due. He also stores other attributes for his users and only gives out this information to those he deems worthy.*
 
 ## Setup
 
