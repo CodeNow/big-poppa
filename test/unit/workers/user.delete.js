@@ -219,7 +219,7 @@ describe('#user.delete', () => {
           let firstCall = destroyStub.firstCall
           sinon.assert.calledWithExactly(
             firstCall,
-            { require: true, transacting: transaction }
+            { transacting: transaction }
           )
           expect(firstCall.thisValue).to.equal(user)
         })
