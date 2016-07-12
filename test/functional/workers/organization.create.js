@@ -34,7 +34,7 @@ describe('organization.create', () => {
     CreateOrganization({ githubId: githubId }).then((organization) => {
       expect(organization.get('github_id')).to.equal(githubId)
       // Check database for entry
-      return knex('organization').where('github_id', githubId)
+      return knex('organizations').where('github_id', githubId)
     })
     .then(res => {
       expect(res).to.have.lengthOf(1)

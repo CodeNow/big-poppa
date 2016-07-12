@@ -52,7 +52,7 @@ describe('organization.user.remove', () => {
       .spread((user, organization) => {
         userId = user.get(user.idAttribute)
         orgId = organization.get(organization.idAttribute)
-        return knex('organization_user').where('user_id', userId)
+        return knex('organizations_users').where('user_id', userId)
       })
       .then(res => {
         expect(res).to.be.an('array')
@@ -65,7 +65,7 @@ describe('organization.user.remove', () => {
         userGithubId: userGithubId,
         organizationGithubId: orgGithubId
       }))
-      .then(() => knex('organization_user').where('user_id', userId).count())
+      .then(() => knex('organizations_users').where('user_id', userId).count())
       .then(res => {
         expect(res).to.be.an('array')
         expect(res[0]).to.be.an('object')
