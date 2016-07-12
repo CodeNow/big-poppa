@@ -7,7 +7,7 @@ var debug = require('debug')('big-poppa:migration')
  */
 
 exports.up = function (knex, Promise) {
-  var createTable = knex.schema.createTable('organization', function (table) {
+  var createTable = knex.schema.createTable('organization_with_deleted', function (table) {
     table.increments('id')
       .primary()
     table.integer('github_id')
@@ -21,13 +21,23 @@ exports.up = function (knex, Promise) {
       .notNullable()
     table.timestamp('grace_period_end')
       .notNullable()
+    table.timestamp('deleted_at')
   })
+  .raw(`
+    CREATE VIEW organization AS
+    SELECT * FROM organization_with_deleted WHERE deleted_at IS NULL;
+  `)
+  .raw(`
+    CREATE TRIGGER soft_delete_organization
+    INSTEAD OF DELETE ON organization
+    FOR EACH ROW EXECUTE PROCEDURE soft_delete();
+  `)
   debug(createTable.toString())
   return createTable
 }
 
 exports.down = function (knex, Promise) {
-  var dropTable = knex.schema.dropTable('organization')
+  var dropTable = knex.schema.dropTable('organization_deleted')
   debug(dropTable.toString())
   return dropTable
 }
