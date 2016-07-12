@@ -1,15 +1,17 @@
 'use strict'
 
-var debug = require('debug')('cream:migration')
+var debug = require('debug')('big-poppa:migration')
 
 /**
  * Creates the `users` table.
  */
 
 exports.up = function (knex, Promise) {
-  var createTable = knex.schema.createTable('users', function (table) {
-    table.integer('github_id')
+  var createTable = knex.schema.createTable('user', function (table) {
+    table.increments('id')
       .primary()
+    table.integer('github_id')
+      .unique()
     table.timestamps(true) // Adds default `created_at` `updated_at` timestamps
   })
   debug(createTable.toString())
@@ -17,7 +19,7 @@ exports.up = function (knex, Promise) {
 }
 
 exports.down = function (knex, Promise) {
-  var dropTable = knex.schema.dropTable('users')
+  var dropTable = knex.schema.dropTable('user')
   debug(dropTable.toString())
   return dropTable
 }

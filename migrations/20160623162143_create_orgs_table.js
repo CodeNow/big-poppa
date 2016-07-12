@@ -1,6 +1,6 @@
 'use strict'
 
-var debug = require('debug')('cream:migration')
+var debug = require('debug')('big-poppa:migration')
 
 /**
  * Creates the `users` table.
@@ -8,8 +8,10 @@ var debug = require('debug')('cream:migration')
 
 exports.up = function (knex, Promise) {
   var createTable = knex.schema.createTable('organization', function (table) {
-    table.integer('github_id')
+    table.increments('id')
       .primary()
+    table.integer('github_id')
+      .unique()
     table.timestamps(true) // Adds default `created_at` `updated_at` timestamps
     table.string('stripe_customer_id')
       .unique()

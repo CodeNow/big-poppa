@@ -1,13 +1,19 @@
 {
-  "name": "cream",
+  "name": "big-poppa",
   "version": "0.0.1",
   "description": "User management and billing",
   "main": "index.js",
   "scripts": {
     "lint": "standard --verbose",
-    "test": "npm run lint && NODE_ENV=test mocha test",
-    "init-db": "createuser -s -d cream; createdb cream; createdb cream-test",
-    "drop-db": "dropdb cream && dropdb cream-test",
+    "test": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha --recursive test/",
+    "coverage": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha -- --recursive test",
+    "coverage-check": "istanbul check-coverage && echo 'Coverage check successful!'",
+    "init": "npm run init-db && npm run migrate",
+    "test-integration": "npm run lint && NODE_PATH=./lib NODE_ENV=test-integration mocha --recursive test/",
+    "test-unit": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/",
+    "test-functional": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/functional/",
+    "init-db": "createuser -s -d big-poppa; createdb big-poppa; createdb big-poppa-test",
+    "drop-db": "dropdb big-poppa && dropdb big-poppa-test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
     "rollback": "npm run rollback-dev && npm run rollback-test",
     "migrate-dev": "knex migrate:latest",
@@ -17,6 +23,10 @@
   },
   "directories": {
     "test": "test"
+  },
+  "engines": {
+    "node": ">=4.4.5 <5",
+    "npm": ">=2.14.7"
   },
   "standard": {
     "globals": [
@@ -30,8 +40,27 @@
   },
   "author": "",
   "dependencies": {
+    "101": "^1.6.0",
+    "bluebird": "^3.4.1",
+    "bookshelf": "^0.9.5",
+    "bunyan": "^1.8.1",
+    "chai": "^3.5.0",
+    "github": "^1.4.0",
+    "joi": "^8.4.2",
+    "keypather": "^2.0.0",
     "knex": "^0.11.7",
     "loadenv": "^2.2.0",
-    "pg": "^6.0.0"
+    "moment": "^2.13.0",
+    "pg": "^6.0.0",
+    "ponos": "^4.0.0",
+    "runnable-hermes": "^6.6.0"
+  },
+  "devDependencies": {
+    "debug": "^2.2.0",
+    "istanbul": "^0.4.4",
+    "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
+    "sinon": "^1.17.4",
+    "sinon-as-promised": "^4.0.0",
+    "standard": "^7.1.2"
   }
 }
