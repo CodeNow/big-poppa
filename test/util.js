@@ -9,7 +9,7 @@ const Organization = require('models/organization')
 
 module.exports = class TestUtil {
 
-  static trundateAllTables () {
+  static truncateAllTables () {
     return knex('organization_user').truncate()
       .then(() => {
         return Promise.all([
@@ -21,15 +21,17 @@ module.exports = class TestUtil {
   }
 
   static createUserAndOrg (orgGithubId, userGithubId) {
-    return Promise.all([
-      new User().save({ github_id: userGithubId }),
-      Organization.create(orgGithubId)
-    ])
+    return Promise.props({
+      user: new User().save({ github_id: userGithubId }),
+      org: Organization.create(orgGithubId)
+    })
   }
 
   static createAttachedUserAndOrg (orgGithubId, userGithubId) {
     return this.createUserAndOrg(orgGithubId, userGithubId)
-      .spread((user, org) => {
+      .tap(res => {
+        let user = res.user
+        let org = res.org
         return org.users().attach(user.get(user.idAttribute))
       })
   }
