@@ -12,7 +12,7 @@ const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 const server = require('http/server')
 const route = '/organization'
 
-describe.only(`HTTP ${route}`, () => {
+describe(`HTTP ${route}`, () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
   let orgId
@@ -60,7 +60,7 @@ describe.only(`HTTP ${route}`, () => {
         })
     })
 
-    it('should return a 404 for an non existing', () => {
+    it('should return a an empty array if there are no existing models', () => {
       return agent
         .get(`${route}/?github_id=2343`)
         .expect(200)
@@ -89,7 +89,7 @@ describe.only(`HTTP ${route}`, () => {
         })
     })
 
-    it('should return a 404 for an non existing', () => {
+    it('should return a 404 for an non existing organization', () => {
       return agent
         .get(`${route}/2342`)
         .expect(404)
