@@ -5,6 +5,8 @@ const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
 const expect = require('chai').expect
 
+const express = require('express')
+
 const NotFoundError = require('errors/not-found-error')
 const Organization = require('models/organization')
 const OrganizationRouter = require('http/routes/organization')
@@ -30,8 +32,14 @@ describe('HTTP /organization', () => {
   })
 
   afterEach(() => {
-    collectionConstructorStub.restore()
     fetchByIdStub.restore()
+  })
+
+  describe('#router', () => {
+    it('should return an express router', () => {
+      let router = OrganizationRouter.router()
+      expect(router).to.be.an.instanceOf(express.Router().constructor)
+    })
   })
 
   describe('get', () => {
@@ -43,6 +51,10 @@ describe('HTTP /organization', () => {
       collectionStub.query = sinon.stub().returns(collectionStub)
       collectionStub.fetch = sinon.stub().resolves(orgMock)
       collectionConstructorStub = sinon.stub(Organization, 'collection').returns(collectionStub)
+    })
+
+    afterEach(() => {
+      collectionConstructorStub.restore()
     })
 
     it('should create a collection', () => {
