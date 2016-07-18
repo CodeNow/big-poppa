@@ -8,6 +8,11 @@ const expect = require('chai').expect
 const Joi = Promise.promisifyAll(require('joi'))
 
 const NotFoundError = require('errors/not-found-error')
+const GithubEntityError = require('errors/github-entity-error')
+const NotNullError = require('errors/not-null-error')
+const UniqueError = require('errors/unique-error')
+const ForeignKeyError = require('errors/foreign-key-error')
+
 const BaseRouter = require('http/routes/base')
 
 describe('HTTP Base Router', () => {
@@ -136,6 +141,7 @@ describe('HTTP Base Router', () => {
       sinon.assert.calledWithExactly(
         responseStub.json,
         {
+          statusCode: 500,
           message: sinon.match(/internal.*server.*error/i),
           err: err
         }
@@ -152,7 +158,72 @@ describe('HTTP Base Router', () => {
       sinon.assert.calledWithExactly(
         responseStub.json,
         {
+          statusCode: 400,
           message: sinon.match(/validation.*error/i),
+          err: err
+        }
+      )
+    })
+
+    it('should throw a 400 error if there is a UniqueError', () => {
+      let err = new UniqueError('Already exists')
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 400)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          statusCode: 400,
+          message: sinon.match(/unique.*error/i),
+          err: err
+        }
+      )
+    })
+
+    it('should throw a 400 error if there is a GithubEntityError', () => {
+      let err = new GithubEntityError('User not found')
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 400)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          statusCode: 400,
+          message: sinon.match(/github.*error/i),
+          err: err
+        }
+      )
+    })
+
+    it('should throw a 400 error if there is a NotNullError', () => {
+      let err = new NotNullError('Field cannot be null')
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 400)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          statusCode: 400,
+          message: sinon.match(/notnull.*error/i),
+          err: err
+        }
+      )
+    })
+
+    it('should throw a 400 error if there is a ForeignKeyError', () => {
+      let err = new ForeignKeyError('Already exists')
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 400)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          statusCode: 400,
+          message: sinon.match(/foreignkey.*error/i),
           err: err
         }
       )
@@ -167,6 +238,7 @@ describe('HTTP Base Router', () => {
       sinon.assert.calledWithExactly(
         responseStub.json,
         {
+          statusCode: 404,
           message: sinon.match(/not.*found/i),
           err: err
         }
