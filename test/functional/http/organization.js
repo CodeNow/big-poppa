@@ -2,11 +2,13 @@
 
 const expect = require('chai').expect
 const request = require('supertest-as-promised')
+const MockAPI = require('mehpi')
+
+const moment = require('moment')
 
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const githubUserFixture = require('../../fixtures/github/user')
-const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const server = require('http/server')
@@ -92,6 +94,53 @@ describe(`HTTP ${route}`, () => {
     it('should return a 404 for an non existing organization', () => {
       return agent
         .get(`${route}/2342`)
+        .expect(404)
+        .then(res => {
+          expect(res).to.be.an.object
+          expect(res.body).to.be.an.object
+          let err = res.body
+          expect(err).to.have.property('err')
+        })
+    })
+  })
+
+  describe('PATCH /:id', () => {
+    it('should return a 200 when patching an organization', () => {
+      let githubId = 2342342
+      let stripeCustomerId = '23423'
+      let unixTimestamp = Math.floor((new Date()).getTime() / 1000)
+      let time = moment(unixTimestamp, 'X')
+      return agent
+        .patch(`${route}/${orgId}`)
+        .send({
+          github_id: githubId,
+          stripe_customer_id: stripeCustomerId,
+          trial_end: unixTimestamp,
+          active_period_end: unixTimestamp,
+          grace_period_end: unixTimestamp
+        })
+        .expect(200)
+        .then(res => {
+          return agent
+            .get(`${route}/${orgId}`)
+            .expect(200)
+        })
+        .then(res => {
+          expect(res).to.be.an.object
+          expect(res.body).to.be.an.object
+          let org = res.body
+          expect(org).to.have.property('id')
+          expect(org).to.have.property('github_id', githubId)
+          expect(org).to.have.property('stripe_customer_id', stripeCustomerId)
+          expect(org).to.have.property('trial_end', time.toISOString())
+          expect(org).to.have.property('active_period_end', time.toISOString())
+          expect(org).to.have.property('grace_period_end', time.toISOString())
+        })
+    })
+
+    it('should return a 404 for an non existing organization', () => {
+      return agent
+        .patch(`${route}/2342`)
         .expect(404)
         .then(res => {
           expect(res).to.be.an.object
