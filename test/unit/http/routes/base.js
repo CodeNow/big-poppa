@@ -11,6 +11,14 @@ const NotFoundError = require('errors/not-found-error')
 const BaseRouter = require('http/routes/base')
 
 describe('HTTP Base Router', () => {
+  let responseStub
+
+  beforeEach(() => {
+    responseStub = {}
+    responseStub.status = sinon.stub().returnsThis()
+    responseStub.json = sinon.stub().resolves()
+  })
+
   describe('#createRoute', () => {
     let schema
 
@@ -48,9 +56,6 @@ describe('HTTP Base Router', () => {
       beforeEach(() => {
         rawRequest = {}
         strippedRequest = {}
-        responseStub = {}
-        responseStub.status = sinon.stub().returnsThis()
-        responseStub.json = sinon.stub().resolves()
         routerResponse = { a: 2 }
         validateAsyncStub = sinon.stub(Joi, 'validateAsync').resolves(strippedRequest)
         // Stub out error handler before it gets bound in `createRoute`
@@ -86,7 +91,6 @@ describe('HTTP Base Router', () => {
             sinon.assert.calledOnce(errorHandlerStub)
             sinon.assert.calledWithExactly(
               errorHandlerStub,
-              rawRequest,
               responseStub,
               err
             )
@@ -114,7 +118,6 @@ describe('HTTP Base Router', () => {
             sinon.assert.calledOnce(errorHandlerStub)
             sinon.assert.calledWithExactly(
               errorHandlerStub,
-              rawRequest,
               responseStub,
               err
             )
@@ -125,12 +128,49 @@ describe('HTTP Base Router', () => {
 
   describe('#errorHandler', () => {
     it('should throw a 500 error if no error is matched', () => {
+      let err = new Error('Random Error')
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 500)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          message: sinon.match(/internal.*server.*error/i),
+          err: err
+        }
+      )
     })
 
     it('should throw a 400 error if there is a validation error', () => {
+      let err = new Error('Validation Error')
+      err.isJoi = true
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 400)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          message: sinon.match(/validation.*error/i),
+          err: err
+        }
+      )
     })
 
     it('should throw a 404 error if there is no resource found', () => {
+      let err = new NotFoundError('Organization Not Found')
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 404)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          message: sinon.match(/not.*found/i),
+          err: err
+        }
+      )
     })
   })
 })
