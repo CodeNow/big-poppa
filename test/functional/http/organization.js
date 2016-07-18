@@ -44,7 +44,7 @@ describe(`HTTP ${route}`, () => {
       })
   })
 
-  describe('GET /?githubId=GH_ID', () => {
+  describe('GET /?github_id=GH_ID', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
         .get(`${route}/?github_id=${orgGithubId}`)
