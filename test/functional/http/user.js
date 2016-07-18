@@ -54,6 +54,10 @@ describe(`HTTP ${route}`, () => {
           let user = res.body[0]
           expect(user).to.have.property('id')
           expect(user).to.have.property('github_id', userGithubId)
+          expect(user).to.have.property('organizations')
+          expect(user.organizations).to.be.an('array')
+          expect(user.organizations[0]).to.have.property('id')
+          expect(user.organizations[0]).to.have.property('github_id')
         })
     })
 
@@ -80,6 +84,10 @@ describe(`HTTP ${route}`, () => {
           let user = res.body
           expect(user).to.have.property('id')
           expect(user).to.have.property('github_id', userGithubId)
+          expect(user).to.have.property('organizations')
+          expect(user.organizations).to.be.an('array')
+          expect(user.organizations[0]).to.have.property('id')
+          expect(user.organizations[0]).to.have.property('github_id')
         })
     })
 

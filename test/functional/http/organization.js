@@ -59,6 +59,10 @@ describe(`HTTP ${route}`, () => {
           expect(org).to.have.property('trial_end')
           expect(org).to.have.property('active_period_end')
           expect(org).to.have.property('grace_period_end')
+          expect(org).to.have.property('users')
+          expect(org.users).to.be.an('array')
+          expect(org.users[0]).to.have.property('id')
+          expect(org.users[0]).to.have.property('github_id')
         })
     })
 
@@ -88,6 +92,10 @@ describe(`HTTP ${route}`, () => {
           expect(org).to.have.property('trial_end')
           expect(org).to.have.property('active_period_end')
           expect(org).to.have.property('grace_period_end')
+          expect(org).to.have.property('users')
+          expect(org.users).to.be.an('array')
+          expect(org.users[0]).to.have.property('id')
+          expect(org.users[0]).to.have.property('github_id')
         })
     })
 

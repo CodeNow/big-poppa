@@ -79,6 +79,10 @@ describe('HTTP /organization', () => {
       return OrganizationRouter.get(requestStub, responseStub)
         .then(() => {
           sinon.assert.calledOnce(collectionStub.fetch)
+          sinon.assert.calledWithExactly(
+            collectionStub.fetch,
+            { withRelated: 'users' }
+          )
         })
     })
 
@@ -120,7 +124,8 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(fetchByIdStub)
           sinon.assert.calledWithExactly(
             fetchByIdStub,
-            orgId
+            orgId,
+            { withRelated: 'users' }
           )
         })
     })
@@ -131,7 +136,8 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(fetchByIdStub)
           sinon.assert.calledWithExactly(
             fetchByIdStub,
-            orgId
+            orgId,
+            { withRelated: 'users' }
           )
         })
     })
