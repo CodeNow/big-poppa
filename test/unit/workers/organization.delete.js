@@ -133,21 +133,6 @@ describe('#organization.delete', () => {
           done()
         })
     })
-
-    it('should throw a `WorkerStopError` if `Organization.destroy` returns a `NoRowsDeletedError`', done => {
-      let originalErr = new NoRowsDeletedError()
-      destroyStub.rejects(originalErr)
-
-      DeleteOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.data.err).to.equal(originalErr)
-          expect(err.message).to.match(/org.*not.*deleted/i)
-          sinon.assert.calledOnce(fetchByGithubIdStub)
-          done()
-        })
-    })
   })
 
   describe('Main Functionality', () => {
@@ -226,7 +211,7 @@ describe('#organization.delete', () => {
           let firstCall = destroyStub.firstCall
           sinon.assert.calledWithExactly(
             firstCall,
-            { require: true, transacting: transaction }
+            { transacting: transaction }
           )
           expect(firstCall.thisValue).to.equal(org)
         })

@@ -112,7 +112,6 @@ describe('GithubAPI', () => {
 
       GithubAPI.getUser(userGithubId)
         .asCallback(err => {
-          console.log()
           expect(err).to.exist
           expect(err).to.be.an.instanceOf(GithubEntityTypeError)
           done()

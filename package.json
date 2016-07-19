@@ -9,12 +9,15 @@
     "coverage": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha -- --recursive test",
     "coverage-check": "istanbul check-coverage && echo 'Coverage check successful!'",
     "init": "npm run init-db && npm run migrate",
-    "test-integration": "npm run lint && NODE_PATH=./lib NODE_ENV=test-integration mocha --recursive test/",
+    "test-integration-env": "npm run lint && NODE_PATH=./lib NODE_ENV=test-integration mocha --recursive test/",
+    "test-integration": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/integration",
     "test-unit": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/",
     "test-functional": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/functional/",
     "init-db": "createuser -s -d big-poppa; createdb big-poppa; createdb big-poppa-test",
     "drop-db": "dropdb big-poppa && dropdb big-poppa-test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
+    "start-worker": "NODE_PATH=./lib node lib/workers",
+    "start-http": "NODE_ENV=development NODE_PATH=./lib node lib/http",
     "rollback": "npm run rollback-dev && npm run rollback-test",
     "migrate-dev": "knex migrate:latest",
     "rollback-dev": "knex migrate:rollback",
@@ -40,8 +43,8 @@
   },
   "author": "",
   "dependencies": {
-    "101": "^1.6.0",
     "bluebird": "^3.4.1",
+    "body-parser": "^1.15.2",
     "bookshelf": "^0.9.5",
     "bunyan": "^1.8.1",
     "chai": "^3.5.0",
@@ -61,6 +64,8 @@
     "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
-    "standard": "^7.1.2"
+    "standard": "^7.1.2",
+    "supertest": "^1.2.0",
+    "supertest-as-promised": "^3.2.0"
   }
 }
