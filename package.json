@@ -17,7 +17,7 @@
     "drop-db": "dropdb big-poppa && dropdb big-poppa-test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
     "start-worker": "NODE_PATH=./lib node lib/workers",
-    "start-http": "NODE_PATH=./lib node lib/http",
+    "start-http": "NODE_ENV=development NODE_PATH=./lib node lib/http",
     "rollback": "npm run rollback-dev && npm run rollback-test",
     "migrate-dev": "knex migrate:latest",
     "rollback-dev": "knex migrate:rollback",
