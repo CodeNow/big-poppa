@@ -63,13 +63,13 @@ describe('User Integration Test', () => {
         // Make a GET request every 100ms to check if org exists
         return request
           .get(`https://localhost:${process.env.HTTPS_PORT}/user`)
-          .query({ github_id: userGithubId })
+          .query({ githubId: userGithubId })
           .then(res => {
             let orgs = res.body
             if (Array.isArray(orgs) && orgs.length > 0) {
               expect(orgs).to.have.lengthOf(1)
               expect(orgs[0]).to.have.property('id')
-              expect(orgs[0]).to.have.property('github_id', userGithubId)
+              expect(orgs[0]).to.have.property('githubId', userGithubId)
               return true
             }
             return false

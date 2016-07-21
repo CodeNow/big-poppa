@@ -57,7 +57,7 @@ describe('Organization', () => {
       let attrs
 
       beforeEach(() => {
-        attrs = { github_id: githubId }
+        attrs = { githubId: githubId }
         sinon.stub(GithubAPI, 'getOrganization').resolves(githubOrganizationFixture)
       })
 
@@ -78,7 +78,7 @@ describe('Organization', () => {
         let githubErr = new GithubEntityNotFoundError(new Error())
         GithubAPI.getOrganization.rejects(githubErr)
 
-        let attrs = { github_id: githubId }
+        let attrs = { githubId: githubId }
         org.validateCreate({}, attrs)
           .asCallback(err => {
             expect(err).to.exist
@@ -262,7 +262,7 @@ describe('Organization', () => {
             sinon.assert.calledOnce(saveStub)
             sinon.assert.calledWithExactly(
               saveStub,
-              sinon.match.has('github_id', githubId),
+              sinon.match.has('githubId', githubId),
               undefined
             )
           })
@@ -280,9 +280,9 @@ describe('Organization', () => {
             let dateTypeMatch = sinon.match.instanceOf(Date)
             sinon.assert.calledWithExactly(
               saveStub,
-              sinon.match.has('trial_end', dateTypeMatch)
-                .and(sinon.match.has('active_period_end', dateTypeMatch))
-                .and(sinon.match.has('grace_period_end', dateTypeMatch)),
+              sinon.match.has('trialEnd', dateTypeMatch)
+                .and(sinon.match.has('activePeriodEnd', dateTypeMatch))
+                .and(sinon.match.has('gracePeriodEnd', dateTypeMatch)),
               undefined
             )
             // Assert timestamps were created now
@@ -291,9 +291,9 @@ describe('Organization', () => {
             let timeMatch = sinon.match(compareTime)
             sinon.assert.calledWithExactly(
               saveStub,
-              sinon.match.has('trial_end', timeMatch)
-                .and(sinon.match.has('active_period_end', timeMatch))
-                .and(sinon.match.has('grace_period_end', timeMatch)),
+              sinon.match.has('trialEnd', timeMatch)
+                .and(sinon.match.has('activePeriodEnd', timeMatch))
+                .and(sinon.match.has('gracePeriodEnd', timeMatch)),
               undefined
             )
           })

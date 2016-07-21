@@ -173,7 +173,7 @@ describe('HTTP /organization', () => {
     beforeEach(() => {
       requestStub = {
         params: { id: orgId },
-        body: { stripe_customer_id: stripeCustomerId }
+        body: { stripeCustomerId: stripeCustomerId }
       }
     })
 
@@ -194,7 +194,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(orgMock.save)
           sinon.assert.calledWithExactly(
             orgMock.save,
-            { stripe_customer_id: stripeCustomerId }
+            { stripeCustomerId: stripeCustomerId }
           )
         })
     })

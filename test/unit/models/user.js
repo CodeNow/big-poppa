@@ -56,7 +56,7 @@ describe('User', () => {
       let attrs
 
       beforeEach(() => {
-        attrs = { github_id: githubId }
+        attrs = { githubId: githubId }
         sinon.stub(GithubAPI, 'getUser').resolves(githubUserFixture)
       })
 
@@ -77,7 +77,7 @@ describe('User', () => {
         let githubErr = new GithubEntityNotFoundError(new Error())
         GithubAPI.getUser.rejects(githubErr)
 
-        let attrs = { github_id: githubId }
+        let attrs = { githubId: githubId }
         user.validateCreate({}, attrs)
           .asCallback(err => {
             expect(err).to.exist

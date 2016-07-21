@@ -32,7 +32,7 @@ describe('user.create', () => {
 
   it('should create a user', done => {
     CreateUser({ githubId: githubId }).then((user) => {
-      expect(user.get('github_id')).to.equal(githubId)
+      expect(user.get('githubId')).to.equal(githubId)
       // Check database for entry
       return knex('user').where('github_id', githubId)
     })

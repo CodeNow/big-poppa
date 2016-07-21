@@ -32,7 +32,7 @@ describe('organization.create', () => {
 
   it('should create an organization', done => {
     CreateOrganization({ githubId: githubId }).then((organization) => {
-      expect(organization.get('github_id')).to.equal(githubId)
+      expect(organization.get('githubId')).to.equal(githubId)
       // Check database for entry
       return knex('organization').where('github_id', githubId)
     })
