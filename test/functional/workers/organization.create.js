@@ -14,9 +14,21 @@ const CreateOrganization = require('workers/organization.create')
 
 describe('organization.create', () => {
   let githubId = 2828361
+  let job
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
+
+  beforeEach(() => {
+    job = {
+      githubId: githubId,
+      creator: {
+        githubUsername: 'thejsj',
+        email: 'jorge.silva@thejsj.com',
+        created: '1469136162'
+      }
+    }
+  })
 
   beforeEach(done => {
     testUtil.truncateAllTables()
@@ -31,7 +43,7 @@ describe('organization.create', () => {
   })
 
   it('should create an organization', done => {
-    CreateOrganization({ githubId: githubId }).then((organization) => {
+    CreateOrganization(job).then((organization) => {
       expect(organization.get('githubId')).to.equal(githubId)
       // Check database for entry
       return knex('organization').where('github_id', githubId)

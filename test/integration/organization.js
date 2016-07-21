@@ -56,7 +56,12 @@ describe('Organization Integration Test', () => {
 
   it('should create an organization', () => {
     return publisher.publishTask('organization.create', {
-      githubId: orgGithubId
+      githubId: orgGithubId,
+      creator: {
+        githubUsername: 'thejsj',
+        email: 'jorge.silva@thejsj.com',
+        created: '1469136162'
+      }
     })
     .then(() => {
       return testUtil.poll(Promise.method(() => {
