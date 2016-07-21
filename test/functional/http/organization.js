@@ -59,6 +59,7 @@ describe(`HTTP ${route}`, () => {
           expect(org).to.have.property('trialEnd')
           expect(org).to.have.property('activePeriodEnd')
           expect(org).to.have.property('gracePeriodEnd')
+          expect(org).to.have.property('firstDockCreated')
           expect(org).to.have.property('users')
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
@@ -92,6 +93,7 @@ describe(`HTTP ${route}`, () => {
           expect(org).to.have.property('trialEnd')
           expect(org).to.have.property('activePeriodEnd')
           expect(org).to.have.property('gracePeriodEnd')
+          expect(org).to.have.property('firstDockCreated')
           expect(org).to.have.property('users')
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
@@ -143,6 +145,7 @@ describe(`HTTP ${route}`, () => {
           expect(org).to.have.property('trialEnd', time.toISOString())
           expect(org).to.have.property('activePeriodEnd', time.toISOString())
           expect(org).to.have.property('gracePeriodEnd', time.toISOString())
+          expect(org).to.have.property('firstDockCreated', false)
         })
     })
 
