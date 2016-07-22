@@ -62,6 +62,7 @@
     "debug": "^2.2.0",
     "istanbul": "^0.4.4",
     "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
+    "mocha": "^2.5.3",
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
     "standard": "^7.1.2",
