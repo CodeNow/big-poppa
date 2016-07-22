@@ -2,7 +2,7 @@ language: node_js
 sudo: false
 node_js:
 - 4.4.7
-- 6.3.1
+- node
 env:
   global:
   - NODE_ENV=test
