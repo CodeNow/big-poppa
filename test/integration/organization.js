@@ -2,7 +2,8 @@
 
 const Promise = require('bluebird')
 const expect = require('chai').expect
-const request = Promise.promisifyAll(require('superagent'))
+const superagentPromisePlugin = require('superagent-promise-plugin')
+const request = superagentPromisePlugin.patch(require('superagent'))
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 const testUtil = require('../util')
