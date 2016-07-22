@@ -17,7 +17,7 @@ const knex = bookshelf.knex
 
 const Organization = require('models/organization')
 
-const DeleteOrganization = require('workers/Organization.delete')
+const DeleteOrganization = require('workers/organization.delete')
 
 describe('organization.delete', () => {
   let userGithubId = 1981198
