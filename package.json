@@ -43,6 +43,7 @@
   },
   "author": "",
   "dependencies": {
+    "101": "^1.6.1",
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "bookshelf": "^0.9.5",
