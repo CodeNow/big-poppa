@@ -52,6 +52,28 @@ describe('Organization', () => {
       })
     })
 
+    describe('#users', () => {
+      let belongsToManyStub
+
+      beforeEach(() => {
+        belongsToManyStub = sinon.stub(Organization.prototype, 'belongsToMany')
+      })
+
+      afterEach(() => {
+        belongsToManyStub.restore()
+      })
+
+      it('should call `belongsToMany`', () => {
+        org = new Organization()
+        org.users()
+        sinon.assert.calledOnce(belongsToManyStub)
+        sinon.assert.calledWithExactly(
+          belongsToManyStub,
+          'User'
+        )
+      })
+    })
+
     describe('#validateCreate', () => {
       let githubId = 123456
       let attrs

@@ -100,6 +100,48 @@ describe('Base', () => {
       })
     })
 
+    describe('#parse', () => {
+      let testModel
+
+      beforeEach(() => {
+        testModel = new TestModel({})
+      })
+
+      it('should return a different object', () => {
+        let obj = {}
+        let res = testModel.parse(obj)
+        expect(res).to.be.an.object
+        expect(res).to.not.equal(obj)
+      })
+
+      it('should convert snake_case into camelCase', () => {
+        let value = 'hello'
+        let res = testModel.parse({ hello_world: value })
+        expect(res).to.have.property('helloWorld', value)
+      })
+    })
+
+    describe('#format', () => {
+      let testModel
+
+      beforeEach(() => {
+        testModel = new TestModel({})
+      })
+
+      it('should return a different object', () => {
+        let obj = {}
+        let res = testModel.format(obj)
+        expect(res).to.be.an.object
+        expect(res).to.not.equal(obj)
+      })
+
+      it('should convert camelCase into snake_case', () => {
+        let value = 'hello'
+        let res = testModel.format({ helloWorld: value })
+        expect(res).to.have.property('hello_world', value)
+      })
+    })
+
     describe('#save', () => {
       let saveStub
 
