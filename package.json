@@ -43,11 +43,13 @@
   },
   "author": "",
   "dependencies": {
+    "101": "^1.6.1",
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "bookshelf": "^0.9.5",
     "bunyan": "^1.8.1",
     "chai": "^3.5.0",
+    "express": "^4.14.0",
     "github": "^1.4.0",
     "joi": "^8.4.2",
     "keypather": "^2.0.0",
@@ -62,9 +64,12 @@
     "debug": "^2.2.0",
     "istanbul": "^0.4.4",
     "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
+    "mocha": "^2.5.3",
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
     "standard": "^7.1.2",
+    "superagent": "^2.1.0",
+    "superagent-promise-plugin": "^3.2.0",
     "supertest": "^1.2.0",
     "supertest-as-promised": "^3.2.0"
   }
