@@ -49,6 +49,7 @@
     "bookshelf": "^0.9.5",
     "bunyan": "^1.8.1",
     "chai": "^3.5.0",
+    "express": "^4.14.0",
     "github": "^1.4.0",
     "joi": "^8.4.2",
     "keypather": "^2.0.0",
@@ -67,6 +68,7 @@
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
     "standard": "^7.1.2",
+    "superagent-promise-plugin": "^3.2.0",
     "supertest": "^1.2.0",
     "supertest-as-promised": "^3.2.0"
   }
