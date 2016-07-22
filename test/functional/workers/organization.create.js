@@ -10,6 +10,7 @@ const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 const bookshelf = require('models').bookshelf
 const knex = bookshelf.knex
 
+const rabbitMQ = require('util/rabbitmq')
 const CreateOrganization = require('workers/organization.create')
 
 describe('organization.create', () => {
@@ -41,6 +42,9 @@ describe('organization.create', () => {
       body: githubOrganizationFixture
     })
   })
+
+  beforeEach(() => rabbitMQ.connect())
+  afterEach(() => rabbitMQ.disconnect())
 
   it('should create an organization', done => {
     CreateOrganization(job).then((organization) => {
