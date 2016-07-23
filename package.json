@@ -46,8 +46,8 @@
   },
   "author": "",
   "dependencies": {
-    "@runnable/orion": "^1.3.1",
     "101": "^1.6.1",
+    "@runnable/orion": "^1.3.1",
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "bookshelf": "^0.9.5",
@@ -70,6 +70,7 @@
     "istanbul": "^0.4.4",
     "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
     "mocha": "^2.5.3",
+    "mongodb": "^2.2.4",
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
     "standard": "^7.1.2",
