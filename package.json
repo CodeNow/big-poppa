@@ -25,7 +25,8 @@
     "migrate-dev": "knex migrate:latest",
     "rollback-dev": "knex migrate:rollback",
     "migrate-test": "NODE_ENV=test knex migrate:latest",
-    "rollback-test": "NODE_ENV=test knex migrate:rollback"
+    "rollback-test": "NODE_ENV=test knex migrate:rollback",
+    "sleep": "sleep 99999999"
   },
   "directories": {
     "test": "test"
