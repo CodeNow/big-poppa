@@ -21,8 +21,8 @@ big-poppa project repository directory:
 
 1. `npm run init-db`
 
-This script creates a super user named `big-poppa` and two databases on your machine:
-`big-poppa` (used for local development) and `big-poppa-test` (used by the test suite).
+This script creates a super user named `big_poppa` and two databases on your machine:
+`big_poppa` (used for local development) and `big_poppa_test` (used by the test suite).
 
 ### Running Migrations
 
