@@ -107,7 +107,12 @@ Promise.resolve()
   })
   .catch(err => log.error({ err: err }, 'Unhandeled error'))
   .then(orgsAndWhitelists => {
-    log.trace('All orgs updated')
+    log.trace({
+      orgsAndWhitelists: orgsAndWhitelists,
+      orgsSuccsefullyCreated: orgsSuccsefullyCreated,
+      orgsWithNotGithubId: orgsWithNotGithubId,
+      orgsThatCouldNotBeCreated: orgsThatCouldNotBeCreated
+    }, 'All orgs updated')
 
     let orgsUnaccountedFor = orgsAndWhitelists
       .map(orgAndWhitelist => orgAndWhitelist.userWhitelist.name)
