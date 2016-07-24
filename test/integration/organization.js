@@ -68,7 +68,7 @@ describe('Organization Integration Test', () => {
       return testUtil.poll(Promise.method(() => {
         // Make a GET request every 100ms to check if org exists
         return request
-          .get(`https://localhost:${process.env.HTTPS_PORT}/organization`)
+          .get(`http://localhost:${process.env.HTTPS_PORT}/organization`)
           .query({ githubId: orgGithubId })
           .then(res => {
             let orgs = res.body

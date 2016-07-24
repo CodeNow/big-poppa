@@ -63,7 +63,7 @@ describe('User Integration Test', () => {
       return testUtil.poll(Promise.method(() => {
         // Make a GET request every 100ms to check if org exists
         return request
-          .get(`https://localhost:${process.env.HTTPS_PORT}/user`)
+          .get(`http://localhost:${process.env.HTTPS_PORT}/user`)
           .query({ githubId: userGithubId })
           .then(res => {
             let orgs = res.body
