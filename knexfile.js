@@ -18,6 +18,30 @@ module.exports = {
     migrations: {
       tableName: 'migrations'
     }
+  },
+
+  'production-gamma': {
+    client: 'pg',
+    connection: process.env.POSTGRES_CONNECT_STRING,
+    migrations: {
+      tableName: 'migrations'
+    }
+  },
+
+  'production-epsilon': {
+    client: 'pg',
+    connection: process.env.POSTGRES_CONNECT_STRING,
+    migrations: {
+      tableName: 'migrations'
+    }
+  },
+
+  'production-delta': {
+    client: 'pg',
+    connection: process.env.POSTGRES_CONNECT_STRING,
+    migrations: {
+      tableName: 'migrations'
+    }
   }
 
 }
