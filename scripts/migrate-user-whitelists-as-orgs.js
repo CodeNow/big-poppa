@@ -117,9 +117,9 @@ Promise.resolve()
     let orgsUnaccountedFor = orgsAndWhitelists
       .map(orgAndWhitelist => orgAndWhitelist.userWhitelist.name)
       .filter(name => {
-        if (orgsSuccsefullyCreated.includes(name)) return false
-        if (orgsThatDoNotExistInGithub.includes(name)) return false
-        if (orgsThatCouldNotBeCreated.includes(name)) return false
+        if (orgsSuccsefullyCreated.indexOf(name) !== -1) return false
+        if (orgsThatDoNotExistInGithub.indexOf(name) !== -1) return false
+        if (orgsThatCouldNotBeCreated.indexOf(name) !== -1) return false
         return true
       })
 
