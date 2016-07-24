@@ -14,10 +14,11 @@ const trialEndDate = process.env.TRIAL_END_DATE || '10-01-2016'
 
 const maxNumberOfRetries = 5
 
+// Either set MONGO env with connection query or set host, port and db separately
 const mongoHost = process.env.MONGODB_HOST || 'localhost'
 const mongoPort = process.env.MONGODB_PORT || 27017
 const mongoDatabase = process.env.MONGODB_DB || 'userwhitelist_test'
-const url = `mongodb://${mongoHost}:${mongoPort}/${mongoDatabase}`
+const url = process.env.MONGO || `mongodb://${mongoHost}:${mongoPort}/${mongoDatabase}`
 
 let log = logger.child({})
 
