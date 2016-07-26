@@ -4,7 +4,6 @@ const Promise = require('bluebird')
 const expect = require('chai').expect
 const superagentPromisePlugin = require('superagent-promise-plugin')
 const request = superagentPromisePlugin.patch(require('superagent'))
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 const testUtil = require('../util')
 const githubOrganizationFixture = require('../fixtures/github/organization')
@@ -14,15 +13,15 @@ const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 const RabbitMQ = require('ponos/lib/rabbitmq')
 
 const workerServer = require('workers/server')
-const httpsServer = require('http/server')
+const httpServer = require('http/server')
 
 describe('Organization Integration Test', () => {
   let orgGithubId = 2828361
   let publisher
 
-  // Start HTTPS Server
-  before(() => httpsServer.start())
-  after(() => httpsServer.stop())
+  // Start HTTP Server
+  before(() => httpServer.start())
+  after(() => httpServer.stop())
 
   // Start Worker Server
   before(() => workerServer.start())
@@ -68,7 +67,7 @@ describe('Organization Integration Test', () => {
       return testUtil.poll(Promise.method(() => {
         // Make a GET request every 100ms to check if org exists
         return request
-          .get(`https://localhost:${process.env.HTTPS_PORT}/organization`)
+          .get(`http://localhost:${process.env.PORT}/organization`)
           .query({ githubId: orgGithubId })
           .then(res => {
             let orgs = res.body
