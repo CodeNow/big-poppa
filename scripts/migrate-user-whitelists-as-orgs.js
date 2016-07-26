@@ -32,6 +32,41 @@ let orgsThatCouldNotBeCreated = []
 let orgsSuccsefullyCreated = []
 let orgsWithNotGithubId = []
 
+const createOrganization = (userWhitelist, retries) => {
+  const wlog = log.child({ userWhitelist: userWhitelist, retries: retries, method: 'createOrganization' })
+  wlog.info('createOrganization called')
+  retries = retries || 0
+
+  return Organization.fetchByGithubId(userWhitelist.githubId)
+    // Only attempt to create the org if the org doesn't exist
+    .catch(NotFoundError, () => Organization.create(userWhitelist.githubId))
+    .then(() => {
+      orgsSuccsefullyCreated.push(userWhitelist.name)
+      return true
+    })
+    .catch(GithubEntityError, err => {
+      wlog.error({ err: err, userWhitelist: userWhitelist }, 'UserWhitelist is not a Github Org')
+      orgsThatDoNotExistInGithub.push(userWhitelist.name)
+      return false // Filter org out
+    })
+    .catch(err => {
+      if (err.code === '504') {
+        wlog.trace({ err: err }, '504 error encountered')
+        numberOf504Errors += 1
+        if (retries === maxNumberOfRetries) {
+          wlog.error({ err: err }, 'Max number of retries reached')
+          throw new Error(`Organization was not inserted after ${maxNumberOfRetries}`)
+        }
+        wlog.trace('Retrying to createOrganization')
+        return Promise.delay(200)
+          .then(() => createOrganization(userWhitelist, retries + 1))
+      }
+      wlog.error({ err: err, userWhitelist: userWhitelist }, 'Error creating organization')
+      orgsThatCouldNotBeCreated.push(userWhitelist.name)
+      return false // Filter out org
+    })
+}
+
 log.info({ url: url }, 'Connecting to Database')
 Promise.resolve()
   .then(() => Promise.fromCallback(cb => MongoClient.connect(url, cb)))
@@ -50,41 +85,6 @@ Promise.resolve()
       numberOfUserWhitelist: userWhitelists.length,
       orgsWithNotGithubId: orgsWithNotGithubId.length
     }, 'UserWhitelists fetched')
-
-    const createOrganization = (userWhitelist, retries) => {
-      const wlog = log.child({ userWhitelist: userWhitelist, retries: retries, method: 'createOrganization' })
-      wlog.info('createOrganization called')
-      retries = retries || 0
-
-      return Organization.fetchByGithubId(userWhitelist.githubId)
-        // Only attempt to create the org if the org doesn't exist
-        .catch(NotFoundError, () => Organization.create(userWhitelist.githubId))
-        .then(() => {
-          orgsSuccsefullyCreated.push(userWhitelist.name)
-          return true
-        })
-        .catch(GithubEntityError, err => {
-          wlog.error({ err: err, userWhitelist: userWhitelist }, 'UserWhitelist is not a Github Org')
-          orgsThatDoNotExistInGithub.push(userWhitelist.name)
-          return false // Filter org out
-        })
-        .catch(err => {
-          if (err.code === '504') {
-            wlog.trace({ err: err }, '504 error encountered')
-            numberOf504Errors += 1
-            if (retries === maxNumberOfRetries) {
-              wlog.error({ err: err }, 'Max number of retries reached')
-              throw new Error(`Organization was not inserted after ${maxNumberOfRetries}`)
-            }
-            wlog.trace('Retrying to createOrganization')
-            return Promise.delay(200)
-              .then(() => createOrganization(userWhitelist, retries + 1))
-          }
-          wlog.error({ err: err, userWhitelist: userWhitelist }, 'Error creating organization')
-          orgsThatCouldNotBeCreated.push(userWhitelist.name)
-          return false // Filter out org
-        })
-    }
 
     log.trace('Filter whitelists')
     return Promise.filter(userWhitelists, createOrganization)
