@@ -46,7 +46,7 @@ describe('organization.delete', () => {
 
   it('should delete an organization', done => {
     DeleteOrganization({ githubId: orgGithubId }).then((org) => {
-      expect(org.get('github_id')).to.be.undefined
+      expect(org.get('githubId')).to.be.undefined
       // Check database for entry
       return knex('organization').where('github_id', orgGithubId)
     })
@@ -70,7 +70,7 @@ describe('organization.delete', () => {
       })
       .then(() => DeleteOrganization({ githubId: orgGithubId }))
       .then(deletedOrg => {
-        expect(deletedOrg.get('github_id')).to.be.undefined
+        expect(deletedOrg.get('githubId')).to.be.undefined
       })
       .then(() => knex('organization_user').where('organization_id', orgId).count())
       .then(res => {

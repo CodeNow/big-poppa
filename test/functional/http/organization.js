@@ -44,10 +44,10 @@ describe(`HTTP ${route}`, () => {
       })
   })
 
-  describe('GET /?github_id=GH_ID', () => {
+  describe('GET /?githubId=GH_ID', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .get(`${route}/?github_id=${orgGithubId}`)
+        .get(`${route}/?githubId=${orgGithubId}`)
         .expect(200)
         .then(res => {
           expect(res).to.be.an.object
@@ -55,20 +55,21 @@ describe(`HTTP ${route}`, () => {
           expect(res.body).to.have.lengthOf(1)
           let org = res.body[0]
           expect(org).to.have.property('id')
-          expect(org).to.have.property('github_id', orgGithubId)
-          expect(org).to.have.property('trial_end')
-          expect(org).to.have.property('active_period_end')
-          expect(org).to.have.property('grace_period_end')
+          expect(org).to.have.property('githubId', orgGithubId)
+          expect(org).to.have.property('trialEnd')
+          expect(org).to.have.property('activePeriodEnd')
+          expect(org).to.have.property('gracePeriodEnd')
+          expect(org).to.have.property('firstDockCreated')
           expect(org).to.have.property('users')
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
-          expect(org.users[0]).to.have.property('github_id')
+          expect(org.users[0]).to.have.property('githubId')
         })
     })
 
     it('should return a an empty array if there are no existing models', () => {
       return agent
-        .get(`${route}/?github_id=2343`)
+        .get(`${route}/?githubId=2343`)
         .expect(200)
         .then(res => {
           expect(res).to.be.an.object
@@ -88,14 +89,15 @@ describe(`HTTP ${route}`, () => {
           expect(res.body).to.be.an.object
           let org = res.body
           expect(org).to.have.property('id')
-          expect(org).to.have.property('github_id', orgGithubId)
-          expect(org).to.have.property('trial_end')
-          expect(org).to.have.property('active_period_end')
-          expect(org).to.have.property('grace_period_end')
+          expect(org).to.have.property('githubId', orgGithubId)
+          expect(org).to.have.property('trialEnd')
+          expect(org).to.have.property('activePeriodEnd')
+          expect(org).to.have.property('gracePeriodEnd')
+          expect(org).to.have.property('firstDockCreated')
           expect(org).to.have.property('users')
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
-          expect(org.users[0]).to.have.property('github_id')
+          expect(org.users[0]).to.have.property('githubId')
         })
     })
 
@@ -121,11 +123,11 @@ describe(`HTTP ${route}`, () => {
       return agent
         .patch(`${route}/${orgId}`)
         .send({
-          github_id: githubId,
-          stripe_customer_id: stripeCustomerId,
-          trial_end: unixTimestamp,
-          active_period_end: unixTimestamp,
-          grace_period_end: unixTimestamp
+          githubId: githubId,
+          stripeCustomerId: stripeCustomerId,
+          trialEnd: unixTimestamp,
+          activePeriodEnd: unixTimestamp,
+          gracePeriodEnd: unixTimestamp
         })
         .expect(200)
         .then(res => {
@@ -138,11 +140,12 @@ describe(`HTTP ${route}`, () => {
           expect(res.body).to.be.an.object
           let org = res.body
           expect(org).to.have.property('id')
-          expect(org).to.have.property('github_id', githubId)
-          expect(org).to.have.property('stripe_customer_id', stripeCustomerId)
-          expect(org).to.have.property('trial_end', time.toISOString())
-          expect(org).to.have.property('active_period_end', time.toISOString())
-          expect(org).to.have.property('grace_period_end', time.toISOString())
+          expect(org).to.have.property('githubId', githubId)
+          expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
+          expect(org).to.have.property('trialEnd', time.format('X'))
+          expect(org).to.have.property('activePeriodEnd', time.format('X'))
+          expect(org).to.have.property('gracePeriodEnd', time.format('X'))
+          expect(org).to.have.property('firstDockCreated', false)
         })
     })
 

@@ -45,7 +45,7 @@ describe(`HTTP ${route}`, () => {
   describe('GET /?githubId=GH_ID', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .get(`${route}/?github_id=${userGithubId}`)
+        .get(`${route}/?githubId=${userGithubId}`)
         .expect(200)
         .then(res => {
           expect(res).to.be.an.object
@@ -53,17 +53,17 @@ describe(`HTTP ${route}`, () => {
           expect(res.body).to.have.lengthOf(1)
           let user = res.body[0]
           expect(user).to.have.property('id')
-          expect(user).to.have.property('github_id', userGithubId)
+          expect(user).to.have.property('githubId', userGithubId)
           expect(user).to.have.property('organizations')
           expect(user.organizations).to.be.an('array')
           expect(user.organizations[0]).to.have.property('id')
-          expect(user.organizations[0]).to.have.property('github_id')
+          expect(user.organizations[0]).to.have.property('githubId')
         })
     })
 
     it('should return a an empty array if there are no existing models', () => {
       return agent
-        .get(`${route}/?github_id=2343`)
+        .get(`${route}/?githubId=2343`)
         .expect(200)
         .then(res => {
           expect(res).to.be.an.object
@@ -83,11 +83,11 @@ describe(`HTTP ${route}`, () => {
           expect(res.body).to.be.an.object
           let user = res.body
           expect(user).to.have.property('id')
-          expect(user).to.have.property('github_id', userGithubId)
+          expect(user).to.have.property('githubId', userGithubId)
           expect(user).to.have.property('organizations')
           expect(user.organizations).to.be.an('array')
           expect(user.organizations[0]).to.have.property('id')
-          expect(user.organizations[0]).to.have.property('github_id')
+          expect(user.organizations[0]).to.have.property('githubId')
         })
     })
 

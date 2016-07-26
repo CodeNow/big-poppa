@@ -51,12 +51,34 @@ describe('User', () => {
       })
     })
 
+    describe('#organizations', () => {
+      let belongsToManyStub
+
+      beforeEach(() => {
+        belongsToManyStub = sinon.stub(User.prototype, 'belongsToMany')
+      })
+
+      afterEach(() => {
+        belongsToManyStub.restore()
+      })
+
+      it('should call `belongsToMany`', () => {
+        user = new User()
+        user.organizations()
+        sinon.assert.calledOnce(belongsToManyStub)
+        sinon.assert.calledWithExactly(
+          belongsToManyStub,
+          'Organization'
+        )
+      })
+    })
+
     describe('#validateCreate', () => {
       let githubId = 123456
       let attrs
 
       beforeEach(() => {
-        attrs = { github_id: githubId }
+        attrs = { githubId: githubId }
         sinon.stub(GithubAPI, 'getUser').resolves(githubUserFixture)
       })
 
@@ -77,7 +99,7 @@ describe('User', () => {
         let githubErr = new GithubEntityNotFoundError(new Error())
         GithubAPI.getUser.rejects(githubErr)
 
-        let attrs = { github_id: githubId }
+        let attrs = { githubId: githubId }
         user.validateCreate({}, attrs)
           .asCallback(err => {
             expect(err).to.exist
