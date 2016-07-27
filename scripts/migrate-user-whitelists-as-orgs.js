@@ -28,7 +28,7 @@ let numberOfUserWhitelistWithNoGithubIds = null
 let numberOf504Errors = 0
 let orgsThatDoNotExistInGithub = []
 let orgsThatCouldNotBeCreated = []
-let orgsSuccsefullyCreated = []
+let orgsSuccessfullyCreated = []
 let orgsWithNotGithubId = []
 
 const createOrganization = (userWhitelist, retries) => {
@@ -40,7 +40,7 @@ const createOrganization = (userWhitelist, retries) => {
     // Only attempt to create the org if the org doesn't exist
     .catch(NotFoundError, () => Organization.create(userWhitelist.githubId))
     .then(() => {
-      orgsSuccsefullyCreated.push(userWhitelist.name)
+      orgsSuccessfullyCreated.push(userWhitelist.name)
       return true // Include org in final array of whitelists
     })
     .catch(GithubEntityError, err => {
@@ -70,7 +70,7 @@ const getUnaccountedForOrgs = (orgsAndWhitelists) => {
   return orgsAndWhitelists
     .map(orgAndWhitelist => orgAndWhitelist.userWhitelist.name)
     .filter(name => {
-      if (orgsSuccsefullyCreated.indexOf(name) !== -1) return false
+      if (orgsSuccessfullyCreated.indexOf(name) !== -1) return false
       if (orgsThatDoNotExistInGithub.indexOf(name) !== -1) return false
       if (orgsThatCouldNotBeCreated.indexOf(name) !== -1) return false
       return true
@@ -120,7 +120,7 @@ Promise.resolve()
   .catch(err => log.error({ err: err }, 'Unhandeled error'))
   .then(function logMigrationResults (orgsAndWhitelists) {
     log.trace({
-      orgsSuccsefullyCreated: orgsSuccsefullyCreated,
+      orgsSuccessfullyCreated: orgsSuccessfullyCreated,
       orgsWithNotGithubId: orgsWithNotGithubId,
       orgsThatCouldNotBeCreated: orgsThatCouldNotBeCreated
     }, 'All orgs updated')
@@ -133,11 +133,11 @@ Promise.resolve()
       numberOfUserWhitelist: numberOfUserWhitelist,
       numberOfUserWhitelistWithNoGithubIds: numberOfUserWhitelistWithNoGithubIds,
       numberOfUserWhitelistsThatDoNotExistInGithub: orgsThatDoNotExistInGithub.length,
-      numberOfSucessfullyCreatedOrgs: orgsSuccsefullyCreated.length,
+      numberOfSucessfullyCreatedOrgs: orgsSuccessfullyCreated.length,
       numberOfErroredOrgs: orgsThatCouldNotBeCreated.length,
       numberOf504Errors: numberOf504Errors,
       orgsWithNotGithubId: orgsWithNotGithubId,
-      orgsSuccsefullyCreated: orgsSuccsefullyCreated,
+      orgsSuccessfullyCreated: orgsSuccessfullyCreated,
       orgsThatDoNotExistInGithub: orgsThatDoNotExistInGithub,
       orgsThatCouldNotBeCreated: orgsThatCouldNotBeCreated,
       orgsUnaccountedFor: orgsUnaccountedFor
