@@ -19,7 +19,7 @@ describe('user.create', () => {
   after(done => githubAPI.stop(done))
 
   beforeEach(done => {
-    testUtil.trundateAllTables()
+    testUtil.truncateAllTables()
      .asCallback(done)
   })
 

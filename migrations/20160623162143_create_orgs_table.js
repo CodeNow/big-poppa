@@ -5,9 +5,17 @@ var debug = require('debug')('big-poppa:migration')
 /**
  * Creates the `users` table.
  */
-
+const CREATE_TABLE_QUERY = `
+    CREATE VIEW active_organizations AS
+    SELECT * FROM organizations WHERE is_active IS true;
+  `
+const ATTACH_TRIGGER_QUERY = `
+    CREATE TRIGGER soft_delete_organization
+    INSTEAD OF DELETE ON active_organizations
+    FOR EACH ROW EXECUTE PROCEDURE soft_delete();
+  `
 exports.up = function (knex, Promise) {
-  var createTable = knex.schema.createTable('organizations_with_deleted', function (table) {
+  var createTable = knex.schema.createTable('organizations', function (table) {
     table.increments('id')
       .primary()
     table.integer('github_id')
@@ -21,23 +29,16 @@ exports.up = function (knex, Promise) {
       .notNullable()
     table.timestamp('grace_period_end')
       .notNullable()
-    table.timestamp('deleted_at')
+    table.boolean('is_active').defaultTo(true)
   })
-  .raw(`
-    CREATE VIEW organizations AS
-    SELECT * FROM organizations_with_deleted WHERE deleted_at IS NULL;
-  `)
-  .raw(`
-    CREATE TRIGGER soft_delete_organization
-    INSTEAD OF DELETE ON organizations
-    FOR EACH ROW EXECUTE PROCEDURE soft_delete();
-  `)
+  .raw(CREATE_TABLE_QUERY)
+  .raw(ATTACH_TRIGGER_QUERY)
   debug(createTable.toString())
   return createTable
 }
 
 exports.down = function (knex, Promise) {
-  var dropTable = knex.schema.dropTable('organizations_with_deleted')
+  var dropTable = knex.schema.dropTable('organizations')
   debug(dropTable.toString())
   return dropTable
 }

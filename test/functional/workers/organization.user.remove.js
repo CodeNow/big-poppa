@@ -25,7 +25,7 @@ describe('organization.user.remove', () => {
   after(done => githubAPI.stop(done))
 
   beforeEach(done => {
-    testUtil.trundateAllTables()
+    testUtil.truncateAllTables()
      .asCallback(done)
   })
 
