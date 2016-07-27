@@ -20,21 +20,20 @@ const mongoPort = process.env.MONGODB_PORT || 27017
 const mongoDatabase = process.env.MONGODB_DB || 'userwhitelist_test'
 const url = process.env.MONGO || `mongodb://${mongoHost}:${mongoPort}/${mongoDatabase}`
 
-let log = logger.child({})
+var log = logger.child({})
 
+// Global variables meant to be used reporting/logging at the end of script
 let numberOfUserWhitelist = null
 let numberOfUserWhitelistWithNoGithubIds = null
 let numberOf504Errors = 0
-
-let userWhitelists
 let orgsThatDoNotExistInGithub = []
 let orgsThatCouldNotBeCreated = []
 let orgsSuccsefullyCreated = []
 let orgsWithNotGithubId = []
 
 const createOrganization = (userWhitelist, retries) => {
-  const wlog = log.child({ userWhitelist: userWhitelist, retries: retries, method: 'createOrganization' })
-  wlog.info('createOrganization called')
+  const uwLog = log.child({ userWhitelist: userWhitelist, retries: retries, method: 'createOrganization' })
+  uwLog.info('createOrganization called')
   retries = retries || 0
 
   return Organization.fetchByGithubId(userWhitelist.githubId)
@@ -42,59 +41,72 @@ const createOrganization = (userWhitelist, retries) => {
     .catch(NotFoundError, () => Organization.create(userWhitelist.githubId))
     .then(() => {
       orgsSuccsefullyCreated.push(userWhitelist.name)
-      return true
+      return true // Include org in final array of whitelists
     })
     .catch(GithubEntityError, err => {
-      wlog.error({ err: err, userWhitelist: userWhitelist }, 'UserWhitelist is not a Github Org')
+      uwLog.error({ err: err, userWhitelist: userWhitelist }, 'UserWhitelist is not a Github Org')
       orgsThatDoNotExistInGithub.push(userWhitelist.name)
-      return false // Filter org out
+      return false // Filter org out if it's not a GH org
     })
     .catch(err => {
       if (err.code === '504') {
-        wlog.trace({ err: err }, '504 error encountered')
+        uwLog.trace({ err: err }, '504 error encountered')
         numberOf504Errors += 1
         if (retries === maxNumberOfRetries) {
-          wlog.error({ err: err }, 'Max number of retries reached')
+          uwLog.error({ err: err }, 'Max number of retries reached')
           throw new Error(`Organization was not inserted after ${maxNumberOfRetries}`)
         }
-        wlog.trace('Retrying to createOrganization')
+        uwLog.trace('Retrying to createOrganization')
         return Promise.delay(200)
           .then(() => createOrganization(userWhitelist, retries + 1))
       }
-      wlog.error({ err: err, userWhitelist: userWhitelist }, 'Error creating organization')
+      uwLog.error({ err: err, userWhitelist: userWhitelist }, 'Error creating organization')
       orgsThatCouldNotBeCreated.push(userWhitelist.name)
-      return false // Filter out org
+      return false // Filter out org if it failed
+    })
+}
+
+const getUnaccountedForOrgs = (orgsAndWhitelists) => {
+  return orgsAndWhitelists
+    .map(orgAndWhitelist => orgAndWhitelist.userWhitelist.name)
+    .filter(name => {
+      if (orgsSuccsefullyCreated.indexOf(name) !== -1) return false
+      if (orgsThatDoNotExistInGithub.indexOf(name) !== -1) return false
+      if (orgsThatCouldNotBeCreated.indexOf(name) !== -1) return false
+      return true
     })
 }
 
 log.info({ url: url }, 'Connecting to Database')
 Promise.resolve()
   .then(() => Promise.fromCallback(cb => MongoClient.connect(url, cb)))
-  .then(db => {
+  .then(function fetctWhitelists (db) {
     log.info('Fetching all documents for userwhitelists')
     let userWhitelistCollection = db.collection('userwhitelists')
     return Promise.fromCallback(cb => {
       userWhitelistCollection.find({}).toArray(cb)
     })
   })
-  .then(unFilteredUserWhitelists => {
+  .then(function filterWhitelistsToWhitelistsWithGithubIds (unFilteredUserWhitelists) {
     orgsWithNotGithubId = unFilteredUserWhitelists.filter(x => !x.githubId).map(x => x.name || x)
-    userWhitelists = unFilteredUserWhitelists.filter(x => !!x.githubId)
-
+    let userWhitelists = unFilteredUserWhitelists.filter(x => !!x.githubId)
     log.trace({
       numberOfUserWhitelist: userWhitelists.length,
       orgsWithNotGithubId: orgsWithNotGithubId.length
     }, 'UserWhitelists fetched')
-
-    log.trace('Filter whitelists')
-    return Promise.filter(userWhitelists, createOrganization)
+    return userWhitelists
   })
-  .then(userWhitelists => {
+  .then(function createOrganizationsFromWhitelists (userWhitelistsWithGithubId) {
+    log.trace('Create all organizations from whitelists. Filter whitelists that dont exist on Github or failed')
+    return Promise.filter(userWhitelistsWithGithubId, createOrganization)
+  })
+  .then(function updateOrganizationsWithWhitelistData (userWhitelists) {
     log.trace({ numberOfUserWhitelistOrgsToUpdates: userWhitelists.length }, 'Update newly created orgs')
-    return Promise.map(userWhitelists, userWhitelist => {
+    return Promise.map(userWhitelists, function updateOrganization (userWhitelist) {
       log.trace({ userWhitelist: userWhitelist }, 'Fetching Organization by githubId')
       return Organization.fetchByGithubId(userWhitelist.githubId)
         .then(org => {
+          log.trace({ org: org }, 'Update organization')
           return Promise.props({
             userWhitelist: userWhitelist,
             org: org.save({
@@ -106,23 +118,17 @@ Promise.resolve()
     })
   })
   .catch(err => log.error({ err: err }, 'Unhandeled error'))
-  .then(orgsAndWhitelists => {
+  .then(function logMigrationResults (orgsAndWhitelists) {
     log.trace({
-      orgsAndWhitelists: orgsAndWhitelists,
       orgsSuccsefullyCreated: orgsSuccsefullyCreated,
       orgsWithNotGithubId: orgsWithNotGithubId,
       orgsThatCouldNotBeCreated: orgsThatCouldNotBeCreated
     }, 'All orgs updated')
 
-    let orgsUnaccountedFor = orgsAndWhitelists
-      .map(orgAndWhitelist => orgAndWhitelist.userWhitelist.name)
-      .filter(name => {
-        if (orgsSuccsefullyCreated.indexOf(name) !== -1) return false
-        if (orgsThatDoNotExistInGithub.indexOf(name) !== -1) return false
-        if (orgsThatCouldNotBeCreated.indexOf(name) !== -1) return false
-        return true
-      })
+    // Check if any org is unaccounted for
+    let orgsUnaccountedFor = getUnaccountedForOrgs(orgsAndWhitelists)
 
+    // Provide a summary of everything that happened
     log.info({
       numberOfUserWhitelist: numberOfUserWhitelist,
       numberOfUserWhitelistWithNoGithubIds: numberOfUserWhitelistWithNoGithubIds,
