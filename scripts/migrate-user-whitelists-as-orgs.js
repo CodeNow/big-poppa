@@ -66,9 +66,24 @@ const createOrganization = (userWhitelist, retries) => {
     })
 }
 
-const getUnaccountedForOrgs = (orgsAndWhitelists) => {
-  return orgsAndWhitelists
-    .map(orgAndWhitelist => orgAndWhitelist.userWhitelist.name)
+function updateOrganization (userWhitelist) {
+  log.trace({ userWhitelist: userWhitelist }, 'Fetching Organization by githubId')
+  return Organization.fetchByGithubId(userWhitelist.githubId)
+    .then(org => {
+      log.trace({ org: org }, 'Update organization')
+      return org.save({
+        trialEnd: moment(trialEndDate, 'MM-DD-YYYY').toDate(),
+        firstDockCreated: userWhitelist.firstDockCreated || false
+      })
+    })
+    .tap(function (orgResult) {
+      log.trace({ orgResult: orgResult }, 'Update organization')
+    })
+}
+
+const getUnaccountedForOrgs = (userWhitelists) => {
+  return userWhitelists
+    .map(userWhitelist => userWhitelist.name)
     .filter(name => {
       if (orgsSuccessfullyCreated.indexOf(name) !== -1) return false
       if (orgsThatDoNotExistInGithub.indexOf(name) !== -1) return false
@@ -100,25 +115,12 @@ Promise.resolve()
     log.trace('Create all organizations from whitelists. Filter whitelists that dont exist on Github or failed')
     return Promise.filter(userWhitelistsWithGithubId, createOrganization)
   })
-  .then(function updateOrganizationsWithWhitelistData (userWhitelists) {
+  .tap(function (userWhitelists) {
     log.trace({ numberOfUserWhitelistOrgsToUpdates: userWhitelists.length }, 'Update newly created orgs')
-    return Promise.map(userWhitelists, function updateOrganization (userWhitelist) {
-      log.trace({ userWhitelist: userWhitelist }, 'Fetching Organization by githubId')
-      return Organization.fetchByGithubId(userWhitelist.githubId)
-        .then(org => {
-          log.trace({ org: org }, 'Update organization')
-          return Promise.props({
-            userWhitelist: userWhitelist,
-            org: org.save({
-              trialEnd: moment(trialEndDate, 'MM-DD-YYYY').toDate(),
-              firstDockCreated: userWhitelist.firstDockCreated || false
-            })
-          })
-        })
-    })
+    return Promise.each(userWhitelists, updateOrganization)
   })
   .catch(err => log.error({ err: err }, 'Unhandeled error'))
-  .then(function logMigrationResults (orgsAndWhitelists) {
+  .then(function logMigrationResults (userWhitelists) {
     log.trace({
       orgsSuccessfullyCreated: orgsSuccessfullyCreated,
       orgsWithNotGithubId: orgsWithNotGithubId,
@@ -126,7 +128,7 @@ Promise.resolve()
     }, 'All orgs updated')
 
     // Check if any org is unaccounted for
-    let orgsUnaccountedFor = getUnaccountedForOrgs(orgsAndWhitelists)
+    let orgsUnaccountedFor = getUnaccountedForOrgs(userWhitelists)
 
     // Provide a summary of everything that happened
     log.info({
