@@ -105,7 +105,7 @@ describe('#user.create', () => {
           sinon.assert.calledOnce(saveStub)
           sinon.assert.calledWithExactly(
             saveStub,
-            { github_id: validJob.githubId }
+            { githubId: validJob.githubId }
           )
         })
         .asCallback(done)

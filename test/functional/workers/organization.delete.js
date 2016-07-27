@@ -17,7 +17,7 @@ const knex = bookshelf.knex
 
 const Organization = require('models/organization')
 
-const DeleteOrganization = require('workers/Organization.delete')
+const DeleteOrganization = require('workers/organization.delete')
 
 describe('organization.delete', () => {
   let userGithubId = 1981198
@@ -46,7 +46,7 @@ describe('organization.delete', () => {
 
   it('should delete an organization', done => {
     DeleteOrganization({ githubId: orgGithubId }).then((org) => {
-      expect(org.get('github_id')).to.be.undefined
+      expect(org.get('githubId')).to.be.undefined
       // Check database for entry
       return knex('organizations').where('github_id', orgGithubId)
     })
@@ -70,7 +70,7 @@ describe('organization.delete', () => {
       })
       .then(() => DeleteOrganization({ githubId: orgGithubId }))
       .then(deletedOrg => {
-        expect(deletedOrg.get('github_id')).to.be.undefined
+        expect(deletedOrg.get('githubId')).to.be.undefined
       })
       .then(() => knex('organizations_users').where('organization_id', orgId).count())
       .then(res => {

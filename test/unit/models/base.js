@@ -100,6 +100,48 @@ describe('Base', () => {
       })
     })
 
+    describe('#parse', () => {
+      let testModel
+
+      beforeEach(() => {
+        testModel = new TestModel({})
+      })
+
+      it('should return a different object', () => {
+        let obj = {}
+        let res = testModel.parse(obj)
+        expect(res).to.be.an.object
+        expect(res).to.not.equal(obj)
+      })
+
+      it('should convert snake_case into camelCase', () => {
+        let value = 'hello'
+        let res = testModel.parse({ hello_world: value })
+        expect(res).to.have.property('helloWorld', value)
+      })
+    })
+
+    describe('#format', () => {
+      let testModel
+
+      beforeEach(() => {
+        testModel = new TestModel({})
+      })
+
+      it('should return a different object', () => {
+        let obj = {}
+        let res = testModel.format(obj)
+        expect(res).to.be.an.object
+        expect(res).to.not.equal(obj)
+      })
+
+      it('should convert camelCase into snake_case', () => {
+        let value = 'hello'
+        let res = testModel.format({ helloWorld: value })
+        expect(res).to.have.property('hello_world', value)
+      })
+    })
+
     describe('#save', () => {
       let saveStub
 
@@ -118,7 +160,7 @@ describe('Base', () => {
           saveStub.rejects(error)
 
           let githubId = 1
-          let testModel = new TestModel({ github_id: githubId })
+          let testModel = new TestModel({ githubId: githubId })
           testModel.save().asCallback(err => {
             sinon.assert.calledOnce(saveStub)
             expect(err).to.be.an.instanceOf(NotNullError)
@@ -130,12 +172,12 @@ describe('Base', () => {
       describe('Success', () => {
         it('should save the model if no errors are thrown', (done) => {
           let githubId = 1
-          let testModel = new TestModel({ github_id: githubId })
+          let testModel = new TestModel({ githubId: githubId })
           testModel.save()
             .then(() => {
               sinon.assert.calledOnce(saveStub)
               let model = saveStub.thisValues[0]
-              expect(model.get('github_id')).to.equal(githubId)
+              expect(model.get('githubId')).to.equal(githubId)
             })
             .asCallback(done)
         })
@@ -160,7 +202,7 @@ describe('Base', () => {
           destroyStub.rejects(error)
 
           let githubId = 1
-          let testModel = new TestModel({ github_id: githubId })
+          let testModel = new TestModel({ githubId: githubId })
           testModel.destroy().asCallback(err => {
             sinon.assert.calledOnce(destroyStub)
             expect(err).to.be.an.instanceOf(NotNullError)
@@ -174,7 +216,7 @@ describe('Base', () => {
           destroyStub.rejects(error)
 
           let githubId = 1
-          let testModel = new TestModel({ github_id: githubId })
+          let testModel = new TestModel({ githubId: githubId })
           testModel.destroy().asCallback(err => {
             sinon.assert.calledOnce(destroyStub)
             expect(err).to.be.an.instanceOf(NoRowsDeletedError)
@@ -186,12 +228,12 @@ describe('Base', () => {
       describe('Success', () => {
         it('should destroy the model if no errors are thrown', (done) => {
           let githubId = 1
-          let testModel = new TestModel({ github_id: githubId })
+          let testModel = new TestModel({ githubId: githubId })
           testModel.destroy()
             .then(() => {
               sinon.assert.calledOnce(destroyStub)
               let model = destroyStub.thisValues[0]
-              expect(model.get('github_id')).to.equal(githubId)
+              expect(model.get('githubId')).to.equal(githubId)
             })
             .asCallback(done)
         })
@@ -448,7 +490,7 @@ describe('Base', () => {
         TestModel.fetchByGithubId(githubId)
           .then(() => {
             sinon.assert.calledOnce(fetchStub)
-            expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
+            expect(fetchStub.thisValues[0].get('githubId')).to.equal(githubId)
             sinon.assert.calledWithExactly(fetchStub, { require: true })
           })
           .asCallback(done)
@@ -459,7 +501,7 @@ describe('Base', () => {
         TestModel.fetchByGithubId(githubId, { transacting: t })
           .then(() => {
             sinon.assert.calledOnce(fetchStub)
-            expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
+            expect(fetchStub.thisValues[0].get('githubId')).to.equal(githubId)
             sinon.assert.calledWithExactly(fetchStub, { require: true, transacting: t })
           })
           .asCallback(done)
@@ -469,7 +511,7 @@ describe('Base', () => {
         TestModel.fetchByGithubId(githubId, { require: false })
           .then(() => {
             sinon.assert.calledOnce(fetchStub)
-            expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
+            expect(fetchStub.thisValues[0].get('githubId')).to.equal(githubId)
             sinon.assert.calledWithExactly(fetchStub, { require: true })
           })
           .asCallback(done)
@@ -484,7 +526,7 @@ describe('Base', () => {
             expect(err).to.exist
             expect(err).to.be.an.instanceOf(Error)
             sinon.assert.calledOnce(fetchStub)
-            expect(fetchStub.thisValues[0].get('github_id')).to.equal(githubId)
+            expect(fetchStub.thisValues[0].get('githubId')).to.equal(githubId)
             sinon.assert.calledWithExactly(fetchStub, { require: true })
             done()
           })

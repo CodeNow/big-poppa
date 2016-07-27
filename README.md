@@ -92,7 +92,8 @@ There are several testing commands:
 - `npm test`: Lints code and runs unit and functional tests
 - `npm run test-unit`: Runs only unit tests.
 - `npm run test-functional`: Runs only functional tests.
-- `npm run test-integration`: Lints code and runs unit and functional test for all services with real GithubAPI calls (`test-integration` ENV)
+- `npm run test-integration`: Runs only integration tests.
+- `npm run test-integration-env`: Lints code and runs unit and functional test for all services with real GithubAPI calls (`test-integration` ENV)
 
 ### Testing Definitions
 

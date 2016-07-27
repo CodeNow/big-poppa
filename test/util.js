@@ -10,7 +10,7 @@ const Organization = require('models/organization')
 module.exports = class TestUtil {
 
   static truncateAllTables () {
-    return knex('organizations_users').truncate()
+    return knex('organization_user').truncate()
       .then(() => {
         return Promise.all([
           // Cannot truncate because of foreign key constraint
@@ -21,16 +21,31 @@ module.exports = class TestUtil {
   }
 
   static createUserAndOrg (orgGithubId, userGithubId) {
-    return Promise.all([
-      new User().save({ github_id: userGithubId }),
-      Organization.create(orgGithubId)
-    ])
+    return Promise.props({
+      user: new User().save({ githubId: userGithubId }),
+      org: Organization.create(orgGithubId)
+    })
   }
 
   static createAttachedUserAndOrg (orgGithubId, userGithubId) {
     return this.createUserAndOrg(orgGithubId, userGithubId)
-      .spread((user, org) => {
+      .tap(res => {
+        let user = res.user
+        let org = res.org
         return org.users().attach(user.get(user.idAttribute))
       })
+  }
+
+  static poll (handler, interval, timeout) {
+    function pollRecursive () {
+      return handler()
+        .then(bool => {
+          if (bool) return true
+          return Promise.delay(interval).then(pollRecursive)
+        })
+    }
+
+    return pollRecursive()
+      .timeout(timeout)
   }
 }
