@@ -7,7 +7,7 @@ var debug = require('debug')('big-poppa:migration')
  */
 
 exports.up = function (knex, Promise) {
-  var createTable = knex.schema.createTable('organization', function (table) {
+  var createTable = knex.schema.createTable('organizations', function (table) {
     table.increments('id')
       .primary()
     table.integer('github_id')
@@ -21,13 +21,14 @@ exports.up = function (knex, Promise) {
       .notNullable()
     table.timestamp('grace_period_end')
       .notNullable()
+    table.boolean('is_active').defaultTo(true) // ONLY FOR MANUAL KILLING
   })
   debug(createTable.toString())
   return createTable
 }
 
 exports.down = function (knex, Promise) {
-  var dropTable = knex.schema.dropTable('organization')
+  var dropTable = knex.schema.dropTable('organizations')
   debug(dropTable.toString())
   return dropTable
 }

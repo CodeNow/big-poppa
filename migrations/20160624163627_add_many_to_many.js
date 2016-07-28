@@ -3,14 +3,15 @@
 let debug = require('debug')('big-poppa:migration')
 
 /**
- * Creates the `organization_user` table.
+ * Creates the `organizations_users` table.
  */
 exports.up = function (knex, Promise) {
-  let createTable = knex.schema.createTable('organization_user', function (table) {
+  let createTable = knex.schema.createTable('organizations_users', function (table) {
     table.integer('organization_id')
-      .references('organization.id')
+      .references('organizations.id')
     table.integer('user_id')
-      .references('user.id')
+      .references('users.id')
+    table.boolean('is_active').defaultTo(true)
     table.unique(['organization_id', 'user_id'])
   })
   debug(createTable.toString())
@@ -18,7 +19,7 @@ exports.up = function (knex, Promise) {
 }
 
 exports.down = function (knex, Promise) {
-  let dropTable = knex.schema.dropTable('organization_user')
+  let dropTable = knex.schema.dropTable('organizations_users')
   debug(dropTable.toString())
   return dropTable
 }

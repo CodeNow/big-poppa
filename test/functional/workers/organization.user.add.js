@@ -52,7 +52,7 @@ describe('organization.user.add', () => {
       .spread((user, organization) => {
         userId = user.get(user.idAttribute)
         orgId = organization.get(organization.idAttribute)
-        return knex('organization_user').where('user_id', userId).count()
+        return knex('organizations_users').where('user_id', userId).count()
       })
       .then(res => {
         expect(res).to.be.an('array')
@@ -63,7 +63,7 @@ describe('organization.user.add', () => {
         userGithubId: userGithubId,
         organizationGithubId: orgGithubId
       }))
-      .then(() => knex('organization_user').where('user_id', userId))
+      .then(() => knex('organizations_users').where('user_id', userId))
       .then(res => {
         expect(res).to.be.an('array')
         expect(res[0]).to.be.an('object')

@@ -48,7 +48,7 @@ describe('user.delete', () => {
     DeleteUser({ githubId: userGithubId }).then((user) => {
       expect(user.get('githubId')).to.be.undefined
       // Check database for entry
-      return knex('user').where('github_id', userGithubId)
+      return knex('users').where('github_id', userGithubId)
     })
     .then(res => {
       expect(res).to.have.lengthOf(0)
@@ -61,7 +61,7 @@ describe('user.delete', () => {
     User.fetchByGithubId(userGithubId)
       .then(user => {
         userId = user.get(user.idAttribute)
-        return knex('organization_user').where('user_id', userId).count()
+        return knex('organizations_users').where('user_id', userId).count()
       })
       .then(res => {
         expect(res).to.be.an('array')
@@ -72,7 +72,7 @@ describe('user.delete', () => {
       .then(deletedUser => {
         expect(deletedUser.get('githubId')).to.be.undefined
       })
-      .then(() => knex('organization_user').where('user_id', userId).count())
+      .then(() => knex('organizations_users').where('user_id', userId).count())
       .then(res => {
         expect(res).to.be.an('array')
         expect(res[0]).to.be.an('object')
@@ -101,8 +101,8 @@ describe('user.delete', () => {
         .catch(() => {
           // Check database for entry
           return Promise.all([
-            knex('user').where('id', userId),
-            knex('organization_user').where('user_id', userId)
+            knex('users').where('id', userId),
+            knex('organizations_users').where('user_id', userId)
           ])
         })
         .spread((userRes, relRes) => {
