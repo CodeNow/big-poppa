@@ -13,7 +13,7 @@ const knex = bookshelf.knex
 const rabbitMQ = require('util/rabbitmq')
 const CreateOrganization = require('workers/organization.create')
 
-describe('organization.create', () => {
+describe('Organization.create Functional Test', () => {
   let githubId = 2828361
   let job
 

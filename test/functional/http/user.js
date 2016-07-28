@@ -11,7 +11,7 @@ const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const server = require('http/server')
 
-describe('HTTP User (FUNCTIONAL)', () => {
+describe('HTTP User Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
   let userId

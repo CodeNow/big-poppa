@@ -1,10 +1,10 @@
 'use strict'
 
 const ApiClient = require('simple-api-client')
-const Bluebird = require('bluebird')
+const Promise = require('bluebird')
 
-Bluebird.promisifyAll(ApiClient)
-Bluebird.promisifyAll(ApiClient.prototype)
+Promise.promisifyAll(ApiClient)
+Promise.promisifyAll(ApiClient.prototype)
 
 module.exports = class BigPoppaClient extends ApiClient {
   /**

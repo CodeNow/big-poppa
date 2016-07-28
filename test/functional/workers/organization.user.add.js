@@ -17,7 +17,7 @@ const Organization = require('models/organization')
 
 const AddUserToOrganization = require('workers/organization.user.add')
 
-describe('organization.user.add', () => {
+describe('Organization.user.add Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
 

@@ -19,7 +19,7 @@ const User = require('models/user')
 
 const DeleteUser = require('workers/user.delete')
 
-describe('user.delete', () => {
+describe('User.delete Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
 
