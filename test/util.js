@@ -10,7 +10,7 @@ const Organization = require('models/organization')
 module.exports = class TestUtil {
 
   static truncateAllTables () {
-    return knex('organization_user').truncate()
+    return knex('organizations_users').truncate()
       .then(() => {
         return Promise.all([
           // Cannot truncate because of foreign key constraint
