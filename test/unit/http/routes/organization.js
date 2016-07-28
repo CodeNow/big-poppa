@@ -55,7 +55,7 @@ describe('HTTP /organization', () => {
       // Timestamp should be a string like this
       // '2016-07-21T17:47:24.161Z'
       originalObject = {
-        is_active: true,
+        isActive: true,
         trialEnd: now.toISOString(),
         activePeriodEnd: now.toISOString(),
         gracePeriodEnd: now.toISOString()
