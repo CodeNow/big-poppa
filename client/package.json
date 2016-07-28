@@ -1,6 +1,6 @@
 {
   "name": "@runnable/big-poppa-client",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "User management and billing client",
   "main": "index.js",
   "scripts": {
