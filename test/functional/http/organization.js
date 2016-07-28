@@ -16,14 +16,14 @@ const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 const server = require('http/server')
 const route = '/organization'
 
-describe(`HTTP ${route}`, () => {
+describe(`HTTP Organization (FUNCTIONAL)`, () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
   let orgId
   let agent
 
   before(() => {
-    //agent = request.agent(server.app)
+    server.start()
     agent = new BigPoppaClient()
   })
 
@@ -50,10 +50,12 @@ describe(`HTTP ${route}`, () => {
   describe('GET /?githubId=GH_ID', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .getOrganization(orgGithubId)
-        .expect(200)
+        .getOrganization({
+          githubId: orgGithubId
+        })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(200)
           expect(res.body).to.be.an.array
           expect(res.body).to.have.lengthOf(1)
           let org = res.body[0]
@@ -72,10 +74,12 @@ describe(`HTTP ${route}`, () => {
 
     it('should return a an empty array if there are no existing models', () => {
       return agent
-        .get(`${route}/?githubId=2343`)
-        .expect(200)
+        .getOrganization({
+          githubId: 2343
+        })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(200)
           expect(res.body).to.be.an.array
           expect(res.body).to.have.lengthOf(0)
         })
@@ -85,10 +89,12 @@ describe(`HTTP ${route}`, () => {
   describe('GET /:id', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .get(`${route}/${orgId}`)
-        .expect(200)
+        .getOrganization({
+          orgId: orgId
+        })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(200)
           expect(res.body).to.be.an.object
           let org = res.body
           expect(org).to.have.property('id')
@@ -106,10 +112,12 @@ describe(`HTTP ${route}`, () => {
 
     it('should return a 404 for an non existing organization', () => {
       return agent
-        .get(`${route}/2342`)
-        .expect(404)
+        .getOrganization({
+          orgId: 2342
+        })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(404)
           expect(res.body).to.be.an.object
           let err = res.body
           expect(err).to.have.property('err')
@@ -124,22 +132,25 @@ describe(`HTTP ${route}`, () => {
       let unixTimestamp = Math.floor((new Date()).getTime() / 1000)
       let time = moment(unixTimestamp, 'X')
       return agent
-        .patch(`${route}/${orgId}`)
-        .send({
+        .updateOrganization({
+          orgId: orgId
+        }, {
           githubId: githubId,
           stripeCustomerId: stripeCustomerId,
           trialEnd: unixTimestamp,
           activePeriodEnd: unixTimestamp,
           gracePeriodEnd: unixTimestamp
         })
-        .expect(200)
         .then(res => {
+          expect(res.statusCode).to.equal(200)
           return agent
-            .get(`${route}/${orgId}`)
-            .expect(200)
+            .getOrganization({
+              orgId: orgId
+            })
         })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(200)
           expect(res.body).to.be.an.object
           let org = res.body
           expect(org).to.have.property('id')
@@ -154,10 +165,12 @@ describe(`HTTP ${route}`, () => {
 
     it('should return a 404 for an non existing organization', () => {
       return agent
-        .patch(`${route}/2342`)
-        .expect(404)
+        .updateOrganization({
+          orgId: 2342
+        })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(404)
           expect(res.body).to.be.an.object
           let err = res.body
           expect(err).to.have.property('err')

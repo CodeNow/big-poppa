@@ -1,6 +1,10 @@
 'use strict'
 
 const ApiClient = require('simple-api-client')
+const Bluebird = require('bluebird')
+
+Bluebird.promisifyAll(ApiClient)
+Bluebird.promisifyAll(ApiClient.prototype)
 
 module.exports = class BigPoppaClient extends ApiClient {
   /**
@@ -19,7 +23,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     } else if (opts.orgId) {
       path += encodeURIComponent(opts.orgId)
     }
-    return this.get({
+    return this.getAsync({
       path: path,
       json: true
     })
@@ -32,7 +36,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     } else if (opts.orgId) {
       path += encodeURIComponent(opts.orgId)
     }
-    return this.patch({
+    return this.patchAsync({
       body: updates,
       path: path,
       json: true
@@ -46,7 +50,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     } else if (opts.userId) {
       path += encodeURIComponent(opts.userId)
     }
-    return this.get({
+    return this.getAsync({
       path: path,
       json: true
     })
@@ -59,7 +63,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     } else if (opts.userId) {
       path += encodeURIComponent(opts.userId)
     }
-    return this.patch({
+    return this.patchAsync({
       body: updates,
       path: path,
       json: true
