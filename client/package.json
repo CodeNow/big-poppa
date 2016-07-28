@@ -1,0 +1,33 @@
+{
+  "name": "@runnable/big-poppa-client",
+  "version": "0.0.3",
+  "description": "User management and billing client",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard --verbose",
+    "test": "npm run lint && NODE_PATH=./lib NODE_ENV=test mocha --recursive test/"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "engines": {
+    "node": ">=4.4.5 <5",
+    "npm": ">=2.14.7"
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "it",
+      "before",
+      "after",
+      "beforeEach",
+      "afterEach"
+    ]
+  },
+  "author": "",
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "simple-api-client": "^0.6.2"
+  },
+  "devDependencies": {}
+}

@@ -4,6 +4,8 @@ const expect = require('chai').expect
 const request = require('supertest-as-promised')
 const MockAPI = require('mehpi')
 
+const BigPoppaClient = require('@runnable/big-poppa-client')
+
 const moment = require('moment')
 
 const testUtil = require('../../util')
@@ -21,7 +23,8 @@ describe(`HTTP ${route}`, () => {
   let agent
 
   before(() => {
-    agent = request.agent(server.app)
+    //agent = request.agent(server.app)
+    agent = new BigPoppaClient()
   })
 
   before(done => githubAPI.start(done))
@@ -47,7 +50,7 @@ describe(`HTTP ${route}`, () => {
   describe('GET /?githubId=GH_ID', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .get(`${route}/?githubId=${orgGithubId}`)
+        .getOrganization(orgGithubId)
         .expect(200)
         .then(res => {
           expect(res).to.be.an.object
