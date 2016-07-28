@@ -16,9 +16,6 @@ exports.up = function (knex, Promise) {
       table.timestamps(true) // Adds default `created_at` `updated_at` timestamps
       table.boolean('is_active').defaultTo(true)
     })
-    .raw(CREATE_TABLE_QUERY)
-    .raw(SOFT_TRIGGER_CREATION_QUERY)
-    .raw(TRIGGER_ATTACH_QUERY)
   debug(createTable.toString())
   return createTable
 }

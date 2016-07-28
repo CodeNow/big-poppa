@@ -23,8 +23,6 @@ exports.up = function (knex, Promise) {
       .notNullable()
     table.boolean('is_active').defaultTo(true)
   })
-  .raw(CREATE_TABLE_QUERY)
-  .raw(ATTACH_TRIGGER_QUERY)
   debug(createTable.toString())
   return createTable
 }
