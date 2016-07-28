@@ -21,7 +21,7 @@ exports.up = function (knex, Promise) {
       .notNullable()
     table.timestamp('grace_period_end')
       .notNullable()
-    table.boolean('is_active').defaultTo(true)
+    table.boolean('is_active').defaultTo(true) // ONLY FOR MANUAL KILLING
   })
   debug(createTable.toString())
   return createTable

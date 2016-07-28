@@ -55,6 +55,7 @@ describe('HTTP /organization', () => {
       // Timestamp should be a string like this
       // '2016-07-21T17:47:24.161Z'
       originalObject = {
+        is_active: true,
         trialEnd: now.toISOString(),
         activePeriodEnd: now.toISOString(),
         gracePeriodEnd: now.toISOString()
@@ -130,7 +131,7 @@ describe('HTTP /organization', () => {
       expect(obj.allowed).to.equal(true)
     })
 
-    it('should only return `allowed` false if both `isPastActivePeriod` and `isPastTrial` are false', () => {
+    it('should return `allowed` false if both `isPastActivePeriod` and `isPastTrial` are false', () => {
       Object.assign(originalObject, {
         trialEnd: now.clone().subtract(1, 'minute').toISOString(),
         activePeriodEnd: now.clone().subtract(1, 'minute').toISOString()
@@ -138,6 +139,15 @@ describe('HTTP /organization', () => {
       let obj = OrganizationRouter.tranformSingleOrg(originalObject)
       expect(obj.isPastTrial).to.equal(false)
       expect(obj.isPastActivePeriod).to.equal(false)
+      expect(obj.allowed).to.equal(false)
+    })
+
+    it('should return `allowed` false if is_active is false', () => {
+      Object.assign({}, {
+        trialEnd: now.clone().subtract(1, 'minute').toISOString(),
+        activePeriodEnd: now.clone().add(1, 'minute').toISOString()
+      })
+      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
       expect(obj.allowed).to.equal(false)
     })
   })
