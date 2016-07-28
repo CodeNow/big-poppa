@@ -1,11 +1,8 @@
 'use strict'
 
-const expect = require('chai').expect
-const request = require('supertest-as-promised')
-const MockAPI = require('mehpi')
-
 const BigPoppaClient = require('@runnable/big-poppa-client')
-
+const expect = require('chai').expect
+const MockAPI = require('mehpi')
 const moment = require('moment')
 
 const testUtil = require('../../util')
@@ -14,7 +11,6 @@ const githubUserFixture = require('../../fixtures/github/user')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const server = require('http/server')
-const route = '/organization'
 
 describe(`HTTP Organization (FUNCTIONAL)`, () => {
   let userGithubId = 1981198
@@ -23,8 +19,14 @@ describe(`HTTP Organization (FUNCTIONAL)`, () => {
   let agent
 
   before(() => {
-    server.start()
+    return server.start()
+  })
+  before(() => {
     agent = new BigPoppaClient()
+  })
+
+  after(() => {
+    return server.stop()
   })
 
   before(done => githubAPI.start(done))
