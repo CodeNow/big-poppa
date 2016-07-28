@@ -10,9 +10,8 @@ const githubUserFixture = require('../../fixtures/github/user')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const server = require('http/server')
-const route = '/user'
 
-describe(`HTTP User (FUNCTIONAL)`, () => {
+describe('HTTP User (FUNCTIONAL)', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
   let userId
