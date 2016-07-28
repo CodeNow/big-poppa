@@ -21,8 +21,8 @@ big-poppa project repository directory:
 
 1. `npm run init-db`
 
-This script creates a super user named `big-poppa` and two databases on your machine:
-`big-poppa` (used for local development) and `big-poppa-test` (used by the test suite).
+This script creates a super user named `big_poppa` and two databases on your machine:
+`big_poppa` (used for local development) and `big_poppa_test` (used by the test suite).
 
 ### Running Migrations
 
@@ -101,3 +101,14 @@ There are three types of tests in this project:
 
 - Unit tests: Tests units of codes and stubs out any external code.
 - Functional tests: Tests the complete functionality of a method and only stubs out HTTP calls. Should interact with the database.
+
+### Scripts And Migrations
+
+#### Migrating UserWhitelist to Organizations in BigPoppa
+
+1. `docker inspect` another container in `app-services` that runs mongo (pheidi)
+2. Copy the `MONGO` env
+3. Go to docker container `docker exec -it CONTAINER_ID bash`
+4. `npm install` which installs mongoDB from dev dependency
+5. Run the following command: `MONGO=MONGO_ENV NODE_PATH=./lib/ node scripts/migrate-user-whitelists-as-orgs.js | bunyan`
+6. Check logs to make sure logs were successfully created

@@ -50,7 +50,7 @@ describe('organization.create', () => {
     CreateOrganization(job).then((organization) => {
       expect(organization.get('githubId')).to.equal(githubId)
       // Check database for entry
-      return knex('organization').where('github_id', githubId)
+      return knex('organizations').where('github_id', githubId)
     })
     .then(res => {
       expect(res).to.have.lengthOf(1)
