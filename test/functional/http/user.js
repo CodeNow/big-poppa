@@ -51,7 +51,7 @@ describe('HTTP User Functional Test', () => {
   describe('GET /?githubId=GH_ID', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .getUser({
+        .getUsers({
           githubId: userGithubId
         })
         .then(res => {
@@ -71,7 +71,7 @@ describe('HTTP User Functional Test', () => {
 
     it('should return a an empty array if there are no existing models', () => {
       return agent
-        .getUser({
+        .getUsers({
           githubId: 1234
         })
         .then(res => {
@@ -85,9 +85,7 @@ describe('HTTP User Functional Test', () => {
   describe('GET /:id', () => {
     it('should return a 200 for an existing user', () => {
       return agent
-        .getUser({
-          userId: userId
-        })
+        .getUser(userId)
         .then(res => {
           expect(res).to.be.an.object
           expect(res.statusCode).to.equal(200)
@@ -104,9 +102,7 @@ describe('HTTP User Functional Test', () => {
 
     it('should return a 404 for an non existing user', () => {
       return agent
-        .getUser({
-          userId: 2342
-        })
+        .getUser(2342)
         .then(res => {
           expect(res).to.be.an.object
           expect(res.statusCode).to.equal(404)

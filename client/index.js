@@ -16,12 +16,21 @@ module.exports = class BigPoppaClient extends ApiClient {
     super(process.env.BIG_POPPA_URL)
   }
 
-  getOrganization (opts) {
+  getOrganization (orgId) {
+    if (!orgId) {
+      return Promise.reject(new Error('missing orgId'))
+    }
+    var path = '/organization/' + encodeURIComponent(orgId)
+    return this.getAsync({
+      path: path,
+      json: true
+    })
+  }
+
+  getOrganizations (opts) {
     var path = '/organization/'
     if (opts.githubId) {
       path += '?githubId=' + encodeURIComponent(opts.githubId)
-    } else if (opts.orgId) {
-      path += encodeURIComponent(opts.orgId)
     }
     return this.getAsync({
       path: path,
@@ -29,13 +38,11 @@ module.exports = class BigPoppaClient extends ApiClient {
     })
   }
 
-  updateOrganization (opts, updates) {
-    var path = '/organization/'
-    if (opts.githubId) {
-      path += '?githubId=' + encodeURIComponent(opts.githubId)
-    } else if (opts.orgId) {
-      path += encodeURIComponent(opts.orgId)
+  updateOrganization (orgId, updates) {
+    if (!orgId) {
+      return Promise.reject(new Error('missing orgId'))
     }
+    var path = '/organization/' + encodeURIComponent(orgId)
     return this.patchAsync({
       body: updates,
       path: path,
@@ -43,28 +50,23 @@ module.exports = class BigPoppaClient extends ApiClient {
     })
   }
 
-  getUser (opts) {
-    var path = '/user/'
-    if (opts.githubId) {
-      path += '?githubId=' + encodeURIComponent(opts.githubId)
-    } else if (opts.userId) {
-      path += encodeURIComponent(opts.userId)
+  getUser (userId) {
+    if (!userId) {
+      return Promise.reject(new Error('missing userId'))
     }
+    var path = '/user/' + encodeURIComponent(userId)
     return this.getAsync({
       path: path,
       json: true
     })
   }
 
-  updateUser (opts, updates) {
+  getUsers (opts) {
     var path = '/user/'
     if (opts.githubId) {
       path += '?githubId=' + encodeURIComponent(opts.githubId)
-    } else if (opts.userId) {
-      path += encodeURIComponent(opts.userId)
     }
-    return this.patchAsync({
-      body: updates,
+    return this.getAsync({
       path: path,
       json: true
     })

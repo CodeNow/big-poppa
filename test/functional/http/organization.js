@@ -52,7 +52,7 @@ describe('HTTP Organization Functional Test', () => {
   describe('GET /?githubId=GH_ID', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .getOrganization({
+        .getOrganizations({
           githubId: orgGithubId
         })
         .then(res => {
@@ -76,7 +76,7 @@ describe('HTTP Organization Functional Test', () => {
 
     it('should return a an empty array if there are no existing models', () => {
       return agent
-        .getOrganization({
+        .getOrganizations({
           githubId: 2343
         })
         .then(res => {
@@ -91,9 +91,7 @@ describe('HTTP Organization Functional Test', () => {
   describe('GET /:id', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .getOrganization({
-          orgId: orgId
-        })
+        .getOrganization(orgId)
         .then(res => {
           expect(res).to.be.an.object
           expect(res.statusCode).to.equal(200)
@@ -114,9 +112,7 @@ describe('HTTP Organization Functional Test', () => {
 
     it('should return a 404 for an non existing organization', () => {
       return agent
-        .getOrganization({
-          orgId: 2342
-        })
+        .getOrganization(2342)
         .then(res => {
           expect(res).to.be.an.object
           expect(res.statusCode).to.equal(404)
@@ -134,9 +130,7 @@ describe('HTTP Organization Functional Test', () => {
       let unixTimestamp = Math.floor((new Date()).getTime() / 1000)
       let time = moment(unixTimestamp, 'X')
       return agent
-        .updateOrganization({
-          orgId: orgId
-        }, {
+        .updateOrganization(orgId, {
           githubId: githubId,
           stripeCustomerId: stripeCustomerId,
           trialEnd: unixTimestamp,
@@ -146,9 +140,7 @@ describe('HTTP Organization Functional Test', () => {
         .then(res => {
           expect(res.statusCode).to.equal(200)
           return agent
-            .getOrganization({
-              orgId: orgId
-            })
+            .getOrganization(orgId)
         })
         .then(res => {
           expect(res).to.be.an.object
@@ -167,9 +159,7 @@ describe('HTTP Organization Functional Test', () => {
 
     it('should return a 404 for an non existing organization', () => {
       return agent
-        .updateOrganization({
-          orgId: 2342
-        })
+        .updateOrganization(2342, {})
         .then(res => {
           expect(res).to.be.an.object
           expect(res.statusCode).to.equal(404)
