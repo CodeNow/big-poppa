@@ -17,7 +17,7 @@ const Organization = require('models/organization')
 
 const RemoveUserFromOrganization = require('workers/organization.user.remove')
 
-describe('organization.user.remove', () => {
+describe('Organization.user.remove Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
 

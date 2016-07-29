@@ -12,7 +12,7 @@ const knex = bookshelf.knex
 
 const CreateUser = require('workers/user.create')
 
-describe('user.create', () => {
+describe('User.create Functional Test', () => {
   let githubId = 1981198
 
   before(done => githubAPI.start(done))

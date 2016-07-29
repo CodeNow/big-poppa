@@ -1,9 +1,8 @@
 'use strict'
 
+const BigPoppaClient = require('@runnable/big-poppa-client')
 const expect = require('chai').expect
-const request = require('supertest-as-promised')
 const MockAPI = require('mehpi')
-
 const moment = require('moment')
 
 const testUtil = require('../../util')
@@ -12,16 +11,22 @@ const githubUserFixture = require('../../fixtures/github/user')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const server = require('http/server')
-const route = '/organization'
 
-describe(`HTTP ${route}`, () => {
+describe('HTTP Organization Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
   let orgId
   let agent
 
   before(() => {
-    agent = request.agent(server.app)
+    return server.start()
+  })
+  before(() => {
+    agent = new BigPoppaClient()
+  })
+
+  after(() => {
+    return server.stop()
   })
 
   before(done => githubAPI.start(done))
@@ -47,10 +52,12 @@ describe(`HTTP ${route}`, () => {
   describe('GET /?githubId=GH_ID', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .get(`${route}/?githubId=${orgGithubId}`)
-        .expect(200)
+        .getOrganizations({
+          githubId: orgGithubId
+        })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(200)
           expect(res.body).to.be.an.array
           expect(res.body).to.have.lengthOf(1)
           let org = res.body[0]
@@ -69,10 +76,12 @@ describe(`HTTP ${route}`, () => {
 
     it('should return a an empty array if there are no existing models', () => {
       return agent
-        .get(`${route}/?githubId=2343`)
-        .expect(200)
+        .getOrganizations({
+          githubId: 2343
+        })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(200)
           expect(res.body).to.be.an.array
           expect(res.body).to.have.lengthOf(0)
         })
@@ -82,10 +91,10 @@ describe(`HTTP ${route}`, () => {
   describe('GET /:id', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
-        .get(`${route}/${orgId}`)
-        .expect(200)
+        .getOrganization(orgId)
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(200)
           expect(res.body).to.be.an.object
           let org = res.body
           expect(org).to.have.property('id')
@@ -103,10 +112,10 @@ describe(`HTTP ${route}`, () => {
 
     it('should return a 404 for an non existing organization', () => {
       return agent
-        .get(`${route}/2342`)
-        .expect(404)
+        .getOrganization(2342)
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(404)
           expect(res.body).to.be.an.object
           let err = res.body
           expect(err).to.have.property('err')
@@ -121,22 +130,21 @@ describe(`HTTP ${route}`, () => {
       let unixTimestamp = Math.floor((new Date()).getTime() / 1000)
       let time = moment(unixTimestamp, 'X')
       return agent
-        .patch(`${route}/${orgId}`)
-        .send({
+        .updateOrganization(orgId, {
           githubId: githubId,
           stripeCustomerId: stripeCustomerId,
           trialEnd: unixTimestamp,
           activePeriodEnd: unixTimestamp,
           gracePeriodEnd: unixTimestamp
         })
-        .expect(200)
         .then(res => {
+          expect(res.statusCode).to.equal(200)
           return agent
-            .get(`${route}/${orgId}`)
-            .expect(200)
+            .getOrganization(orgId)
         })
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(200)
           expect(res.body).to.be.an.object
           let org = res.body
           expect(org).to.have.property('id')
@@ -151,10 +159,10 @@ describe(`HTTP ${route}`, () => {
 
     it('should return a 404 for an non existing organization', () => {
       return agent
-        .patch(`${route}/2342`)
-        .expect(404)
+        .updateOrganization(2342, {})
         .then(res => {
           expect(res).to.be.an.object
+          expect(res.statusCode).to.equal(404)
           expect(res.body).to.be.an.object
           let err = res.body
           expect(err).to.have.property('err')

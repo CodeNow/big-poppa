@@ -19,7 +19,7 @@ const Organization = require('models/organization')
 
 const DeleteOrganization = require('workers/organization.delete')
 
-describe('organization.delete', () => {
+describe('Organization.delete Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
 
