@@ -8,15 +8,11 @@ Promise.promisifyAll(ApiClient.prototype)
 
 module.exports = class BigPoppaClient extends ApiClient {
   /**
-   * API Client for Optimus. Sets the default host to `process.env.OPTIMUS_HOST`.
+   * API Client for Big Poppa. Sets the default host to `process.env.BIG_POPPA_HOST`.
    * @param {string} [host] Overrides the default host for the client.
-   * @param {Number} [port] Overrides the default port for the client.
    */
-  constructor (host, port) {
-    super([
-      host || process.env.BIG_POPPA_HOST,
-      port || process.env.BIG_POPPA_PORT || 80
-    ].join(':'))
+  constructor (host) {
+    super(host || process.env.BIG_POPPA_HOST)
   }
 
   /**
