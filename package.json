@@ -68,7 +68,7 @@
     "runnable-hermes": "^6.6.0"
   },
   "devDependencies": {
-    "@runnable/big-poppa-client": "^0.0.9",
+    "@runnable/big-poppa-client": "^0.1.0",
     "debug": "^2.2.0",
     "istanbul": "^0.4.4",
     "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
