@@ -94,7 +94,15 @@ const getUnaccountedForOrgs = (userWhitelists) => {
 
 log.info({ url: url }, 'Connecting to Database')
 Promise.resolve()
-  .then(() => Promise.fromCallback(cb => MongoClient.connect(url, cb)))
+  .then(() => Promise.fromCallback(cb => {
+    let opts = {}
+    if (process.env.MONGO_REPLSET_NAME) {
+      opts.replset = {
+        rs_name: process.env.MONGO_REPLSET_NAME
+      }
+    }
+    MongoClient.connect(url, opts, cb)
+  }))
   .then(function fetctWhitelists (db) {
     log.info('Fetching all documents for userwhitelists')
     let userWhitelistCollection = db.collection('userwhitelists')
