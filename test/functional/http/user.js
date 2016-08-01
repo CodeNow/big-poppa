@@ -1,6 +1,6 @@
 'use strict'
 
-const BigPoppaClient = require('@runnable/big-poppa-client')
+const BigPoppaClient = require('./../../../client/index')
 const expect = require('chai').expect
 const MockAPI = require('mehpi')
 

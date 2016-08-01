@@ -17,7 +17,7 @@
     "test-integration": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/integration",
     "test-integration-env": "npm run lint && NODE_PATH=./lib NODE_ENV=test-integration mocha --recursive test/",
     "init-db": "createuser -s -d big_poppa; createdb big_poppa; createdb big_poppa_test",
-    "drop-db": "dropdb big_poppa && dropdb big_poppa-test",
+    "drop-db": "dropdb big_poppa && dropdb big_poppa_test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
     "start-worker": "npm run migrate-dev && NODE_PATH=./lib node lib/workers",
     "start-http": "npm run migrate-dev && NODE_PATH=./lib node lib/http",
@@ -68,7 +68,6 @@
     "runnable-hermes": "^6.6.0"
   },
   "devDependencies": {
-    "@runnable/big-poppa-client": "^0.1.0",
     "debug": "^2.2.0",
     "istanbul": "^0.4.4",
     "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
