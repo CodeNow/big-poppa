@@ -13,7 +13,6 @@ exports.up = function (knex, Promise) {
         .primary()
       table.integer('github_id')
         .unique()
-      table.string('access_token')
       table.timestamps(true) // Adds default `created_at` `updated_at` timestamps
       table.boolean('is_active').defaultTo(true)
     })

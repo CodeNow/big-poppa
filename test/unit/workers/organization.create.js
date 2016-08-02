@@ -18,7 +18,7 @@ const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
 const CreateOrganization = require('workers/organization.create')
 
-describe('#orgnization.create', () => {
+describe('#organization.create', () => {
   let githubId = 123
   let creatorUsername = 'thejsj'
   let creatorEmail = 'jorge.silva@thejsj.com'
@@ -46,7 +46,7 @@ describe('#orgnization.create', () => {
     newOrg = {}
     createStub = sinon.stub(Organization, 'create').resolves(newOrg)
     fetchByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(newOrg)
-    getGithubOrganizationStub = sinon.stub(GithubAPI, 'getOrganization').resolves(githubOrganizationFixture)
+    getGithubOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
     publishASGCreateStub = sinon.stub(rabbitMQ, 'publishASGCreate')
     publishOrganizationCreatedStub = sinon.stub(rabbitMQ, 'publishOrganizationCreated')
     orionUserCreateStub = sinon.stub(orion.users, 'create')

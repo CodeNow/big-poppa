@@ -1,13 +1,9 @@
 'use strict'
 
-const moment = require('moment')
-
 const logger = require('util/logger').child({ module: 'scripts/user-whitelist-migration-script' })
-const Organization = require('models/organization')
-const GithubEntityNotFoundError = require('errors/github-entity-not-found-error')
+const User = require('models/user')
 
 const GithubAPI = require('util/github')
-
 const AddUserToOrganization = require('workers/organization.user.add')
 
 var log = logger.child({})
@@ -15,45 +11,42 @@ var log = logger.child({})
 // Global variables meant to be used reporting/logging at the end of script
 let totalMembershipsCreated = []
 let alreadyMembershipsCreated = []
-let orgsWithNoUsers = []
-let badOrgs = []
+let usersWithNoOrgs = []
+let badUsers = []
 
-Organization.collection()
+User.collection()
   .fetch()
-  .then(orgs => orgs.toJSON())
+  .then(users => users.toJSON())
   .tap(function (orgs) {
     log.trace({
       orgs: orgs
     }, 'fetch orgs')
   })
-  .map(function (org) {
-    return GithubAPI.getOrganization(org.githubId)
-      .tap(function (members) {
-        if (!members) {
-          orgsWithNoUsers.push(org)
-          return
+  .map(function (user) {
+    const githubApi = new GithubAPI(user.accessToken)
+    return githubApi.getOrgsForUser(user.githubId)
+      .tap(function (orgs) {
+        if (!orgs.length) {
+          usersWithNoOrgs.push(user)
         }
-        log.trace({
-          org: org,
-          members: members
-        }, 'Update newly created orgs')
       })
-      .map(function (member) {
+      .map(function (org) {
         log.trace({
           org: org,
-          member: member
+          member: user
         }, 'Update newly created orgs')
+        // If the org doesn't exist in our db, it'll just worker_stop
         return AddUserToOrganization({
           tid: 'dasdasdsasadasd',
           organizationGithubId: org.githubId,
-          userGithubId: member.id
+          userGithubId: user.id
         })
           .tap(function (membership) {
             totalMembershipsCreated.push(membership)
           })
-      })
-      .catch(GithubEntityNotFoundError, err => {
-        badOrgs.push(org)
+          .catch(err => {
+            log.error({ err: err }, 'Error creating relationships')
+          })
       })
   })
   .catch(err => log.error({ err: err }, 'Unhandeled error'))
@@ -61,8 +54,8 @@ Organization.collection()
     log.trace({
       totalMembershipsCreated: totalMembershipsCreated.length,
       alreadyMembershipsCreated: alreadyMembershipsCreated.length,
-      orgsWithNoUsers: orgsWithNoUsers.length,
-      badOrgs: badOrgs.length
+      orgsWithNoUsers: usersWithNoOrgs.length,
+      badOrgs: badUsers.length
     }, 'Finished. Exiting.')
     process.exit()
   })

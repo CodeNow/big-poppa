@@ -2,7 +2,6 @@
 
 const Promise = require('bluebird')
 const MongoClient = require('mongodb').MongoClient
-const moment = require('moment')
 
 const logger = require('util/logger').child({ module: 'scripts/user-whitelist-migration-script' })
 const User = require('models/user')
@@ -33,11 +32,17 @@ function createUser (user, retries) {
   const githubUserId = user.accounts.github.id
 
   return User.fetchByGithubId(githubUserId)
+    .then((user) => {
+      createUserLog.trace({ userId: user.githubId }, 'updating access token')
+      return user.save({
+        accessToken: user.accounts.github.accessToken
+      })
+    })
     // Only attempt to create the org if the org doesn't exist
     .catch(NotFoundError, () => {
       return CreateUser({
         githubId: githubUserId,
-        accessToken: user.accounts.github.accessToken,
+        accessToken: user.accounts.github.accessToken
       })
     })
     .then(() => {
@@ -84,7 +89,6 @@ Promise.resolve()
       usersSuccessfullyCreated: usersSuccessfullyCreated,
       usersThatCouldNotBeCreated: usersThatCouldNotBeCreated
     }, 'All orgs updated')
-
 
     // Provide a summary of everything that happened
     log.info({

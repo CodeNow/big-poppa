@@ -31,7 +31,10 @@ describe('User.create Functional Test', () => {
   })
 
   it('should create a user', done => {
-    CreateUser({ githubId: githubId }).then((user) => {
+    CreateUser({
+      accessToken: 'asdsadasdasdasdasdsadsad',
+      githubId: githubId
+    }).then((user) => {
       expect(user.get('githubId')).to.equal(githubId)
       // Check database for entry
       return knex('users').where('github_id', githubId)
