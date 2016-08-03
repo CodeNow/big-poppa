@@ -18,7 +18,7 @@ const httpServer = require('http/server')
 const User = require('models/user')
 const rabbitMQ = require('util/rabbitmq')
 
-describe('Organization Integration Test', () => {
+describe.only('Organization Integration Test', () => {
   let orgGithubId = 2828361
   let userGithubId = 1981198
   let publisher
@@ -46,6 +46,7 @@ describe('Organization Integration Test', () => {
 
   // Delete everything from the DB after every test
   beforeEach(() => testUtil.truncateAllTables())
+  afterEach(() => testUtil.truncateAllTables())
 
   // Set GH stubs
   before(done => githubAPI.start(done))

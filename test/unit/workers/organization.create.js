@@ -20,6 +20,7 @@ const CreateOrganization = require('workers/organization.create')
 
 describe('#organization.create', () => {
   let githubId = 123
+  let creatorGithubId = 123231
   let creatorUsername = 'thejsj'
   let creatorEmail = 'jorge.silva@thejsj.com'
   let creatorCreated = 1469136162
@@ -38,6 +39,7 @@ describe('#organization.create', () => {
     validJob = {
       githubId: githubId,
       creator: {
+        githubId: creatorGithubId,
         githubUsername: creatorUsername,
         email: creatorEmail,
         created: creatorCreated
@@ -99,6 +101,27 @@ describe('#organization.create', () => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.message).to.match(/creator.*githubUsername/i)
+          done()
+        })
+    })
+    it('should throw a validation error if no `creator.githubId` is passed', done => {
+      delete validJob.creator.githubId
+      CreateOrganization(validJob)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err).to.be.an.instanceof(WorkerStopError)
+          expect(err.message).to.match(/invalid.*job/i)
+          done()
+        })
+    })
+
+    it('should throw a validation error if the `creator.githubId` is not a number', done => {
+      validJob.creator.githubId = 'dfasdfsadf'
+      CreateOrganization(validJob)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err).to.be.an.instanceof(WorkerStopError)
+          expect(err.message).to.match(/githubId/i)
           done()
         })
     })

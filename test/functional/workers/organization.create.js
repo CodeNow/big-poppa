@@ -8,7 +8,6 @@ const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
-const User = require('models/user')
 
 const bookshelf = require('models').bookshelf
 const knex = bookshelf.knex
@@ -49,12 +48,6 @@ describe('Organization.create Functional Test', () => {
     sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
   })
 
-  beforeEach(() => {
-    return new User().save({
-      accessToken: 'testing',
-      githubId: userGithubId
-    })
-  })
   beforeEach(() => rabbitMQ.connect())
   afterEach(() => rabbitMQ.disconnect())
 
