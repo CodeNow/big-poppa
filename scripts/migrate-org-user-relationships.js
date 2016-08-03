@@ -2,6 +2,7 @@
 
 const logger = require('util/logger').child({ module: 'scripts/user-whitelist-migration-script' })
 const User = require('models/user')
+const Promise = require('bluebird')
 
 const GithubAPI = require('util/github')
 const AddUserToOrganization = require('workers/organization.user.add')
@@ -17,35 +18,38 @@ let badUsers = []
 User.collection()
   .fetch()
   .then(users => users.toJSON())
-  .tap(function (orgs) {
+  .then(function (users) {
     log.trace({
-      orgs: orgs
-    }, 'fetch orgs')
-  })
-  .map(function (user) {
-    const githubApi = new GithubAPI(user.accessToken)
-    return githubApi.getOrgsForUser(user.githubId)
-      .tap(function (orgs) {
-        if (!orgs.length) {
-          usersWithNoOrgs.push(user)
-        }
-      })
-      .map(function (org) {
-        log.trace({
-          org: org,
-          member: user
-        }, 'Update newly created orgs')
-        // If the org doesn't exist in our db, it'll just worker_stop
-        return AddUserToOrganization({
-          tid: 'dasdasdsasadasd',
-          organizationGithubId: org.githubId,
-          userGithubId: user.id
-        })
-          .tap(function (membership) {
-            totalMembershipsCreated.push(membership)
+      users: users
+    }, 'fetch users')
+    return Promise
+      .mapSeries(users, function (user) {
+        const githubApi = new GithubAPI(user.accessToken)
+        return githubApi.getOrgsForUser(user.githubId)
+          .tap(function (orgs) {
+            if (!orgs.length) {
+              usersWithNoOrgs.push(user)
+            }
+          })
+          .map(function (org) {
+            log.trace({
+              org: org,
+              member: user
+            }, 'Update newly created orgs')
+            // If the org doesn't exist in our db, it'll just worker_stop
+            return AddUserToOrganization({
+              organizationGithubId: org.id,
+              userGithubId: user.githubId
+            })
+              .tap(function (membership) {
+                totalMembershipsCreated.push(membership)
+              })
+              .catch(err => {
+                log.error({ err: err }, 'Error creating relationships')
+              })
           })
           .catch(err => {
-            log.error({ err: err }, 'Error creating relationships')
+            log.error({ err: err }, `Error creating relationships for ${user.githubId}`)
           })
       })
   })
