@@ -58,11 +58,11 @@ function createUser (githubUser, retries) {
           createUserLog.error({ err: err }, 'Max number of retries reached')
           throw new Error(`User was not inserted after ${maxNumberOfRetries}`)
         }
-        createUserLog.trace('Retrying to createOrganization')
+        createUserLog.trace('Retrying to createUser')
         return Promise.delay(200)
           .then(() => createUser(githubUser, retries + 1))
       }
-      createUserLog.error({ err: err }, 'Error creating organization')
+      createUserLog.error({ err: err }, 'Error creating user')
       usersThatCouldNotBeCreated.push(githubUser)
       return false // Filter out org if it failed
     })
@@ -80,7 +80,7 @@ Promise.resolve()
     MongoClient.connect(url, opts, cb)
   }))
   .then(function fetchUsersFromMongo (db) {
-    log.info('Fetching all documents for userwhitelists')
+    log.info('Fetching all documents for user')
     let userCollection = db.collection('users')
     return Promise.fromCallback(cb => {
       userCollection.find({ 'accounts.github.id': {
@@ -97,7 +97,7 @@ Promise.resolve()
     log.trace({
       usersSuccessfullyCreated: usersSuccessfullyCreated,
       usersThatCouldNotBeCreated: usersThatCouldNotBeCreated
-    }, 'All orgs updated')
+    }, 'All users updated')
 
     // Provide a summary of everything that happened
     log.info({
