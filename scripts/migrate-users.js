@@ -26,26 +26,27 @@ let numberOf504Errors = 0
 let usersThatCouldNotBeCreated = []
 let usersSuccessfullyCreated = []
 
-function createUser (user, retries) {
-  const createUserLog = log.child({ user: user, retries: retries, method: 'createUser' })
+function createUser (githubUser, retries) {
+  const createUserLog = log.child({ user: githubUser, retries: retries, method: 'createUser' })
   retries = retries || 0
-  const githubUserId = user.accounts.github.id
+  const githubUserId = githubUser.accounts.github.id
+  const accessToken = githubUser.accounts.github.accessToken
 
   return User.fetchByGithubId(githubUserId)
     .then((user) => {
       createUserLog.trace({ userId: user.githubId }, 'updating access token')
       return user.save({
-        accessToken: user.accounts.github.accessToken
+        accessToken: accessToken
       })
     })
     // Only attempt to create the org if the org doesn't exist
     .catch(NotFoundError, () => {
       return CreateUser({
         githubId: githubUserId,
-        accessToken: user.accounts.github.accessToken
+        accessToken: accessToken
       })
     })
-    .then(() => {
+    .then((user) => {
       usersSuccessfullyCreated.push(user)
       return true // Include org in final array of whitelists
     })
@@ -59,7 +60,7 @@ function createUser (user, retries) {
         }
         createUserLog.trace('Retrying to createOrganization')
         return Promise.delay(200)
-          .then(() => createUser(user, retries + 1))
+          .then(() => createUser(githubUser, retries + 1))
       }
       createUserLog.error({ err: err }, 'Error creating organization')
       usersThatCouldNotBeCreated.push(user)
