@@ -18,7 +18,7 @@ const httpServer = require('http/server')
 const User = require('models/user')
 const rabbitMQ = require('util/rabbitmq')
 
-describe.only('Organization Integration Test', () => {
+describe('Organization Integration Test', () => {
   let orgGithubId = 2828361
   let userGithubId = 1981198
   let publisher
