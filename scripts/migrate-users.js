@@ -69,7 +69,15 @@ function createUser (user, retries) {
 
 log.info({ url: url }, 'Connecting to Database')
 Promise.resolve()
-  .then(() => Promise.fromCallback(cb => MongoClient.connect(url, cb)))
+  .then(() => Promise.fromCallback(cb => {
+    let opts = {}
+    if (process.env.MONGO_REPLSET_NAME) {
+      opts.replset = {
+        rs_name: process.env.MONGO_REPLSET_NAME
+      }
+    }
+    MongoClient.connect(url, opts, cb)
+  }))
   .then(function fetchUsersFromMongo (db) {
     log.info('Fetching all documents for userwhitelists')
     let userCollection = db.collection('users')
