@@ -45,6 +45,7 @@ User.collection()
                 totalMembershipsCreated.push(membership)
               })
               .catch(err => {
+                alreadyMembershipsCreated.push(org)
                 log.error({ err: err }, 'Error creating relationships')
               })
           })

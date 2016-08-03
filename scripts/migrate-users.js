@@ -63,7 +63,7 @@ function createUser (githubUser, retries) {
           .then(() => createUser(githubUser, retries + 1))
       }
       createUserLog.error({ err: err }, 'Error creating organization')
-      usersThatCouldNotBeCreated.push(user)
+      usersThatCouldNotBeCreated.push(githubUser)
       return false // Filter out org if it failed
     })
 }
