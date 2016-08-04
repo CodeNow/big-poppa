@@ -1,6 +1,6 @@
 'use strict'
 
-const BigPoppaClient = require('@runnable/big-poppa-client')
+const BigPoppaClient = require('../../../client')
 const expect = require('chai').expect
 const MockAPI = require('mehpi')
 const moment = require('moment')
@@ -71,6 +71,14 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it('should return all of the orgs when not specifying opts', () => {
+      return agent
+        .getOrganizations()
+        .then(body => {
+          expect(body).to.be.an.array
+          expect(body).to.have.lengthOf(0)
+        })
+    })
     it('should return a an empty array if there are no existing models', () => {
       return agent
         .getOrganizations({

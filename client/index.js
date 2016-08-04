@@ -45,7 +45,7 @@ module.exports = class BigPoppaClient extends ApiClient {
    */
   getOrganizations (opts) {
     var path = '/organization/'
-    if (opts.githubId) {
+    if (opts && opts.githubId) {
       path += '?githubId=' + encodeURIComponent(opts.githubId)
     }
     return this.getAsync({
@@ -126,7 +126,7 @@ module.exports = class BigPoppaClient extends ApiClient {
    */
   getUsers (opts) {
     var path = '/user/'
-    if (opts.githubId) {
+    if (opts && opts.githubId) {
       path += '?githubId=' + encodeURIComponent(opts.githubId)
     }
     return this.getAsync({
