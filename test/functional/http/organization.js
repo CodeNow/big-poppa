@@ -124,8 +124,7 @@ describe('HTTP Organization Functional Test', () => {
           activePeriodEnd: unixTimestamp,
           gracePeriodEnd: unixTimestamp
         })
-        .then(res => {
-          expect(res.statusCode).to.equal(200)
+        .then(() => {
           return agent
             .getOrganization(orgId)
         })
