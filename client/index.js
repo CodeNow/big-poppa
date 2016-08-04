@@ -2,6 +2,7 @@
 
 const ApiClient = require('simple-api-client')
 const Promise = require('bluebird')
+const BigPoppaClientError = require('./errors/big-poppa-client-error')
 
 Promise.promisifyAll(ApiClient)
 Promise.promisifyAll(ApiClient.prototype)
@@ -27,7 +28,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     })
       .tap(res => {
         if (res.statusCode >= 400) {
-          throw Error(res.body.message)
+          throw BigPoppaClientError(res.body.message)
         }
       })
       .get('body')
@@ -54,7 +55,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     })
       .tap(res => {
         if (res.statusCode >= 400) {
-          throw Error(res.body.message)
+          throw BigPoppaClientError(res.body.message)
         }
       })
       .get('body')
@@ -82,7 +83,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     })
       .tap(res => {
         if (res.statusCode >= 400) {
-          throw Error(res.body.message)
+          throw BigPoppaClientError(res.body.message)
         }
       })
       .get('body')
@@ -108,7 +109,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     })
       .tap(res => {
         if (res.statusCode >= 400) {
-          throw Error(res.body.message)
+          throw BigPoppaClientError(res.body.message)
         }
       })
       .get('body')
@@ -135,7 +136,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     })
       .tap(res => {
         if (res.statusCode >= 400) {
-          throw Error(res.body.message)
+          throw BigPoppaClientError(res.body.message)
         }
       })
       .get('body')
