@@ -22,7 +22,7 @@ describe('HTTP Organization Functional Test', () => {
     return server.start()
   })
   before(() => {
-    agent = new BigPoppaClient()
+    agent = new BigPoppaClient(process.env.BIG_POPPA_HOST)
   })
 
   after(() => {
@@ -55,12 +55,9 @@ describe('HTTP Organization Functional Test', () => {
         .getOrganizations({
           githubId: orgGithubId
         })
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(200)
-          expect(res.body).to.be.an.array
-          expect(res.body).to.have.lengthOf(1)
-          let org = res.body[0]
+        .then(orgs => {
+          expect(orgs).to.have.lengthOf(1)
+          let org = orgs[0]
           expect(org).to.have.property('id')
           expect(org).to.have.property('githubId', orgGithubId)
           expect(org).to.have.property('trialEnd')
@@ -79,11 +76,9 @@ describe('HTTP Organization Functional Test', () => {
         .getOrganizations({
           githubId: 2343
         })
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(200)
-          expect(res.body).to.be.an.array
-          expect(res.body).to.have.lengthOf(0)
+        .then(body => {
+          expect(body).to.be.an.array
+          expect(body).to.have.lengthOf(0)
         })
     })
   })
@@ -92,11 +87,7 @@ describe('HTTP Organization Functional Test', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
         .getOrganization(orgId)
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(200)
-          expect(res.body).to.be.an.object
-          let org = res.body
+        .then(org => {
           expect(org).to.have.property('id')
           expect(org).to.have.property('githubId', orgGithubId)
           expect(org).to.have.property('trialEnd')
@@ -113,12 +104,8 @@ describe('HTTP Organization Functional Test', () => {
     it('should return a 404 for an non existing organization', () => {
       return agent
         .getOrganization(2342)
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(404)
-          expect(res.body).to.be.an.object
-          let err = res.body
-          expect(err).to.have.property('err')
+        .catch(err => {
+          expect(err).to.be.an.object
         })
     })
   })
@@ -142,11 +129,7 @@ describe('HTTP Organization Functional Test', () => {
           return agent
             .getOrganization(orgId)
         })
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(200)
-          expect(res.body).to.be.an.object
-          let org = res.body
+        .then(org => {
           expect(org).to.have.property('id')
           expect(org).to.have.property('githubId', githubId)
           expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
@@ -160,12 +143,8 @@ describe('HTTP Organization Functional Test', () => {
     it('should return a 404 for an non existing organization', () => {
       return agent
         .updateOrganization(2342, {})
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(404)
-          expect(res.body).to.be.an.object
-          let err = res.body
-          expect(err).to.have.property('err')
+        .catch(err => {
+          expect(err).to.be.an.object
         })
     })
   })
