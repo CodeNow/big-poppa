@@ -80,33 +80,33 @@ describe('Organization', () => {
 
       beforeEach(() => {
         attrs = { githubId: githubId }
-        sinon.stub(GithubAPI, 'getOrganization').resolves(githubOrganizationFixture)
+        sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
       })
 
       afterEach(() => {
-        GithubAPI.getOrganization.restore()
+        GithubAPI.prototype.getOrganization.restore()
       })
 
       it('should check if the github id exists and is for a org', done => {
         org.validateCreate({}, attrs)
           .then(() => {
-            sinon.assert.calledOnce(GithubAPI.getOrganization)
-            sinon.assert.calledWithExactly(GithubAPI.getOrganization, githubId)
+            sinon.assert.calledOnce(GithubAPI.prototype.getOrganization)
+            sinon.assert.calledWithExactly(GithubAPI.prototype.getOrganization, githubId)
           })
           .asCallback(done)
       })
 
       it('should throw an error if the org does not exist', done => {
         let githubErr = new GithubEntityNotFoundError(new Error())
-        GithubAPI.getOrganization.rejects(githubErr)
+        GithubAPI.prototype.getOrganization.rejects(githubErr)
 
         let attrs = { githubId: githubId }
         org.validateCreate({}, attrs)
           .asCallback(err => {
             expect(err).to.exist
             expect(err).to.equal(githubErr)
-            sinon.assert.calledOnce(GithubAPI.getOrganization)
-            sinon.assert.calledWithExactly(GithubAPI.getOrganization, githubId)
+            sinon.assert.calledOnce(GithubAPI.prototype.getOrganization)
+            sinon.assert.calledWithExactly(GithubAPI.prototype.getOrganization, githubId)
             done()
           })
       })

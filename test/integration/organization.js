@@ -7,6 +7,7 @@ const request = superagentPromisePlugin.patch(require('superagent'))
 
 const testUtil = require('../util')
 const githubOrganizationFixture = require('../fixtures/github/organization')
+const githubUserFixture = require('../fixtures/github/user')
 const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
@@ -14,9 +15,12 @@ const RabbitMQ = require('ponos/lib/rabbitmq')
 
 const workerServer = require('workers/server')
 const httpServer = require('http/server')
+const User = require('models/user')
+const rabbitMQ = require('util/rabbitmq')
 
-describe('Organization Integration Test', () => {
+describe.only('Organization Integration Test', () => {
   let orgGithubId = 2828361
+  let userGithubId = 1981198
   let publisher
 
   // Start HTTP Server
@@ -42,22 +46,38 @@ describe('Organization Integration Test', () => {
 
   // Delete everything from the DB after every test
   beforeEach(() => testUtil.truncateAllTables())
+  afterEach(() => testUtil.truncateAllTables())
 
   // Set GH stubs
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
+
+  beforeEach(() => rabbitMQ.connect())
+  afterEach(() => rabbitMQ.disconnect())
 
   before(() => {
     githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
       status: 200,
       body: githubOrganizationFixture
     })
+    githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
+      status: 200,
+      body: githubUserFixture
+    })
   })
 
-  it('should create an organization', () => {
+  beforeEach(() => {
+    return new User().save({
+      accessToken: 'testing',
+      githubId: userGithubId
+    })
+  })
+
+  it('should create an organization, and create the org-user relationship', () => {
     return publisher.publishTask('organization.create', {
       githubId: orgGithubId,
       creator: {
+        githubId: userGithubId,
         githubUsername: 'thejsj',
         email: 'jorge.silva@thejsj.com',
         created: '1469136162'
@@ -73,8 +93,13 @@ describe('Organization Integration Test', () => {
             let orgs = res.body
             if (Array.isArray(orgs) && orgs.length > 0) {
               expect(orgs).to.have.lengthOf(1)
-              expect(orgs[0]).to.have.property('id')
-              expect(orgs[0]).to.have.property('githubId', orgGithubId)
+              const thisOrg = orgs[0]
+              expect(thisOrg).to.have.property('id')
+              expect(thisOrg).to.have.property('githubId', orgGithubId)
+              expect(thisOrg).to.have.property('users')
+              expect(thisOrg.users).to.have.lengthOf(1)
+              expect(thisOrg.users[0]).to.have.property('id')
+              expect(thisOrg.users[0]).to.have.property('githubId', userGithubId)
               return true
             }
             return false

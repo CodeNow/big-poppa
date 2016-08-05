@@ -2,18 +2,12 @@
 
 const ApiClient = require('simple-api-client')
 const Promise = require('bluebird')
+const BigPoppaClientError = require('./errors/big-poppa-client-error')
 
 Promise.promisifyAll(ApiClient)
 Promise.promisifyAll(ApiClient.prototype)
 
 module.exports = class BigPoppaClient extends ApiClient {
-  /**
-   * API Client for Big Poppa. Sets the default host to `process.env.BIG_POPPA_HOST`.
-   * @param {string} [host] Overrides the default host for the client.
-   */
-  constructor (host) {
-    super(host || process.env.BIG_POPPA_HOST)
-  }
 
   /**
    * Given an internal orgId, fetch the matching org
@@ -32,6 +26,12 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
+      .tap(res => {
+        if (res.statusCode >= 400) {
+          throw BigPoppaClientError(res.body.message)
+        }
+      })
+      .get('body')
   }
 
   /**
@@ -46,13 +46,19 @@ module.exports = class BigPoppaClient extends ApiClient {
    */
   getOrganizations (opts) {
     var path = '/organization/'
-    if (opts.githubId) {
+    if (opts && opts.githubId) {
       path += '?githubId=' + encodeURIComponent(opts.githubId)
     }
     return this.getAsync({
       path: path,
       json: true
     })
+      .tap(res => {
+        if (res.statusCode >= 400) {
+          throw BigPoppaClientError(res.body.message)
+        }
+      })
+      .get('body')
   }
 
   /**
@@ -75,6 +81,12 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
+      .tap(res => {
+        if (res.statusCode >= 400) {
+          throw BigPoppaClientError(res.body.message)
+        }
+      })
+      .get('body')
   }
 
   /**
@@ -95,6 +107,12 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
+      .tap(res => {
+        if (res.statusCode >= 400) {
+          throw BigPoppaClientError(res.body.message)
+        }
+      })
+      .get('body')
   }
 
   /**
@@ -109,12 +127,18 @@ module.exports = class BigPoppaClient extends ApiClient {
    */
   getUsers (opts) {
     var path = '/user/'
-    if (opts.githubId) {
+    if (opts && opts.githubId) {
       path += '?githubId=' + encodeURIComponent(opts.githubId)
     }
     return this.getAsync({
       path: path,
       json: true
     })
+      .tap(res => {
+        if (res.statusCode >= 400) {
+          throw BigPoppaClientError(res.body.message)
+        }
+      })
+      .get('body')
   }
 }
