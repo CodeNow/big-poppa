@@ -2,6 +2,8 @@
 
 const Promise = require('bluebird')
 const expect = require('chai').expect
+const sinon = require('sinon')
+require('sinon-as-promised')(Promise)
 
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
@@ -21,6 +23,7 @@ const AddUserToOrganization = require('workers/organization.user.add')
 describe('Organization.user.add Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
+  let publishEventStub
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
@@ -43,14 +46,15 @@ describe('Organization.user.add Functional Test', () => {
       .asCallback(done)
   })
 
-  before(() => {
-    return rabbitMQ.connect()
-      .then(function () {
-        // Create exchange so that message can be published succsefully
-        return rabbitMQ._rabbit.subscribeToFanoutExchange('organization.user.added', Promise.method(() => {}), {})
-      })
+  beforeEach(() => rabbitMQ.connect())
+  afterEach(() => rabbitMQ.disconnect())
+
+  beforeEach(() => {
+    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent')
   })
-  after(() => rabbitMQ.disconnect())
+  afterEach(() => {
+    publishEventStub.restore()
+  })
 
   it('should add a user to an organization', done => {
     let userId
