@@ -4,6 +4,7 @@ const Promise = require('bluebird')
 const expect = require('chai').expect
 const superagentPromisePlugin = require('superagent-promise-plugin')
 const request = superagentPromisePlugin.patch(require('superagent'))
+const keypather = require('keypather')()
 
 const testUtil = require('../util')
 const githubOrganizationFixture = require('../fixtures/github/organization')
@@ -18,7 +19,7 @@ const httpServer = require('http/server')
 const User = require('models/user')
 const rabbitMQ = require('util/rabbitmq')
 
-describe.only('Organization Integration Test', () => {
+describe('Organization Integration Test', () => {
   let orgGithubId = 2828361
   let userGithubId = 1981198
   let publisher
@@ -91,7 +92,8 @@ describe.only('Organization Integration Test', () => {
           .query({ githubId: orgGithubId })
           .then(res => {
             let orgs = res.body
-            if (Array.isArray(orgs) && orgs.length > 0) {
+            console.log(orgs)
+            if (keypather.get(orgs, '[0].users[0]')) {
               expect(orgs).to.have.lengthOf(1)
               const thisOrg = orgs[0]
               expect(thisOrg).to.have.property('id')

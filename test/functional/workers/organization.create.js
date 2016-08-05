@@ -19,6 +19,7 @@ describe('Organization.create Functional Test', () => {
   let githubId = 2828361
   let userGithubId = 1981198
   let job
+  let publishOrganizationUserAddStub
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
@@ -45,7 +46,13 @@ describe('Organization.create Functional Test', () => {
       status: 200,
       body: githubOrganizationFixture
     })
-    sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
+  })
+
+  beforeEach(() => {
+    publishOrganizationUserAddStub = sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
+  })
+  afterEach(() => {
+    publishOrganizationUserAddStub.restore()
   })
 
   beforeEach(() => rabbitMQ.connect())

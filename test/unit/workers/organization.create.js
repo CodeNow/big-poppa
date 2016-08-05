@@ -33,6 +33,7 @@ describe('#organization.create', () => {
   let getGithubOrganizationStub
   let publishASGCreateStub
   let publishOrganizationCreatedStub
+  let publishOrganizationUserAddStub
   let orionUserCreateStub
 
   beforeEach(() => {
@@ -52,6 +53,7 @@ describe('#organization.create', () => {
     publishASGCreateStub = sinon.stub(rabbitMQ, 'publishASGCreate')
     publishOrganizationCreatedStub = sinon.stub(rabbitMQ, 'publishOrganizationCreated')
     orionUserCreateStub = sinon.stub(orion.users, 'create')
+    publishOrganizationUserAddStub = sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
   })
 
   afterEach(() => {
@@ -61,6 +63,7 @@ describe('#organization.create', () => {
     publishASGCreateStub.restore()
     publishOrganizationCreatedStub.restore()
     orionUserCreateStub.restore()
+    publishOrganizationUserAddStub.restore()
   })
 
   describe('Validation', () => {
@@ -245,6 +248,22 @@ describe('#organization.create', () => {
                 name: githubOrganizationFixture.login,
                 remote_created_at: sinon.match.number
               }]
+            }
+          )
+        })
+        .asCallback(done)
+    })
+
+    it('should publish an `organization.user.add` job', done => {
+      CreateOrganization(validJob)
+        .then(res => {
+          sinon.assert.calledOnce(publishOrganizationUserAddStub)
+          sinon.assert.calledWithExactly(
+            publishOrganizationUserAddStub,
+            {
+              tid: sinon.match.any,
+              organizationGithubId: githubId,
+              userGithubId: creatorGithubId
             }
           )
         })
