@@ -4,6 +4,7 @@ const Promise = require('bluebird')
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
 const expect = require('chai').expect
+const moment = require('moment')
 
 const bookshelf = require('models').bookshelf
 const BaseModel = require('models/base')
@@ -75,23 +76,36 @@ describe('Organization', () => {
     })
 
     describe('#validateCreate', () => {
+      let belongsToManyStub
       let githubId = 123456
+      let getOrganizationStub
       let attrs
 
       beforeEach(() => {
+        belongsToManyStub = sinon.stub(Organization.prototype, 'belongsToMany')
         attrs = { githubId: githubId }
-        sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
+        getOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
       })
 
       afterEach(() => {
-        GithubAPI.prototype.getOrganization.restore()
+        belongsToManyStub.restore()
+        getOrganizationStub.restore()
+      })
+
+      it('should call `belongsToMany`', () => {
+        org = new Organization()
+        org.users()
+        sinon.assert.calledOnce(belongsToManyStub)
+        sinon.assert.calledWithExactly(
+          belongsToManyStub,
+          'User'
+        )
       })
 
       it('should check if the github id exists and is for a org', done => {
         org.validateCreate({}, attrs)
           .then(() => {
             sinon.assert.calledOnce(GithubAPI.prototype.getOrganization)
-            sinon.assert.calledWithExactly(GithubAPI.prototype.getOrganization, githubId)
           })
           .asCallback(done)
       })
@@ -99,7 +113,6 @@ describe('Organization', () => {
       it('should throw an error if the org does not exist', done => {
         let githubErr = new GithubEntityNotFoundError(new Error())
         GithubAPI.prototype.getOrganization.rejects(githubErr)
-
         let attrs = { githubId: githubId }
         org.validateCreate({}, attrs)
           .asCallback(err => {
@@ -109,6 +122,32 @@ describe('Organization', () => {
             sinon.assert.calledWithExactly(GithubAPI.prototype.getOrganization, githubId)
             done()
           })
+      })
+    })
+
+    describe('#serialize', () => {
+      let getCurrentGracePeriodEndStub
+      let gracePeriodEnd
+
+      beforeEach(() => {
+        gracePeriodEnd = '2016-08-05T21:54:46.093Z'
+        getCurrentGracePeriodEndStub = sinon.stub(Organization.prototype, 'getCurrentGracePeriodEnd')
+          .returns(gracePeriodEnd)
+      })
+
+      afterEach(() => {
+        getCurrentGracePeriodEndStub.restore()
+      })
+
+      it('should return an object', () => {
+        let orgJSON = org.serialize()
+        expect(orgJSON).to.be.an('object')
+      })
+
+      it('should have a `gracePeriodEnd` method', () => {
+        let orgJSON = org.serialize()
+        expect(orgJSON.gracePeriodEnd).to.be.a('string')
+        expect(orgJSON.gracePeriodEnd).to.equal(gracePeriodEnd)
       })
     })
 
@@ -253,6 +292,79 @@ describe('Organization', () => {
             expect(err).to.equal(err)
             done()
           })
+      })
+    })
+
+    describe('#getCurrentGracePeriodEnd', () => {
+      it('should return the end of trial + 72 hours if trial is after active period', () => {
+        let trialEnd = moment().add('1', 'weeks')
+        let activePeriodEnd = trialEnd.clone().subtract('1', 'minutes')
+        org = new Organization({
+          trialEnd: trialEnd.toISOString(),
+          activePeriodEnd: activePeriodEnd.toISOString()
+        })
+
+        let gracePeriodEnd = org.getCurrentGracePeriodEnd()
+        let _gracePeriodEnd = trialEnd.clone().add(process.env.GRACE_PERIOD_DURATION_IN_HOURS, 'hours').toISOString()
+        expect(gracePeriodEnd).to.equal(_gracePeriodEnd)
+      })
+
+      it('should return the end of active period + 72 hours if active period is after trial', () => {
+        let trialEnd = moment().add('1', 'weeks')
+        let activePeriodEnd = trialEnd.clone().add('1', 'minutes')
+        org = new Organization({
+          trialEnd: trialEnd.toISOString(),
+          activePeriodEnd: activePeriodEnd.toISOString()
+        })
+
+        let gracePeriodEnd = org.getCurrentGracePeriodEnd()
+        let _gracePeriodEnd = activePeriodEnd.clone().add(process.env.GRACE_PERIOD_DURATION_IN_HOURS, 'hours').toISOString()
+        expect(gracePeriodEnd).to.equal(_gracePeriodEnd)
+      })
+
+      it('should return the grace period end is set and if after trial or active period + 72 hours', () => {
+        let trialEnd = moment().add('1', 'weeks')
+        let activePeriodEnd = trialEnd.clone().add('1', 'minutes')
+        let setGracePeriodEnd = trialEnd.clone().add('73', 'hours')
+        org = new Organization({
+          trialEnd: trialEnd.toISOString(),
+          activePeriodEnd: activePeriodEnd.toISOString(),
+          gracePeriodEnd: setGracePeriodEnd
+        })
+
+        let gracePeriodEnd = org.getCurrentGracePeriodEnd()
+        let _gracePeriodEnd = setGracePeriodEnd.toISOString()
+        expect(gracePeriodEnd).to.equal(_gracePeriodEnd)
+      })
+
+      it('should return trial end + 72 hours if more than grace period', () => {
+        let trialEnd = moment().add('1', 'weeks')
+        let activePeriodEnd = trialEnd.clone().subtract('1', 'minutes')
+        let setGracePeriodEnd = trialEnd.clone().add('73', 'hours')
+        org = new Organization({
+          trialEnd: trialEnd.toISOString(),
+          activePeriodEnd: activePeriodEnd.toISOString(),
+          gracePeriodEnd: setGracePeriodEnd
+        })
+
+        let gracePeriodEnd = org.getCurrentGracePeriodEnd()
+        let _gracePeriodEnd = setGracePeriodEnd.toISOString()
+        expect(gracePeriodEnd).to.equal(_gracePeriodEnd)
+      })
+
+      it('should return active period end + 72 hours if more than grace period', () => {
+        let trialEnd = moment().add('1', 'weeks')
+        let activePeriodEnd = trialEnd.clone().subtract('1', 'minutes')
+        let setGracePeriodEnd = trialEnd.clone().add('10', 'hours')
+        org = new Organization({
+          trialEnd: trialEnd.toISOString(),
+          activePeriodEnd: activePeriodEnd.toISOString(),
+          gracePeriodEnd: setGracePeriodEnd
+        })
+
+        let gracePeriodEnd = org.getCurrentGracePeriodEnd()
+        let _gracePeriodEnd = trialEnd.clone().add(process.env.GRACE_PERIOD_DURATION_IN_HOURS, 'hours').toISOString()
+        expect(gracePeriodEnd).to.equal(_gracePeriodEnd)
       })
     })
   })

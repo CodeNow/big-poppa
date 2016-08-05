@@ -198,4 +198,142 @@ describe('RabbitMQ', () => {
         })
     })
   })
+
+  describe('publishUserAddedToOrganization', () => {
+    let orgGithubId = 4567
+    let orgId = 897
+    let userGithubId = 23423
+    let userId = 8007
+    let validJob
+
+    beforeEach(() => {
+      validJob = {
+        organization: {
+          id: orgId,
+          githubId: orgGithubId
+        },
+        user: {
+          id: userId,
+          githubId: userGithubId
+        }
+      }
+    })
+
+    describe('Validation', () => {
+      it('shoud required a `organization.githubId` property', done => {
+        delete validJob.organization.githubId
+        rabbitMQ.publishUserAddedToOrganization(validJob)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err.message).to.match(/githubid/i)
+            done()
+          })
+      })
+
+      it('shoud required a `organization.id` property', done => {
+        delete validJob.organization.id
+        rabbitMQ.publishUserAddedToOrganization(validJob)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err.message).to.match(/id/i)
+            done()
+          })
+      })
+
+      it('shoud required a `user` property', done => {
+        delete validJob.user
+        rabbitMQ.publishUserAddedToOrganization(validJob)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err.message).to.match(/user/i)
+            done()
+          })
+      })
+
+      it('should resolve promise if job is valid', () => {
+        return rabbitMQ.publishUserAddedToOrganization(validJob)
+      })
+    })
+
+    it('should publish the task', () => {
+      return rabbitMQ.publishUserAddedToOrganization(validJob)
+        .then(() => {
+          sinon.assert.calledOnce(publishEventStub)
+          sinon.assert.calledWithExactly(
+            publishEventStub,
+            'organization.user.added',
+            validJob
+          )
+        })
+    })
+  })
+
+  describe('publishUserRemovedFromOrganization', () => {
+    let orgGithubId = 4567
+    let orgId = 897
+    let userGithubId = 23423
+    let userId = 8007
+    let validJob
+
+    beforeEach(() => {
+      validJob = {
+        organization: {
+          id: orgId,
+          githubId: orgGithubId
+        },
+        user: {
+          id: userId,
+          githubId: userGithubId
+        }
+      }
+    })
+
+    describe('Validation', () => {
+      it('shoud required a `organization.githubId` property', done => {
+        delete validJob.organization.githubId
+        rabbitMQ.publishUserRemovedFromOrganization(validJob)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err.message).to.match(/githubid/i)
+            done()
+          })
+      })
+
+      it('shoud required a `organization.id` property', done => {
+        delete validJob.organization.id
+        rabbitMQ.publishUserRemovedFromOrganization(validJob)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err.message).to.match(/id/i)
+            done()
+          })
+      })
+
+      it('shoud required a `user` property', done => {
+        delete validJob.user
+        rabbitMQ.publishUserRemovedFromOrganization(validJob)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err.message).to.match(/user/i)
+            done()
+          })
+      })
+
+      it('should resolve promise if job is valid', () => {
+        return rabbitMQ.publishUserRemovedFromOrganization(validJob)
+      })
+    })
+
+    it('should publish the task', () => {
+      return rabbitMQ.publishUserRemovedFromOrganization(validJob)
+        .then(() => {
+          sinon.assert.calledOnce(publishEventStub)
+          sinon.assert.calledWithExactly(
+            publishEventStub,
+            'organization.user.removed',
+            validJob
+          )
+        })
+    })
+  })
 })
