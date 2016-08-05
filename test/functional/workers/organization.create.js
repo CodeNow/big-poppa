@@ -47,15 +47,15 @@ describe('Organization.create Functional Test', () => {
       status: 200,
       body: githubOrganizationFixture
     })
-    sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
   })
 
   beforeEach(() => rabbitMQ.connect())
   afterEach(() => rabbitMQ.disconnect())
 
   beforeEach(() => {
-    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent')
+    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent').resolves()
   })
+
   afterEach(() => {
     publishEventStub.restore()
   })
@@ -70,13 +70,6 @@ describe('Organization.create Functional Test', () => {
         expect(res).to.have.lengthOf(1)
         expect(res[0]).to.be.an('object')
         expect(res[0].github_id).to.equal(githubId)
-      })
-      .then(() => {
-        sinon.assert.calledWith(rabbitMQ.publishOrganizationUserAdd, {
-          tid: sinon.match.undefined,
-          organizationGithubId: job.githubId,
-          userGithubId: job.creator.githubId
-        })
       })
       .asCallback(done)
   })

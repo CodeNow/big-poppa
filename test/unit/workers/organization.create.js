@@ -19,12 +19,12 @@ const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const CreateOrganization = require('workers/organization.create')
 
 describe('#organization.create', () => {
+  let orgId = 2343243
   let githubId = 123
   let creatorGithubId = 123231
   let creatorUsername = 'thejsj'
   let creatorEmail = 'jorge.silva@thejsj.com'
   let creatorCreated = 1469136162
-  let orgId = 76622
 
   let newOrg
   let validJob
@@ -34,6 +34,7 @@ describe('#organization.create', () => {
   let getGithubOrganizationStub
   let publishASGCreateStub
   let publishOrganizationCreatedStub
+  let publishOrganizationUserAddStub
   let orionUserCreateStub
 
   beforeEach(() => {
@@ -55,6 +56,7 @@ describe('#organization.create', () => {
     publishASGCreateStub = sinon.stub(rabbitMQ, 'publishASGCreate')
     publishOrganizationCreatedStub = sinon.stub(rabbitMQ, 'publishOrganizationCreated')
     orionUserCreateStub = sinon.stub(orion.users, 'create')
+    publishOrganizationUserAddStub = sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
   })
 
   afterEach(() => {
@@ -64,6 +66,7 @@ describe('#organization.create', () => {
     publishASGCreateStub.restore()
     publishOrganizationCreatedStub.restore()
     orionUserCreateStub.restore()
+    publishOrganizationUserAddStub.restore()
   })
 
   describe('Validation', () => {
@@ -254,6 +257,22 @@ describe('#organization.create', () => {
         .asCallback(done)
     })
 
+    it('should publish an `organization.user.add` job', done => {
+      CreateOrganization(validJob)
+        .then(res => {
+          sinon.assert.calledOnce(publishOrganizationUserAddStub)
+          sinon.assert.calledWithExactly(
+            publishOrganizationUserAddStub,
+            {
+              tid: sinon.match.any,
+              organizationGithubId: githubId,
+              userGithubId: creatorGithubId
+            }
+          )
+        })
+        .asCallback(done)
+    })
+
     it('should publish an `asg.create` job', done => {
       CreateOrganization(validJob)
         .then(res => {
@@ -280,7 +299,7 @@ describe('#organization.create', () => {
                 githubId: githubOrganizationFixture.id,
                 name: githubOrganizationFixture.login
               },
-              createdAt: sinon.match.any
+              createdAt: sinon.match.number
             }
           )
         })
