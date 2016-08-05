@@ -1,6 +1,6 @@
 'use strict'
 
-const BigPoppaClient = require('@runnable/big-poppa-client')
+const BigPoppaClient = require('../../../client')
 const expect = require('chai').expect
 const MockAPI = require('mehpi')
 const moment = require('moment')
@@ -134,8 +134,7 @@ describe('HTTP Organization Functional Test', () => {
           githubId: githubId,
           stripeCustomerId: stripeCustomerId,
           trialEnd: unixTimestamp,
-          activePeriodEnd: unixTimestamp,
-          gracePeriodEnd: unixTimestamp
+          activePeriodEnd: unixTimestamp
         })
         .then(res => {
           expect(res.statusCode).to.equal(200)
