@@ -76,9 +76,10 @@ describe('HTTP Organization Functional Test', () => {
         .getOrganizations()
         .then(body => {
           expect(body).to.be.an.array
-          expect(body).to.have.lengthOf(0)
+          expect(body).to.have.lengthOf(1)
         })
     })
+
     it('should return a an empty array if there are no existing models', () => {
       return agent
         .getOrganizations({
