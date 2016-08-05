@@ -43,8 +43,14 @@ describe('Organization.user.add Functional Test', () => {
       .asCallback(done)
   })
 
-  beforeEach(() => rabbitMQ.connect())
-  afterEach(() => rabbitMQ.disconnect())
+  before(() => {
+    return rabbitMQ.connect()
+      .then(function () {
+        // Create exchange so that message can be published succsefully
+        return rabbitMQ._rabbit.subscribeToFanoutExchange('organization.user.added', Promise.method(() => {}), {})
+      })
+  })
+  after(() => rabbitMQ.disconnect())
 
   it('should add a user to an organization', done => {
     let userId

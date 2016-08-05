@@ -1,5 +1,6 @@
 'use strict'
 
+const Promise = require('bluebird')
 const expect = require('chai').expect
 
 const testUtil = require('../../util')
@@ -43,8 +44,14 @@ describe('Organization.create Functional Test', () => {
     })
   })
 
-  beforeEach(() => rabbitMQ.connect())
-  afterEach(() => rabbitMQ.disconnect())
+  before(() => {
+    return rabbitMQ.connect()
+      .then(function () {
+        // Create exchange so that message can be published succsefully
+        return rabbitMQ._rabbit.subscribeToFanoutExchange('organization.created', Promise.method(() => {}), {})
+      })
+  })
+  after(() => rabbitMQ.disconnect())
 
   it('should create an organization', done => {
     CreateOrganization(job).then((organization) => {

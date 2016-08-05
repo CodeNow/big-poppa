@@ -43,8 +43,14 @@ describe('Organization.user.remove Functional Test', () => {
       .asCallback(done)
   })
 
-  beforeEach(() => rabbitMQ.connect())
-  afterEach(() => rabbitMQ.disconnect())
+  before(() => {
+    return rabbitMQ.connect()
+      .then(function () {
+        // Create exchange so that message can be published succsefully
+        return rabbitMQ._rabbit.subscribeToFanoutExchange('organization.user.removed', Promise.method(() => {}), {})
+      })
+  })
+  after(() => rabbitMQ.disconnect())
 
   it('should remove a user from an organization', done => {
     let userId
