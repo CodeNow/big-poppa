@@ -14,6 +14,7 @@ module.exports = class TestUtil {
       .then(() => {
         return Promise.all([
           // Cannot truncate because of foreign key constraint
+          knex('organizations_users').del(),
           knex('organizations').del(),
           knex('users').del()
         ])
@@ -22,7 +23,10 @@ module.exports = class TestUtil {
 
   static createUserAndOrg (orgGithubId, userGithubId) {
     return Promise.props({
-      user: new User().save({ githubId: userGithubId }),
+      user: new User().save({
+        accessToken: 'testing',
+        githubId: userGithubId
+      }),
       org: Organization.create(orgGithubId)
     })
   }

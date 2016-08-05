@@ -78,34 +78,37 @@ describe('User', () => {
       let attrs
 
       beforeEach(() => {
-        attrs = { githubId: githubId }
-        sinon.stub(GithubAPI, 'getUser').resolves(githubUserFixture)
+        attrs = {
+          accessToken: 'asdsadasdasdasdasdsadsad',
+          githubId: githubId
+        }
+        sinon.stub(GithubAPI.prototype, 'getUser').resolves(githubUserFixture)
       })
 
       afterEach(() => {
-        GithubAPI.getUser.restore()
+        GithubAPI.prototype.getUser.restore()
       })
 
       it('should check if the github id exists and is for a user', done => {
         user.validateCreate({}, attrs)
           .then(() => {
-            sinon.assert.calledOnce(GithubAPI.getUser)
-            sinon.assert.calledWithExactly(GithubAPI.getUser, githubId)
+            sinon.assert.calledOnce(GithubAPI.prototype.getUser)
+            sinon.assert.calledWithExactly(GithubAPI.prototype.getUser, githubId)
           })
           .asCallback(done)
       })
 
       it('should throw an error if the user does not exist', done => {
         let githubErr = new GithubEntityNotFoundError(new Error())
-        GithubAPI.getUser.rejects(githubErr)
+        GithubAPI.prototype.getUser.rejects(githubErr)
 
         let attrs = { githubId: githubId }
         user.validateCreate({}, attrs)
           .asCallback(err => {
             expect(err).to.exist
             expect(err).to.equal(githubErr)
-            sinon.assert.calledOnce(GithubAPI.getUser)
-            sinon.assert.calledWithExactly(GithubAPI.getUser, githubId)
+            sinon.assert.calledOnce(GithubAPI.prototype.getUser)
+            sinon.assert.calledWithExactly(GithubAPI.prototype.getUser, githubId)
             done()
           })
       })

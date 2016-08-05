@@ -56,25 +56,51 @@ describe('User Integration Test', () => {
 
   it('should create an user', () => {
     return publisher.publishTask('user.create', {
-      githubId: userGithubId
+      githubId: userGithubId,
+      accessToken: 'asdsadasdasdasdasdsadsad'
     })
-    .then(() => {
-      return testUtil.poll(Promise.method(() => {
-        // Make a GET request every 100ms to check if org exists
-        return request
-          .get(`http://localhost:${process.env.PORT}/user`)
-          .query({ githubId: userGithubId })
-          .then(res => {
-            let orgs = res.body
-            if (Array.isArray(orgs) && orgs.length > 0) {
-              expect(orgs).to.have.lengthOf(1)
-              expect(orgs[0]).to.have.property('id')
-              expect(orgs[0]).to.have.property('githubId', userGithubId)
-              return true
-            }
-            return false
-          })
-      }), 100, 5000)
+      .then(() => {
+        return testUtil.poll(Promise.method(() => {
+          // Make a GET request every 100ms to check if org exists
+          return request
+            .get(`http://localhost:${process.env.PORT}/user`)
+            .query({ githubId: userGithubId })
+            .then(res => {
+              let orgs = res.body
+              if (Array.isArray(orgs) && orgs.length > 0) {
+                expect(orgs).to.have.lengthOf(1)
+                expect(orgs[0]).to.have.property('id')
+                expect(orgs[0]).to.have.property('githubId', userGithubId)
+                return true
+              }
+              return false
+            })
+        }), 100, 5000)
+      })
+  }).timeout(5000)
+
+  it('should create an user on the authorized event', () => {
+    return publisher.publishEvent('user.authorized', {
+      githubId: userGithubId,
+      accessToken: 'asdsadasdasdasdasdsadsad'
     })
+      .then(() => {
+        return testUtil.poll(Promise.method(() => {
+          // Make a GET request every 100ms to check if org exists
+          return request
+            .get(`http://localhost:${process.env.PORT}/user`)
+            .query({ githubId: userGithubId })
+            .then(res => {
+              let orgs = res.body
+              if (Array.isArray(orgs) && orgs.length > 0) {
+                expect(orgs).to.have.lengthOf(1)
+                expect(orgs[0]).to.have.property('id')
+                expect(orgs[0]).to.have.property('githubId', userGithubId)
+                return true
+              }
+              return false
+            })
+        }), 100, 5000)
+      })
   }).timeout(5000)
 })

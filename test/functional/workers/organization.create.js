@@ -18,6 +18,7 @@ const CreateOrganization = require('workers/organization.create')
 
 describe('Organization.create Functional Test', () => {
   let githubId = 2828361
+  let userGithubId = 1981198
   let job
   let publishEventStub
 
@@ -28,6 +29,7 @@ describe('Organization.create Functional Test', () => {
     job = {
       githubId: githubId,
       creator: {
+        githubId: userGithubId,
         githubUsername: 'thejsj',
         email: 'jorge.silva@thejsj.com',
         created: '1469136162'
@@ -45,6 +47,7 @@ describe('Organization.create Functional Test', () => {
       status: 200,
       body: githubOrganizationFixture
     })
+    sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
   })
 
   beforeEach(() => rabbitMQ.connect())
@@ -57,17 +60,24 @@ describe('Organization.create Functional Test', () => {
     publishEventStub.restore()
   })
 
-  it('should create an organization', done => {
+  it('should create an organization, and queue creating a relationship', done => {
     CreateOrganization(job).then((organization) => {
       expect(organization.get('githubId')).to.equal(githubId)
       // Check database for entry
       return knex('organizations').where('github_id', githubId)
     })
-    .then(res => {
-      expect(res).to.have.lengthOf(1)
-      expect(res[0]).to.be.an('object')
-      expect(res[0].github_id).to.equal(githubId)
-    })
+      .then(res => {
+        expect(res).to.have.lengthOf(1)
+        expect(res[0]).to.be.an('object')
+        expect(res[0].github_id).to.equal(githubId)
+      })
+      .then(() => {
+        sinon.assert.calledWith(rabbitMQ.publishOrganizationUserAdd, {
+          tid: sinon.match.undefined,
+          organizationGithubId: job.githubId,
+          userGithubId: job.creator.githubId
+        })
+      })
       .asCallback(done)
   })
 })

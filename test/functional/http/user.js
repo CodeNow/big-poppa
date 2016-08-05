@@ -21,7 +21,7 @@ describe('HTTP User Functional Test', () => {
     return server.start()
   })
   before(() => {
-    agent = new BigPoppaClient()
+    agent = new BigPoppaClient(process.env.BIG_POPPA_HOST)
   })
 
   after(() => {
@@ -54,12 +54,10 @@ describe('HTTP User Functional Test', () => {
         .getUsers({
           githubId: userGithubId
         })
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(200)
-          expect(res.body).to.be.an.array
-          expect(res.body).to.have.lengthOf(1)
-          let user = res.body[0]
+        .then(users => {
+          expect(users).to.be.an.array
+          expect(users).to.have.lengthOf(1)
+          let user = users[0]
           expect(user).to.have.property('id')
           expect(user).to.have.property('githubId', userGithubId)
           expect(user).to.have.property('organizations')
@@ -74,10 +72,9 @@ describe('HTTP User Functional Test', () => {
         .getUsers({
           githubId: 1234
         })
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.body).to.be.an.array
-          expect(res.body).to.have.lengthOf(0)
+        .then(body => {
+          expect(body).to.be.an.array
+          expect(body).to.have.lengthOf(0)
         })
     })
   })
@@ -86,11 +83,7 @@ describe('HTTP User Functional Test', () => {
     it('should return a 200 for an existing user', () => {
       return agent
         .getUser(userId)
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(200)
-          expect(res.body).to.be.an.object
-          let user = res.body
+        .then(user => {
           expect(user).to.have.property('id')
           expect(user).to.have.property('githubId', userGithubId)
           expect(user).to.have.property('organizations')
@@ -103,12 +96,8 @@ describe('HTTP User Functional Test', () => {
     it('should return a 404 for an non existing user', () => {
       return agent
         .getUser(2342)
-        .then(res => {
-          expect(res).to.be.an.object
-          expect(res.statusCode).to.equal(404)
-          expect(res.body).to.be.an.object
-          let err = res.body
-          expect(err).to.have.property('err')
+        .catch(err => {
+          expect(err).to.be.an.object
         })
     })
   })

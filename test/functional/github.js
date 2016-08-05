@@ -4,9 +4,10 @@ require('loadenv')()
 const expect = require('chai').expect
 
 const MockAPI = require('mehpi')
-const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
+const mockGithubApi = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const GithubAPI = require('util/github')
+const githubApi = new GithubAPI()
 
 const githubOrganizationFixture = require('../fixtures/github/organization')
 const githubUseFixture = require('../fixtures/github/user')
@@ -16,19 +17,19 @@ const GithubEntityNotFoundError = require('errors/github-entity-not-found-error'
 const GithubEntityTypeError = require('errors/github-entity-type-error')
 
 describe('GithubAPI Functional Tests', () => {
-  before(done => githubAPI.start(done))
-  after(done => githubAPI.stop(done))
+  before(done => mockGithubApi.start(done))
+  after(done => mockGithubApi.stop(done))
 
   describe('getOrganization', () => {
     let orgGithubId = 2828361
 
     it('should return a github organization if the organization exists', done => {
-      githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
+      mockGithubApi.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
         status: 200,
         body: githubOrganizationFixture
       })
 
-      GithubAPI.getOrganization(orgGithubId)
+      githubApi.getOrganization(orgGithubId)
         .then(org => {
           expect(org).to.be.an('object')
           expect(org.login).to.equal(githubOrganizationFixture.login)
@@ -40,12 +41,12 @@ describe('GithubAPI Functional Tests', () => {
 
     it('should throw a `GithubEntityNotFoundError` if no entity is returned', done => {
       orgGithubId = 999999999 // Doesn't exist
-      githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
+      mockGithubApi.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
         status: 404,
         body: githubNotFoundFixture
       })
 
-      GithubAPI.getOrganization(orgGithubId)
+      githubApi.getOrganization(orgGithubId)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceOf(GithubEntityNotFoundError)
@@ -55,12 +56,12 @@ describe('GithubAPI Functional Tests', () => {
 
     it('should throw a `GithubEntityTypeError` if the entity is not an organization', done => {
       orgGithubId = 1981198 // user id
-      githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
+      mockGithubApi.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
         status: 200,
         body: githubUseFixture
       })
 
-      GithubAPI.getOrganization(orgGithubId)
+      githubApi.getOrganization(orgGithubId)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceOf(GithubEntityTypeError)
@@ -73,12 +74,12 @@ describe('GithubAPI Functional Tests', () => {
     let userGithubId = 1981198
 
     it('should return a github organization if the organization exists', done => {
-      githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
+      mockGithubApi.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
         status: 200,
         body: githubUseFixture
       })
 
-      GithubAPI.getUser(userGithubId)
+      githubApi.getUser(userGithubId)
         .then(org => {
           expect(org).to.be.an('object')
           expect(org.login).to.equal(githubUseFixture.login)
@@ -90,12 +91,12 @@ describe('GithubAPI Functional Tests', () => {
 
     it('should throw a `GithubEntityNotFoundError` if no entity is returned', done => {
       userGithubId = 999999999 // Doesn't exist
-      githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
+      mockGithubApi.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
         status: 404,
         body: githubNotFoundFixture
       })
 
-      GithubAPI.getUser(userGithubId)
+      githubApi.getUser(userGithubId)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceOf(GithubEntityNotFoundError)
@@ -105,12 +106,12 @@ describe('GithubAPI Functional Tests', () => {
 
     it('should throw a `GithubEntityTypeError` if the entity is not an organization', done => {
       userGithubId = 2828361 // organization id
-      githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
+      mockGithubApi.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
         status: 200,
         body: githubOrganizationFixture
       })
 
-      GithubAPI.getUser(userGithubId)
+      githubApi.getUser(userGithubId)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceOf(GithubEntityTypeError)

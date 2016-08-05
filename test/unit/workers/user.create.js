@@ -19,7 +19,10 @@ describe('#user.create', () => {
   let validJob
 
   beforeEach(() => {
-    validJob = { githubId: 123 }
+    validJob = {
+      accessToken: 'asdasdasdasasdasdas',
+      githubId: 123
+    }
     newUser = {}
     saveStub = sinon.stub(User.prototype, 'save').resolves(newUser)
   })
@@ -105,7 +108,10 @@ describe('#user.create', () => {
           sinon.assert.calledOnce(saveStub)
           sinon.assert.calledWithExactly(
             saveStub,
-            { githubId: validJob.githubId }
+            {
+              accessToken: validJob.accessToken,
+              githubId: validJob.githubId
+            }
           )
         })
         .asCallback(done)

@@ -18,8 +18,9 @@ const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
 const CreateOrganization = require('workers/organization.create')
 
-describe('#orgnization.create', () => {
+describe('#organization.create', () => {
   let githubId = 123
+  let creatorGithubId = 123231
   let creatorUsername = 'thejsj'
   let creatorEmail = 'jorge.silva@thejsj.com'
   let creatorCreated = 1469136162
@@ -39,6 +40,7 @@ describe('#orgnization.create', () => {
     validJob = {
       githubId: githubId,
       creator: {
+        githubId: creatorGithubId,
         githubUsername: creatorUsername,
         email: creatorEmail,
         created: creatorCreated
@@ -49,7 +51,7 @@ describe('#orgnization.create', () => {
     }
     createStub = sinon.stub(Organization, 'create').resolves(newOrg)
     fetchByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(newOrg)
-    getGithubOrganizationStub = sinon.stub(GithubAPI, 'getOrganization').resolves(githubOrganizationFixture)
+    getGithubOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
     publishASGCreateStub = sinon.stub(rabbitMQ, 'publishASGCreate')
     publishOrganizationCreatedStub = sinon.stub(rabbitMQ, 'publishOrganizationCreated')
     orionUserCreateStub = sinon.stub(orion.users, 'create')
@@ -102,6 +104,27 @@ describe('#orgnization.create', () => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.message).to.match(/creator.*githubUsername/i)
+          done()
+        })
+    })
+    it('should throw a validation error if no `creator.githubId` is passed', done => {
+      delete validJob.creator.githubId
+      CreateOrganization(validJob)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err).to.be.an.instanceof(WorkerStopError)
+          expect(err.message).to.match(/invalid.*job/i)
+          done()
+        })
+    })
+
+    it('should throw a validation error if the `creator.githubId` is not a number', done => {
+      validJob.creator.githubId = 'dfasdfsadf'
+      CreateOrganization(validJob)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err).to.be.an.instanceof(WorkerStopError)
+          expect(err.message).to.match(/githubId/i)
           done()
         })
     })
