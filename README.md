@@ -109,6 +109,6 @@ There are three types of tests in this project:
 1. `docker inspect` another container in `app-services` that runs mongo (pheidi)
 2. Copy the `MONGO` env
 3. Go to docker container `docker exec -it CONTAINER_ID bash`
-4. `npm install` which installs mongoDB from dev dependency
+4. `npm install` which installs mongoDB from dev dependency (If you get errors connecting to the DB it might be the client version).
 5. Run the following command: `MONGO=MONGO_ENV NODE_PATH=./lib/ node scripts/migrate-user-whitelists-as-orgs.js | bunyan`
 6. Check logs to make sure logs were successfully created
