@@ -10,6 +10,7 @@ const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const bookshelf = require('models').bookshelf
+const rabbitMQ = require('util/rabbitmq')
 const knex = bookshelf.knex
 
 const User = require('models/user')
@@ -41,6 +42,9 @@ describe('Organization.user.add Functional Test', () => {
     testUtil.createUserAndOrg(orgGithubId, userGithubId)
       .asCallback(done)
   })
+
+  beforeEach(() => rabbitMQ.connect())
+  afterEach(() => rabbitMQ.disconnect())
 
   it('should add a user to an organization', done => {
     let userId

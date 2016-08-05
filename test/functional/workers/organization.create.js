@@ -8,9 +8,9 @@ const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const bookshelf = require('models').bookshelf
+const rabbitMQ = require('util/rabbitmq')
 const knex = bookshelf.knex
 
-const rabbitMQ = require('util/rabbitmq')
 const CreateOrganization = require('workers/organization.create')
 
 describe('Organization.create Functional Test', () => {

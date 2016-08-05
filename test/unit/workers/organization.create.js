@@ -23,6 +23,7 @@ describe('#orgnization.create', () => {
   let creatorUsername = 'thejsj'
   let creatorEmail = 'jorge.silva@thejsj.com'
   let creatorCreated = 1469136162
+  let orgId = 76622
 
   let newOrg
   let validJob
@@ -43,7 +44,9 @@ describe('#orgnization.create', () => {
         created: creatorCreated
       }
     }
-    newOrg = {}
+    newOrg = {
+      id: orgId
+    }
     createStub = sinon.stub(Organization, 'create').resolves(newOrg)
     fetchByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(newOrg)
     getGithubOrganizationStub = sinon.stub(GithubAPI, 'getOrganization').resolves(githubOrganizationFixture)
@@ -249,9 +252,12 @@ describe('#orgnization.create', () => {
           sinon.assert.calledWithExactly(
             publishOrganizationCreatedStub,
             {
-              githubId: githubOrganizationFixture.id.toString(),
-              orgName: githubOrganizationFixture.login,
-              createdAt: sinon.match.number
+              organization: {
+                id: orgId,
+                githubId: githubOrganizationFixture.id,
+                name: githubOrganizationFixture.login
+              },
+              createdAt: sinon.match.any
             }
           )
         })

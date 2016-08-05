@@ -151,7 +151,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
           expect(org).to.have.property('trialEnd', time.format('X'))
           expect(org).to.have.property('activePeriodEnd', time.format('X'))
-          expect(org).to.have.property('gracePeriodEnd', time.format('X'))
+          expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').format('X'))
           expect(org).to.have.property('firstDockCreated', false)
         })
     })

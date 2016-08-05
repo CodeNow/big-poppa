@@ -303,8 +303,7 @@ describe('Organization', () => {
             sinon.assert.calledWithExactly(
               saveStub,
               sinon.match.has('trialEnd', dateTypeMatch)
-                .and(sinon.match.has('activePeriodEnd', dateTypeMatch))
-                .and(sinon.match.has('gracePeriodEnd', dateTypeMatch)),
+                .and(sinon.match.has('activePeriodEnd', dateTypeMatch)),
               undefined
             )
             // Assert timestamps were created now
@@ -314,8 +313,7 @@ describe('Organization', () => {
             sinon.assert.calledWithExactly(
               saveStub,
               sinon.match.has('trialEnd', timeMatch)
-                .and(sinon.match.has('activePeriodEnd', timeMatch))
-                .and(sinon.match.has('gracePeriodEnd', timeMatch)),
+                .and(sinon.match.has('activePeriodEnd', timeMatch)),
               undefined
             )
           })

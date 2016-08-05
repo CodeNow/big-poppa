@@ -7,6 +7,7 @@ require('sinon-as-promised')(Promise)
 
 const User = require('models/user')
 const Organization = require('models/organization')
+const rabbitMQ = require('util/rabbitmq')
 
 const NotFoundError = require('errors/not-found-error')
 const NoRowsDeletedError = require('errors/no-rows-deleted-error')
@@ -17,28 +18,33 @@ const RemoveUserFromOrganization = require('workers/organization.user.remove')
 describe('#organization.user.remove', () => {
   let user
   let org
-  let orgGithubId = 123
+  let userId = 23
   let userGithubId = 678
+  let orgId = 12223
+  let orgGithubId = 123
   let validJob
 
   let fetchOrgByGithubIdStub
   let fetchUserByGithubIdStub
   let removeUserStub
+  let publishUserRemovedFromOrganizationStub
 
   beforeEach(() => {
-    user = new User({ id: userGithubId })
-    org = new Organization({ id: orgGithubId })
+    user = new User({ id: userId, githubId: userGithubId })
+    org = new Organization({ id: orgId, githubId: orgGithubId })
     validJob = { organizationGithubId: orgGithubId, userGithubId: userGithubId }
 
     fetchOrgByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(org)
     fetchUserByGithubIdStub = sinon.stub(User, 'fetchByGithubId').resolves(user)
     removeUserStub = sinon.stub(Organization.prototype, 'removeUser').resolves(user)
+    publishUserRemovedFromOrganizationStub = sinon.stub(rabbitMQ, 'publishUserRemovedFromOrganization')
   })
 
   afterEach(() => {
     fetchOrgByGithubIdStub.restore()
     fetchUserByGithubIdStub.restore()
     removeUserStub.restore()
+    publishUserRemovedFromOrganizationStub.restore()
   })
 
   describe('Validation', () => {
@@ -179,6 +185,26 @@ describe('#organization.user.remove', () => {
           expect(firstCall.thisValue).to.equal(org)
         })
         .asCallback(done)
+    })
+
+    it('should publish an event with rabbitMQ', () => {
+      return RemoveUserFromOrganization(validJob)
+        .then(() => {
+          sinon.assert.calledOnce(publishUserRemovedFromOrganizationStub)
+          sinon.assert.calledWithExactly(
+            publishUserRemovedFromOrganizationStub,
+            {
+              user: {
+                id: userId,
+                githubId: userGithubId
+              },
+              organization: {
+                id: orgId,
+                githubId: orgGithubId
+              }
+            }
+          )
+        })
     })
   })
 })
