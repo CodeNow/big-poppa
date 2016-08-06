@@ -126,17 +126,23 @@ describe('HTTP Organization Functional Test', () => {
       let unixTimestamp = Math.floor((new Date()).getTime() / 1000)
       let time = moment(unixTimestamp, 'X')
       return agent
-        .updateOrganization(orgId, {
-          githubId: githubId,
-          stripeCustomerId: stripeCustomerId,
-          trialEnd: unixTimestamp,
-          activePeriodEnd: unixTimestamp
+        .getOrganization(orgId)
+        .tap(console.log)
+        .then(() => {
+          return agent
+            .updateOrganization(orgId, {
+              githubId: githubId,
+              stripeCustomerId: stripeCustomerId,
+              trialEnd: unixTimestamp,
+              activePeriodEnd: unixTimestamp
+            })
         })
         .then(() => {
           return agent
             .getOrganization(orgId)
         })
         .then(org => {
+          console.log(org)
           expect(org).to.have.property('id')
           expect(org).to.have.property('githubId', githubId)
           expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
