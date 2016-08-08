@@ -127,7 +127,6 @@ describe('HTTP Organization Functional Test', () => {
       let time = moment(unixTimestamp, 'X')
       return agent
         .getOrganization(orgId)
-        .tap(console.log)
         .then(() => {
           return agent
             .updateOrganization(orgId, {
@@ -142,7 +141,6 @@ describe('HTTP Organization Functional Test', () => {
             .getOrganization(orgId)
         })
         .then(org => {
-          console.log(org)
           expect(org).to.have.property('id')
           expect(org).to.have.property('githubId', githubId)
           expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
