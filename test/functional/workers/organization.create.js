@@ -1,5 +1,6 @@
 'use strict'
 
+const Promise = require('bluebird')
 const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
@@ -10,16 +11,16 @@ const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const bookshelf = require('models').bookshelf
+const rabbitMQ = require('util/rabbitmq')
 const knex = bookshelf.knex
 
-const rabbitMQ = require('util/rabbitmq')
 const CreateOrganization = require('workers/organization.create')
 
 describe('Organization.create Functional Test', () => {
   let githubId = 2828361
   let userGithubId = 1981198
   let job
-  let publishOrganizationUserAddStub
+  let publishEventStub
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
@@ -48,15 +49,16 @@ describe('Organization.create Functional Test', () => {
     })
   })
 
-  beforeEach(() => {
-    publishOrganizationUserAddStub = sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
-  })
-  afterEach(() => {
-    publishOrganizationUserAddStub.restore()
-  })
-
   beforeEach(() => rabbitMQ.connect())
   afterEach(() => rabbitMQ.disconnect())
+
+  beforeEach(() => {
+    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent').resolves()
+  })
+
+  afterEach(() => {
+    publishEventStub.restore()
+  })
 
   it('should create an organization, and queue creating a relationship', done => {
     CreateOrganization(job).then((organization) => {
@@ -68,13 +70,6 @@ describe('Organization.create Functional Test', () => {
         expect(res).to.have.lengthOf(1)
         expect(res[0]).to.be.an('object')
         expect(res[0].github_id).to.equal(githubId)
-      })
-      .then(() => {
-        sinon.assert.calledWith(rabbitMQ.publishOrganizationUserAdd, {
-          tid: sinon.match.undefined,
-          organizationGithubId: job.githubId,
-          userGithubId: job.creator.githubId
-        })
       })
       .asCallback(done)
   })

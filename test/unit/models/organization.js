@@ -75,23 +75,36 @@ describe('Organization', () => {
     })
 
     describe('#validateCreate', () => {
+      let belongsToManyStub
       let githubId = 123456
+      let getOrganizationStub
       let attrs
 
       beforeEach(() => {
+        belongsToManyStub = sinon.stub(Organization.prototype, 'belongsToMany')
         attrs = { githubId: githubId }
-        sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
+        getOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
       })
 
       afterEach(() => {
-        GithubAPI.prototype.getOrganization.restore()
+        belongsToManyStub.restore()
+        getOrganizationStub.restore()
+      })
+
+      it('should call `belongsToMany`', () => {
+        org = new Organization()
+        org.users()
+        sinon.assert.calledOnce(belongsToManyStub)
+        sinon.assert.calledWithExactly(
+          belongsToManyStub,
+          'User'
+        )
       })
 
       it('should check if the github id exists and is for a org', done => {
         org.validateCreate({}, attrs)
           .then(() => {
             sinon.assert.calledOnce(GithubAPI.prototype.getOrganization)
-            sinon.assert.calledWithExactly(GithubAPI.prototype.getOrganization, githubId)
           })
           .asCallback(done)
       })
@@ -99,7 +112,6 @@ describe('Organization', () => {
       it('should throw an error if the org does not exist', done => {
         let githubErr = new GithubEntityNotFoundError(new Error())
         GithubAPI.prototype.getOrganization.rejects(githubErr)
-
         let attrs = { githubId: githubId }
         org.validateCreate({}, attrs)
           .asCallback(err => {
@@ -305,8 +317,7 @@ describe('Organization', () => {
             sinon.assert.calledWithExactly(
               saveStub,
               sinon.match.has('trialEnd', dateTypeMatch)
-                .and(sinon.match.has('activePeriodEnd', dateTypeMatch))
-                .and(sinon.match.has('gracePeriodEnd', dateTypeMatch)),
+                .and(sinon.match.has('activePeriodEnd', dateTypeMatch)),
               undefined
             )
             // Assert timestamps were created now
@@ -316,8 +327,7 @@ describe('Organization', () => {
             sinon.assert.calledWithExactly(
               saveStub,
               sinon.match.has('trialEnd', timeMatch)
-                .and(sinon.match.has('activePeriodEnd', timeMatch))
-                .and(sinon.match.has('gracePeriodEnd', timeMatch)),
+                .and(sinon.match.has('activePeriodEnd', timeMatch)),
               undefined
             )
           })

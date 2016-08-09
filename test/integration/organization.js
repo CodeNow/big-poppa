@@ -4,6 +4,8 @@ const Promise = require('bluebird')
 const expect = require('chai').expect
 const superagentPromisePlugin = require('superagent-promise-plugin')
 const request = superagentPromisePlugin.patch(require('superagent'))
+const sinon = require('sinon')
+require('sinon-as-promised')(Promise)
 const keypather = require('keypather')()
 
 const testUtil = require('../util')
@@ -24,6 +26,7 @@ describe('Organization Integration Test', () => {
   let orgGithubId = 2828361
   let userGithubId = 1981198
   let publisher
+  let publishEventStub
 
   // Start HTTP Server
   before(() => httpServer.start())
@@ -56,6 +59,13 @@ describe('Organization Integration Test', () => {
 
   beforeEach(() => rabbitMQ.connect())
   afterEach(() => rabbitMQ.disconnect())
+
+  beforeEach(() => {
+    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent').resolves()
+  })
+  afterEach(() => {
+    publishEventStub.restore()
+  })
 
   before(() => {
     githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
@@ -97,7 +107,6 @@ describe('Organization Integration Test', () => {
           .query({ githubId: orgGithubId })
           .then(res => {
             let orgs = res.body
-            console.log(orgs)
             if (keypather.get(orgs, '[0].users[0]')) {
               expect(orgs).to.have.lengthOf(1)
               const thisOrg = orgs[0]

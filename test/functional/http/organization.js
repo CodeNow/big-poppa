@@ -131,12 +131,15 @@ describe('HTTP Organization Functional Test', () => {
       let unixTimestamp = Math.floor((new Date()).getTime() / 1000)
       let time = moment(unixTimestamp, 'X')
       return agent
-        .updateOrganization(orgId, {
-          githubId: githubId,
-          stripeCustomerId: stripeCustomerId,
-          trialEnd: unixTimestamp,
-          activePeriodEnd: unixTimestamp,
-          gracePeriodEnd: unixTimestamp
+        .getOrganization(orgId)
+        .then(() => {
+          return agent
+            .updateOrganization(orgId, {
+              githubId: githubId,
+              stripeCustomerId: stripeCustomerId,
+              trialEnd: unixTimestamp,
+              activePeriodEnd: unixTimestamp
+            })
         })
         .then(() => {
           return agent
@@ -148,7 +151,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
           expect(org).to.have.property('trialEnd', time.format('X'))
           expect(org).to.have.property('activePeriodEnd', time.format('X'))
-          expect(org).to.have.property('gracePeriodEnd', time.format('X'))
+          expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').format('X'))
           expect(org).to.have.property('firstDockCreated', false)
         })
     })
