@@ -210,7 +210,8 @@ describe('#organization.create', () => {
           sinon.assert.calledOnce(createStub)
           sinon.assert.calledWithExactly(
             createStub,
-            githubId
+            githubId,
+            githubOrganizationFixture.login
           )
           sinon.assert.notCalled(fetchByGithubIdStub)
         })

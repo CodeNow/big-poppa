@@ -336,7 +336,7 @@ describe('Organization', () => {
 
       it('should call `save` with the passed options', done => {
         let opts = { transacting: {} }
-        Organization.create(githubId, opts)
+        Organization.create(githubId, 'name', opts)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
             sinon.assert.calledWithExactly(

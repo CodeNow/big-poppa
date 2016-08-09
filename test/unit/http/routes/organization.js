@@ -366,7 +366,7 @@ describe('HTTP /organization', () => {
     beforeEach(() => {
       requestStub = {
         params: { id: orgId },
-        body: { id: userId }
+        body: { user: { id: userId } }
       }
     })
 

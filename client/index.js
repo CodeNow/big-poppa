@@ -144,7 +144,7 @@ module.exports = class BigPoppaClient extends ApiClient {
     }
     var path = '/organization/' + encodeURIComponent(orgId) + '/add'
     return this.patchAsync({
-      body: { id: userId },
+      body: { user: { id: userId } },
       path: path,
       json: true
     })
