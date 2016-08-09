@@ -2,6 +2,8 @@
 
 const Promise = require('bluebird')
 const expect = require('chai').expect
+const sinon = require('sinon')
+require('sinon-as-promised')(Promise)
 
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
@@ -10,6 +12,7 @@ const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const bookshelf = require('models').bookshelf
+const rabbitMQ = require('util/rabbitmq')
 const knex = bookshelf.knex
 
 const User = require('models/user')
@@ -20,6 +23,7 @@ const AddUserToOrganization = require('workers/organization.user.add')
 describe('Organization.user.add Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
+  let publishEventStub
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
@@ -40,6 +44,16 @@ describe('Organization.user.add Functional Test', () => {
     })
     testUtil.createUserAndOrg(orgGithubId, userGithubId)
       .asCallback(done)
+  })
+
+  beforeEach(() => rabbitMQ.connect())
+  afterEach(() => rabbitMQ.disconnect())
+
+  beforeEach(() => {
+    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent')
+  })
+  afterEach(() => {
+    publishEventStub.restore()
   })
 
   it('should add a user to an organization', done => {

@@ -19,6 +19,7 @@ const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const CreateOrganization = require('workers/organization.create')
 
 describe('#organization.create', () => {
+  let orgId = 2343243
   let githubId = 123
   let creatorGithubId = 123231
   let creatorUsername = 'thejsj'
@@ -46,7 +47,9 @@ describe('#organization.create', () => {
         created: creatorCreated
       }
     }
-    newOrg = {}
+    newOrg = {
+      id: orgId
+    }
     createStub = sinon.stub(Organization, 'create').resolves(newOrg)
     fetchByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(newOrg)
     getGithubOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
@@ -291,8 +294,11 @@ describe('#organization.create', () => {
           sinon.assert.calledWithExactly(
             publishOrganizationCreatedStub,
             {
-              githubId: githubOrganizationFixture.id.toString(),
-              orgName: githubOrganizationFixture.login,
+              organization: {
+                id: orgId,
+                githubId: githubOrganizationFixture.id,
+                name: githubOrganizationFixture.login
+              },
               createdAt: sinon.match.number
             }
           )

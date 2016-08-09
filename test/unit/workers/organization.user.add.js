@@ -7,6 +7,7 @@ require('sinon-as-promised')(Promise)
 
 const User = require('models/user')
 const Organization = require('models/organization')
+const rabbitMQ = require('util/rabbitmq')
 
 const NotFoundError = require('errors/not-found-error')
 const UniqueError = require('errors/unique-error')
@@ -17,28 +18,33 @@ const AddUserToOrganization = require('workers/organization.user.add')
 describe('#organization.user.add', () => {
   let user
   let org
-  let orgGithubId = 123
+  let userId = 23
   let userGithubId = 678
+  let orgId = 12223
+  let orgGithubId = 123
   let validJob
 
   let fetchOrgByGithubIdStub
   let fetchUserByGithubIdStub
   let addUserStub
+  let publishUserAddedToOrganizationStub
 
   beforeEach(() => {
-    user = new User({ id: userGithubId })
-    org = new Organization({ id: orgGithubId })
+    user = new User({ id: userId, githubId: userGithubId })
+    org = new Organization({ id: orgId, githubId: orgGithubId })
     validJob = { organizationGithubId: orgGithubId, userGithubId: userGithubId }
 
     fetchOrgByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(org)
     fetchUserByGithubIdStub = sinon.stub(User, 'fetchByGithubId').resolves(user)
     addUserStub = sinon.stub(Organization.prototype, 'addUser').resolves(user)
+    publishUserAddedToOrganizationStub = sinon.stub(rabbitMQ, 'publishUserAddedToOrganization')
   })
 
   afterEach(() => {
     fetchOrgByGithubIdStub.restore()
     fetchUserByGithubIdStub.restore()
     addUserStub.restore()
+    publishUserAddedToOrganizationStub.restore()
   })
 
   describe('Validation', () => {
@@ -143,8 +149,8 @@ describe('#organization.user.add', () => {
   })
 
   describe('Main Functionality', () => {
-    it('should fetch the organization by its github id', done => {
-      AddUserToOrganization(validJob)
+    it('should fetch the organization by its github id', () => {
+      return AddUserToOrganization(validJob)
         .then(() => {
           sinon.assert.calledOnce(fetchOrgByGithubIdStub)
           sinon.assert.calledWithExactly(
@@ -152,11 +158,10 @@ describe('#organization.user.add', () => {
             orgGithubId
           )
         })
-        .asCallback(done)
     })
 
-    it('should fetch the user by its github id', done => {
-      AddUserToOrganization(validJob)
+    it('should fetch the user by its github id', () => {
+      return AddUserToOrganization(validJob)
         .then(() => {
           sinon.assert.calledOnce(fetchUserByGithubIdStub)
           sinon.assert.calledWithExactly(
@@ -164,11 +169,10 @@ describe('#organization.user.add', () => {
             userGithubId
           )
         })
-        .asCallback(done)
     })
 
-    it('should add the user to the org', done => {
-      AddUserToOrganization(validJob)
+    it('should add the user to the org', () => {
+      return AddUserToOrganization(validJob)
         .then(() => {
           sinon.assert.calledOnce(addUserStub)
           let firstCall = addUserStub.firstCall
@@ -178,7 +182,26 @@ describe('#organization.user.add', () => {
           )
           expect(firstCall.thisValue).to.equal(org)
         })
-        .asCallback(done)
+    })
+
+    it('should publish an event with rabbitMQ', () => {
+      return AddUserToOrganization(validJob)
+        .then(() => {
+          sinon.assert.calledOnce(publishUserAddedToOrganizationStub)
+          sinon.assert.calledWithExactly(
+            publishUserAddedToOrganizationStub,
+            {
+              user: {
+                id: userId,
+                githubId: userGithubId
+              },
+              organization: {
+                id: orgId,
+                githubId: orgGithubId
+              }
+            }
+          )
+        })
     })
   })
 })
