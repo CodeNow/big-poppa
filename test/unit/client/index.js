@@ -24,41 +24,46 @@ describe('BigPoppa Client', () => {
   })
 
   describe('addUserToOrganization', () => {
-    it('should reject if no orgId', () => {
+    it('should reject if no orgId', done => {
       return bigPoppaClient.addUserToOrganization()
-        .catch(err => {
+        .asCallback(err => {
           expect(err.message).to.equal('missing orgId')
+          done()
         })
     })
-    it('should reject if no userId', () => {
+    it('should reject if no userId', done => {
       return bigPoppaClient.addUserToOrganization(23)
-        .catch(err => {
+        .asCallback(err => {
           expect(err.message).to.equal('missing userId')
+          done()
         })
     })
   })
 
   describe('getUser', () => {
-    it('should reject if no userId', () => {
+    it('should reject if no userId', done => {
       return bigPoppaClient.getUser()
-        .catch(err => {
+        .asCallback(err => {
           expect(err.message).to.equal('missing userId')
+          done()
         })
     })
   })
   describe('updateOrganization', () => {
-    it('should reject if no orgId', () => {
+    it('should reject if no orgId', done => {
       return bigPoppaClient.updateOrganization()
-        .catch(err => {
+        .asCallback(err => {
           expect(err.message).to.equal('missing orgId')
+          done()
         })
     })
   })
   describe('getOrganization', () => {
-    it('should reject if no orgId', () => {
+    it('should reject if no orgId', done => {
       return bigPoppaClient.getOrganization()
-        .catch(err => {
+        .asCallback(err => {
           expect(err.message).to.equal('missing orgId')
+          done()
         })
     })
   })
