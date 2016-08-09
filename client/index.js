@@ -15,7 +15,6 @@ function checkResponseForError (res) {
 
 module.exports = class BigPoppaClient extends ApiClient {
 
-
   /**
    * Given an internal orgId, fetch the matching org
    *
@@ -130,7 +129,7 @@ module.exports = class BigPoppaClient extends ApiClient {
   }
 
   /**
-   * Given a user's githubId or Internal PostgresId, add them tg
+   * Given the PostGres IDs of a user and organization, create an association
    *
    * @param {Number} orgId  - Organization PostGres ID
    * @param {Number} userId - User PostGres ID

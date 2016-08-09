@@ -13,7 +13,7 @@ module.exports = {
     'issues_url': 'https://api.github.com/orgs/Runnable/issues',
     'members_url': 'https://api.github.com/orgs/Runnable/members{/member}',
     'public_members_url': 'https://api.github.com/orgs/Runnable/public_members{/member}',
-    'avatar_url': 'https://avatars.githubusercontent.com/u/2828361?v=3',
+    'avatar_url': 'https://avatars.githubusercontent.com/u/2828361?v=3'
   },
   'user': {
     'login': 'thejsj',
