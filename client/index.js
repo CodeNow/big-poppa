@@ -42,14 +42,19 @@ module.exports = class BigPoppaClient extends ApiClient {
    *
    * @param {Object} opts          - optional parameters
    * @param {String} opts.githubId - githubId of an organization
+   * @param {String} opts.name     - name of an organization
    *
    * @returns  {Promise}
    * @resolves {[Organization]} requested orgs
    */
   getOrganizations (opts) {
     var path = '/organization/'
-    if (opts && opts.githubId) {
-      path += '?githubId=' + encodeURIComponent(opts.githubId)
+    if (opts) {
+      if (opts.githubId) {
+        path += '?githubId=' + encodeURIComponent(opts.githubId)
+      } else if (opts.name) {
+        path += '?name=' + encodeURIComponent(opts.name)
+      }
     }
     return this.getAsync({
       path: path,

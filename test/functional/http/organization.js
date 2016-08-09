@@ -76,6 +76,27 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users[0]).to.have.property('githubId')
         })
     })
+    it('should return a 200 for an existing organization', () => {
+      return agent
+        .getOrganizations({
+          name: orgGithubId.toString()
+        })
+        .then(orgs => {
+          expect(orgs).to.have.lengthOf(1)
+          let org = orgs[0]
+          expect(org).to.have.property('id')
+          expect(org).to.have.property('name', orgGithubId.toString())
+          expect(org).to.have.property('githubId', orgGithubId)
+          expect(org).to.have.property('trialEnd')
+          expect(org).to.have.property('activePeriodEnd')
+          expect(org).to.have.property('gracePeriodEnd')
+          expect(org).to.have.property('firstDockCreated')
+          expect(org).to.have.property('users')
+          expect(org.users).to.be.an('array')
+          expect(org.users[0]).to.have.property('id')
+          expect(org.users[0]).to.have.property('githubId')
+        })
+    })
 
     it('should return all of the orgs when not specifying opts', () => {
       return agent
