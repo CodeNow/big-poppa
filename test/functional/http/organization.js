@@ -8,14 +8,18 @@ const moment = require('moment')
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const githubUserFixture = require('../../fixtures/github/user')
+const githubOtherUserFixture = require('../../fixtures/github/otherUser')
+const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const server = require('http/server')
 
 describe('HTTP Organization Functional Test', () => {
   let userGithubId = 1981198
+  let otherGithubId = 6379413
   let orgGithubId = 2828361
   let orgId
+  let userId
   let agent
 
   before(() => {
@@ -46,6 +50,7 @@ describe('HTTP Organization Functional Test', () => {
     return testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
       .then(res => {
         orgId = res.org[res.org.idAttribute]
+        userId = res.user[res.user.idAttribute]
       })
   })
 
@@ -151,6 +156,46 @@ describe('HTTP Organization Functional Test', () => {
     it('should return a 404 for an non existing organization', () => {
       return agent
         .updateOrganization(2342, {})
+        .catch(err => {
+          expect(err).to.be.an.object
+        })
+    })
+  })
+
+  describe('PATCH /:id/add', () => {
+    var otherUser
+    var otherToken = 'otherToken'
+    beforeEach(() => {
+      githubAPI.stub('GET', `/user/${otherGithubId}?access_token=testing`).returns({
+        status: 200,
+        body: githubOtherUserFixture
+      })
+      githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=${otherToken}`).returns({
+        status: 200,
+        body: githubOrgMembershipFixture
+      })
+      return testUtil.createUser(otherGithubId, otherToken)
+        .then((user) => {
+          otherUser = user
+        })
+    })
+    it('should return a 200 when adding a valid user to an organization', () => {
+      return agent
+        .addUserToOrganization(orgId, otherUser.id)
+        .then(org => {
+          expect(org).to.have.property('users')
+          expect(org.users).to.be.an('array')
+          expect(org.users).to.have.length(2)
+          expect(org.users[0]).to.have.property('id')
+          expect(org.users[0]).to.have.property('githubId', userGithubId)
+          expect(org.users[1]).to.have.property('id')
+          expect(org.users[1]).to.have.property('githubId', otherGithubId)
+        })
+    })
+
+    it('should return an error when the user is already part of the org', () => {
+      return agent
+        .addUserToOrganization(orgId, userId)
         .catch(err => {
           expect(err).to.be.an.object
         })

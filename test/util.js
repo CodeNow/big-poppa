@@ -21,6 +21,13 @@ module.exports = class TestUtil {
       })
   }
 
+  static createUser (userGithubId, token) {
+    return new User().save({
+      accessToken: token || userGithubId,
+      githubId: userGithubId
+    })
+  }
+
   static createUserAndOrg (orgGithubId, userGithubId) {
     return Promise.props({
       user: new User().save({

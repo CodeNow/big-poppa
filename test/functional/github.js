@@ -11,10 +11,12 @@ const githubApi = new GithubAPI()
 
 const githubOrganizationFixture = require('../fixtures/github/organization')
 const githubUseFixture = require('../fixtures/github/user')
+const githubOrgMembershipFixture = require('../fixtures/github/org-membership')
 const githubNotFoundFixture = require('../fixtures/github/not-found')
 
 const GithubEntityNotFoundError = require('errors/github-entity-not-found-error')
 const GithubEntityTypeError = require('errors/github-entity-type-error')
+const GithubError = require('errors/github-error')
 
 describe('GithubAPI Functional Tests', () => {
   before(done => mockGithubApi.start(done))
@@ -115,6 +117,39 @@ describe('GithubAPI Functional Tests', () => {
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceOf(GithubEntityTypeError)
+          done()
+        })
+    })
+  })
+
+  describe('hasUserOrgMembership', () => {
+    let orgGithubId = 1981198
+
+    it('should return a github organization if the organization exists', done => {
+      mockGithubApi.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=testing`).returns({
+        status: 200,
+        body: githubOrgMembershipFixture
+      })
+
+      githubApi.hasUserOrgMembership(orgGithubId)
+        .then(res => {
+          expect(res).to.be.an('object')
+          expect(res.user).to.deep.equal(githubOrgMembershipFixture.user)
+        })
+        .asCallback(done)
+    })
+
+    it('should throw a `GithubError` if the call throws anything', done => {
+      orgGithubId = 999999999 // Doesn't exist
+      mockGithubApi.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=testing`).returns({
+        status: 404,
+        body: githubNotFoundFixture
+      })
+
+      githubApi.hasUserOrgMembership(orgGithubId)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err).to.be.an.instanceOf(GithubError)
           done()
         })
     })

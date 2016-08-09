@@ -7,7 +7,14 @@ const BigPoppaClientError = require('./errors/big-poppa-client-error')
 Promise.promisifyAll(ApiClient)
 Promise.promisifyAll(ApiClient.prototype)
 
+function checkResponseForError (res) {
+  if (res.statusCode >= 400) {
+    throw new BigPoppaClientError(res.body.err)
+  }
+}
+
 module.exports = class BigPoppaClient extends ApiClient {
+
 
   /**
    * Given an internal orgId, fetch the matching org
@@ -26,11 +33,7 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
       .get('body')
   }
 
@@ -53,11 +56,7 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
       .get('body')
   }
 
@@ -81,11 +80,7 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
       .get('body')
   }
 
@@ -107,11 +102,7 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
       .get('body')
   }
 
@@ -123,7 +114,7 @@ module.exports = class BigPoppaClient extends ApiClient {
    * @param {String} opts.githubId - githubId of a user
    *
    * @returns  {Promise}
-   * @resolves {[Organization]} requested users
+   * @resolves {[User]} requested users
    */
   getUsers (opts) {
     var path = '/user/'
@@ -134,11 +125,31 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
+      .get('body')
+  }
+
+  /**
+   * Given a user's githubId or Internal PostgresId, add them tg
+   *
+   * @param {Number} orgId  - Organization PostGres ID
+   * @param {Number} userId - User PostGres ID
+   *
+   * @resolves {Organization} organization model containing the updated list of users
+   */
+  addUserToOrganization (orgId, userId) {
+    if (!orgId) {
+      return Promise.reject(new Error('missing orgId'))
+    } else if (!userId) {
+      return Promise.reject(new Error('missing userId'))
+    }
+    var path = '/organization/' + encodeURIComponent(orgId) + '/add'
+    return this.patchAsync({
+      body: { id: userId },
+      path: path,
+      json: true
+    })
+      .tap(checkResponseForError)
       .get('body')
   }
 }

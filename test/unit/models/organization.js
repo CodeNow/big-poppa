@@ -124,11 +124,13 @@ describe('Organization', () => {
           attach: attachStub
         }
         usersStub = sinon.stub(Organization.prototype, 'users').returns(collectionStub)
+        sinon.stub(GithubAPI.prototype, 'hasUserOrgMembership').resolves({})
         user = new User({ id: Math.floor(Math.random() * 100) })
       })
 
       afterEach(() => {
         Organization.prototype.users.restore()
+        GithubAPI.prototype.hasUserOrgMembership.restore()
       })
 
       it('should throw a TypeError if no user is passed', done => {
