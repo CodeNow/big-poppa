@@ -10,14 +10,17 @@ const moment = require('moment')
 
 const NotFoundError = require('errors/not-found-error')
 const Organization = require('models/organization')
+const User = require('models/user')
 const OrganizationRouter = require('http/routes/organization')
 
 describe('HTTP /organization', () => {
   let collectionConstructorStub
   let orgMock
+  let userMock
   let orgMockJSON
   let responseStub
   let fetchByIdStub
+  let userFetchByIdStub
   let requestStub
   let tranformSingleOrgSpy
 
@@ -25,9 +28,16 @@ describe('HTTP /organization', () => {
     orgMockJSON = { id: 1 }
     orgMock = {
       save: sinon.stub().returnsThis(),
+      addUser: sinon.stub().returnsThis(),
+      fetch: sinon.stub().returnsThis(),
+      toJSON: sinon.stub().returns(orgMockJSON)
+    }
+    userMock = {
+      save: sinon.stub().returnsThis(),
       toJSON: sinon.stub().returns(orgMockJSON)
     }
     fetchByIdStub = sinon.stub(Organization, 'fetchById').resolves(orgMock)
+    userFetchByIdStub = sinon.stub(User, 'fetchById').resolves(userMock)
     tranformSingleOrgSpy = sinon.spy(OrganizationRouter, 'tranformSingleOrg')
     responseStub = {
       json: sinon.stub()
@@ -36,6 +46,7 @@ describe('HTTP /organization', () => {
 
   afterEach(() => {
     fetchByIdStub.restore()
+    userFetchByIdStub.restore()
     tranformSingleOrgSpy.restore()
   })
 
@@ -341,6 +352,90 @@ describe('HTTP /organization', () => {
       fetchByIdStub.rejects(err)
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
+        .catch(err => {
+          expect(err).to.exist
+          expect(err).to.equal(err)
+        })
+    })
+  })
+
+  describe('addUser', () => {
+    let orgId = 7
+    let userId = 12
+
+    beforeEach(() => {
+      requestStub = {
+        params: { id: orgId },
+        body: { id: userId }
+      }
+    })
+
+    it('should fetch both user and org with `fetchById`', () => {
+      return OrganizationRouter.addUser(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(fetchByIdStub)
+          sinon.assert.calledOnce(userFetchByIdStub)
+          sinon.assert.calledWithExactly(
+            fetchByIdStub,
+            orgId
+          )
+          sinon.assert.calledWithExactly(
+            userFetchByIdStub,
+            userId
+          )
+        })
+    })
+
+    it('should attempt to add the user', () => {
+      return OrganizationRouter.addUser(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(orgMock.addUser)
+          sinon.assert.calledWithExactly(
+            orgMock.addUser,
+            userMock
+          )
+        })
+    })
+
+    it('should fetch itself after it adds the user', () => {
+      return OrganizationRouter.addUser(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(orgMock.fetch)
+          sinon.assert.calledWithExactly(
+            orgMock.fetch,
+            { withRelated: 'users' }
+          )
+        })
+    })
+
+    it('should pass the results to `res.json`', () => {
+      return OrganizationRouter.addUser(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(orgMock.toJSON)
+          sinon.assert.calledOnce(responseStub.json)
+          sinon.assert.calledWithExactly(
+            responseStub.json,
+            sinon.match(orgMockJSON)
+          )
+        })
+    })
+
+    it('should return the error if `fetch` return an error', () => {
+      let err = new NotFoundError('Organization Not Found')
+      fetchByIdStub.rejects(err)
+
+      return OrganizationRouter.addUser(requestStub, responseStub)
+        .catch(err => {
+          expect(err).to.exist
+          expect(err).to.equal(err)
+        })
+    })
+
+    it('should return the error if `fetch user` return an error', () => {
+      let err = new NotFoundError('Organization Not Found')
+      userFetchByIdStub.rejects(err)
+
+      return OrganizationRouter.addUser(requestStub, responseStub)
         .catch(err => {
           expect(err).to.exist
           expect(err).to.equal(err)
