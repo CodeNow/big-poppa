@@ -116,11 +116,12 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
-    it('should return a 404 for an non existing organization', () => {
+    it('should return a 404 for an non existing organization', done => {
       return agent
         .getOrganization(2342)
-        .catch(err => {
+        .asCallback(err => {
           expect(err).to.be.an.object
+          done()
         })
     })
   })
@@ -157,11 +158,12 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
-    it('should return a 404 for an non existing organization', () => {
+    it('should return a 404 for an non existing organization', done => {
       return agent
         .updateOrganization(2342, {})
-        .catch(err => {
+        .asCallback(err => {
           expect(err).to.be.an.object
+          done()
         })
     })
   })
@@ -197,11 +199,12 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
-    it('should return an error when the user is already part of the org', () => {
+    it('should return an error when the user is already part of the org', done => {
       return agent
         .addUserToOrganization(orgId, userId)
-        .catch(err => {
+        .asCallback(err => {
           expect(err).to.be.an.object
+          done()
         })
     })
   })
