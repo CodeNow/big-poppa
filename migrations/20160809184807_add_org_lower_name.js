@@ -26,7 +26,7 @@ const DELETE_TRIGGER = `
   DROP TRIGGER ${triggerName} ON ${tableName};
 `
 
-exports.up = function(knex, Promise) {
+exports.up = function (knex, Promise) {
   var modifyTable = Promise.resolve()
     .then(function () {
       return knex.schema
@@ -35,9 +35,9 @@ exports.up = function(knex, Promise) {
     })
   debug(modifyTable.toString())
   return modifyTable
-};
+}
 
-exports.down = function(knex, Promise) {
+exports.down = function (knex, Promise) {
   var modifyTable = Promise.resolve()
     .then(function () {
       return knex.schema
@@ -45,4 +45,4 @@ exports.down = function(knex, Promise) {
     })
   debug(modifyTable.toString())
   return modifyTable
-};
+}
