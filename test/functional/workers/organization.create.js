@@ -69,7 +69,8 @@ describe('Organization.create Functional Test', () => {
       .then(res => {
         expect(res).to.have.lengthOf(1)
         expect(res[0]).to.be.an('object')
-        expect(res[0].github_id).to.equal(githubId)
+        expect(res[0].name).to.equal(githubOrganizationFixture.login)
+        expect(res[0].lower_name).to.equal(githubOrganizationFixture.login.toLowerCase())
       })
       .asCallback(done)
   })

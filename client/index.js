@@ -53,7 +53,7 @@ module.exports = class BigPoppaClient extends ApiClient {
       if (opts.githubId) {
         path += '?githubId=' + encodeURIComponent(opts.githubId)
       } else if (opts.name) {
-        path += '?name=' + encodeURIComponent(opts.name)
+        path += '?lowerName=' + encodeURIComponent(opts.name.toLowerCase())
       }
     }
     return this.getAsync({
