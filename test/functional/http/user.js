@@ -64,6 +64,7 @@ describe('HTTP User Functional Test', () => {
           expect(user.organizations).to.be.an('array')
           expect(user.organizations[0]).to.have.property('id')
           expect(user.organizations[0]).to.have.property('githubId')
+          expect(user.organizations[0]).to.have.property('allowed')
         })
     })
 
@@ -90,6 +91,7 @@ describe('HTTP User Functional Test', () => {
           expect(user.organizations).to.be.an('array')
           expect(user.organizations[0]).to.have.property('id')
           expect(user.organizations[0]).to.have.property('githubId')
+          expect(user.organizations[0]).to.have.property('allowed')
         })
     })
 
