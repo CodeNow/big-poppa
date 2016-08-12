@@ -278,7 +278,7 @@ describe('#organization.create', () => {
           sinon.assert.calledWithExactly(
             publishASGCreateStub,
             {
-              githubId: githubOrganizationFixture.id.toString()
+              githubId: githubOrganizationFixture.id
             }
           )
         })
