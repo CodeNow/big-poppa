@@ -32,7 +32,7 @@ describe('Organization.create Functional Test', () => {
         githubId: userGithubId,
         githubUsername: 'thejsj',
         email: 'jorge.silva@thejsj.com',
-        created: '1469136162'
+        created: '2016-07-21T21:22:42+0000'
       }
     }
   })

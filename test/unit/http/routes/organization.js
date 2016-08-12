@@ -22,7 +22,7 @@ describe('HTTP /organization', () => {
   let fetchByIdStub
   let userFetchByIdStub
   let requestStub
-  let tranformSingleOrgSpy
+  let transformSingleOrgSpy
 
   beforeEach(() => {
     orgMockJSON = { id: 1 }
@@ -37,8 +37,8 @@ describe('HTTP /organization', () => {
       toJSON: sinon.stub().returns(orgMockJSON)
     }
     fetchByIdStub = sinon.stub(Organization, 'fetchById').resolves(orgMock)
+    transformSingleOrgSpy = sinon.spy(OrganizationRouter, 'transformSingleOrg')
     userFetchByIdStub = sinon.stub(User, 'fetchById').resolves(userMock)
-    tranformSingleOrgSpy = sinon.spy(OrganizationRouter, 'tranformSingleOrg')
     responseStub = {
       json: sinon.stub()
     }
@@ -47,7 +47,7 @@ describe('HTTP /organization', () => {
   afterEach(() => {
     fetchByIdStub.restore()
     userFetchByIdStub.restore()
-    tranformSingleOrgSpy.restore()
+    transformSingleOrgSpy.restore()
   })
 
   describe('#router', () => {
@@ -57,7 +57,7 @@ describe('HTTP /organization', () => {
     })
   })
 
-  describe('tranformSingleOrg', () => {
+  describe('transformSingleOrg', () => {
     let originalObject
     let now
 
@@ -74,82 +74,82 @@ describe('HTTP /organization', () => {
     })
 
     it('should return the same object', () => {
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
       expect(obj).to.not.equal(originalObject)
     })
 
     it('should transform `trialEnd`, `activePeriodEnd`, `gracePeriodEnd` to unix timestamps', () => {
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
-      expect(obj.trialEnd).to.equal(now.format('X'))
-      expect(obj.activePeriodEnd).to.equal(now.format('X'))
-      expect(obj.gracePeriodEnd).to.equal(now.format('X'))
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.trialEnd).to.equal(now.toISOString())
+      expect(obj.activePeriodEnd).to.equal(now.toISOString())
+      expect(obj.gracePeriodEnd).to.equal(now.toISOString())
     })
 
-    it('should return `true` for `isPastTrial`, `isPastActivePeriod`, and `isPastGracePeriod`if trial, active period and grace period have passed', () => {
+    it('should return `true` for `isInTrial`, `isInActivePeriod`, and `isInGracePeriod`if trial, active period and grace period have passed', () => {
       Object.assign(originalObject, {
         trialEnd: now.clone().add(1, 'minute').toISOString(),
         activePeriodEnd: now.clone().add(1, 'minute').toISOString(),
         gracePeriodEnd: now.clone().add(1, 'minute').toISOString()
       })
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
-      expect(obj.isPastTrial).to.equal(true)
-      expect(obj.isPastActivePeriod).to.equal(true)
-      expect(obj.isPastGracePeriod).to.equal(true)
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.isInTrial).to.equal(true)
+      expect(obj.isInActivePeriod).to.equal(true)
+      expect(obj.isInGracePeriod).to.equal(false)
     })
 
-    it('should return `false` for `isPastTrial`, `isPastActivePeriod`, and `is`if trial, active period and grace period have not passed', () => {
+    it('should return `false` for `isInTrial`, `isInActivePeriod`, and `is`if trial, active period and grace period have not passed', () => {
       Object.assign(originalObject, {
         trialEnd: now.clone().subtract(1, 'minute').toISOString(),
         activePeriodEnd: now.clone().subtract(1, 'minute').toISOString(),
         gracePeriodEnd: now.clone().subtract(1, 'minute').toISOString()
       })
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
-      expect(obj.isPastTrial).to.equal(false)
-      expect(obj.isPastActivePeriod).to.equal(false)
-      expect(obj.isPastGracePeriod).to.equal(false)
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.isInTrial).to.equal(false)
+      expect(obj.isInActivePeriod).to.equal(false)
+      expect(obj.isInGracePeriod).to.equal(false)
     })
 
-    it('should return `allowed` true if both `isPastTrial` and `isPastActivePeriod` are true', () => {
+    it('should return `allowed` true if both `isInTrial` and `isInActivePeriod` are true', () => {
       Object.assign(originalObject, {
         trialEnd: now.clone().add(1, 'minute').toISOString(),
         activePeriodEnd: now.clone().add(1, 'minute').toISOString()
       })
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
-      expect(obj.isPastTrial).to.equal(true)
-      expect(obj.isPastActivePeriod).to.equal(true)
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.isInTrial).to.equal(true)
+      expect(obj.isInActivePeriod).to.equal(true)
       expect(obj.allowed).to.equal(true)
     })
 
-    it('should return `allowed` true if both `isPastTrial` is true', () => {
+    it('should return `allowed` true if both `isInTrial` is true', () => {
       Object.assign(originalObject, {
         trialEnd: now.clone().add(1, 'minute').toISOString(),
         activePeriodEnd: now.clone().subtract(1, 'minute').toISOString()
       })
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
-      expect(obj.isPastTrial).to.equal(true)
-      expect(obj.isPastActivePeriod).to.equal(false)
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.isInTrial).to.equal(true)
+      expect(obj.isInActivePeriod).to.equal(false)
       expect(obj.allowed).to.equal(true)
     })
 
-    it('should return `allowed` true if `isPastActivePeriod` is true', () => {
+    it('should return `allowed` true if `isInActivePeriod` is true', () => {
       Object.assign(originalObject, {
         trialEnd: now.clone().subtract(1, 'minute').toISOString(),
         activePeriodEnd: now.clone().add(1, 'minute').toISOString()
       })
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
-      expect(obj.isPastTrial).to.equal(false)
-      expect(obj.isPastActivePeriod).to.equal(true)
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.isInTrial).to.equal(false)
+      expect(obj.isInActivePeriod).to.equal(true)
       expect(obj.allowed).to.equal(true)
     })
 
-    it('should return `allowed` false if both `isPastActivePeriod` and `isPastTrial` are false', () => {
+    it('should return `allowed` false if both `isInActivePeriod` and `isInTrial` are false', () => {
       Object.assign(originalObject, {
         trialEnd: now.clone().subtract(1, 'minute').toISOString(),
         activePeriodEnd: now.clone().subtract(1, 'minute').toISOString()
       })
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
-      expect(obj.isPastTrial).to.equal(false)
-      expect(obj.isPastActivePeriod).to.equal(false)
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.isInTrial).to.equal(false)
+      expect(obj.isInActivePeriod).to.equal(false)
       expect(obj.allowed).to.equal(false)
     })
 
@@ -158,7 +158,7 @@ describe('HTTP /organization', () => {
         trialEnd: now.clone().subtract(1, 'minute').toISOString(),
         activePeriodEnd: now.clone().add(1, 'minute').toISOString()
       })
-      let obj = OrganizationRouter.tranformSingleOrg(originalObject)
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
       expect(obj.allowed).to.equal(false)
     })
   })
@@ -211,12 +211,12 @@ describe('HTTP /organization', () => {
         })
     })
 
-    it('should call `tranformSingleOrg` on every org', () => {
+    it('should call `transformSingleOrg` on every org', () => {
       return OrganizationRouter.get(requestStub, responseStub)
         .then(() => {
-          sinon.assert.calledTwice(tranformSingleOrgSpy)
+          sinon.assert.calledTwice(transformSingleOrgSpy)
           sinon.assert.calledWith(
-            tranformSingleOrgSpy,
+            transformSingleOrgSpy,
             sinon.match(orgMockJSON)
           )
         })

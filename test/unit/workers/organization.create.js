@@ -6,6 +6,7 @@ const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
 
 const orion = require('@runnable/orion')
+const moment = require('moment')
 
 const Organization = require('models/organization')
 const GithubAPI = require('util/github')
@@ -24,7 +25,8 @@ describe('#organization.create', () => {
   let creatorGithubId = 123231
   let creatorUsername = 'thejsj'
   let creatorEmail = 'jorge.silva@thejsj.com'
-  let creatorCreated = 1469136162
+  let creatorCreated = '2016-07-21T21:22:42+0000'
+  let creatorCreatedMoment = moment('2016-07-21T21:22:42+0000')
 
   let newOrg
   let validJob
@@ -245,7 +247,7 @@ describe('#organization.create', () => {
             {
               name: creatorUsername,
               email: creatorEmail,
-              created_at: creatorCreated,
+              created_at: +creatorCreatedMoment.format('X'),
               update_last_request_at: true,
               companies: [{
                 company_id: githubOrganizationFixture.login.toLowerCase(),
@@ -300,7 +302,7 @@ describe('#organization.create', () => {
                 githubId: githubOrganizationFixture.id,
                 name: githubOrganizationFixture.login
               },
-              createdAt: sinon.match.number
+              createdAt: sinon.match.string
             }
           )
         })
