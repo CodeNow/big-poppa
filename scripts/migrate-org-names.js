@@ -20,12 +20,12 @@ Organization.collection()
       }, 'fetch org')
       const githubApi = new GithubAPI()
       return githubApi.getOrganization(org.get('githubId'))
-        .then((githubOrg) => {
+        .then(githubOrg => {
           return org.save({
             name: githubOrg.login
           })
         })
-        .then((org) => {
+        .then(org => {
           totalUpdated.push(org)
         })
     })
