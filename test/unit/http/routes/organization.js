@@ -420,25 +420,27 @@ describe('HTTP /organization', () => {
         })
     })
 
-    it('should return the error if `fetch` return an error', () => {
+    it('should return the error if `fetch` return an error', (done) => {
       let err = new NotFoundError('Organization Not Found')
       fetchByIdStub.rejects(err)
 
       return OrganizationRouter.addUser(requestStub, responseStub)
-        .catch(err => {
+        .asCallback(err => {
           expect(err).to.exist
           expect(err).to.equal(err)
+          done()
         })
     })
 
-    it('should return the error if `fetch user` return an error', () => {
+    it('should return the error if `fetch user` return an error', (done) => {
       let err = new NotFoundError('Organization Not Found')
       userFetchByIdStub.rejects(err)
 
       return OrganizationRouter.addUser(requestStub, responseStub)
-        .catch(err => {
+        .asCallback(err => {
           expect(err).to.exist
           expect(err).to.equal(err)
+          done()
         })
     })
   })
