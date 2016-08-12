@@ -136,7 +136,7 @@ describe('RabbitMQ', () => {
     let githubId = 4567
     let orgId = 897
     let orgName = 'CodeNow'
-    let createdAt = 1469207585
+    let createdAt = new Date('2016-07-21T21:22:42+0000')
     let validJob
 
     beforeEach(() => {

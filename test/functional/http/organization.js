@@ -123,8 +123,8 @@ describe('HTTP Organization Functional Test', () => {
     it('should return a 200 when patching an organization', () => {
       let githubId = 2342342
       let stripeCustomerId = '23423'
-      let unixTimestamp = Math.floor((new Date()).getTime() / 1000)
-      let time = moment(unixTimestamp, 'X')
+      let timeCreated = new Date()
+      let time = moment(timeCreated)
       return agent
         .getOrganization(orgId)
         .then(() => {
@@ -132,8 +132,8 @@ describe('HTTP Organization Functional Test', () => {
             .updateOrganization(orgId, {
               githubId: githubId,
               stripeCustomerId: stripeCustomerId,
-              trialEnd: unixTimestamp,
-              activePeriodEnd: unixTimestamp
+              trialEnd: timeCreated,
+              activePeriodEnd: timeCreated
             })
         })
         .then(() => {
@@ -144,9 +144,9 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('id')
           expect(org).to.have.property('githubId', githubId)
           expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
-          expect(org).to.have.property('trialEnd', time.format('X'))
-          expect(org).to.have.property('activePeriodEnd', time.format('X'))
-          expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').format('X'))
+          expect(org).to.have.property('trialEnd', time.toISOString())
+          expect(org).to.have.property('activePeriodEnd', time.toISOString())
+          expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').toISOString())
           expect(org).to.have.property('firstDockCreated', false)
         })
     })

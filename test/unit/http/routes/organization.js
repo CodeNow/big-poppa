@@ -69,9 +69,9 @@ describe('HTTP /organization', () => {
 
     it('should transform `trialEnd`, `activePeriodEnd`, `gracePeriodEnd` to unix timestamps', () => {
       let obj = OrganizationRouter.transformSingleOrg(originalObject)
-      expect(obj.trialEnd).to.equal(now.format('X'))
-      expect(obj.activePeriodEnd).to.equal(now.format('X'))
-      expect(obj.gracePeriodEnd).to.equal(now.format('X'))
+      expect(obj.trialEnd).to.equal(now.toISOString())
+      expect(obj.activePeriodEnd).to.equal(now.toISOString())
+      expect(obj.gracePeriodEnd).to.equal(now.toISOString())
     })
 
     it('should return `true` for `isInTrial`, `isInActivePeriod`, and `isInGracePeriod`if trial, active period and grace period have passed', () => {
