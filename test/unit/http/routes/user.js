@@ -14,16 +14,24 @@ const UserRouter = require('http/routes/user')
 describe('HTTP /user', () => {
   let collectionConstructorStub
   let userMock
+  let usersMock
   let userMockJSON
   let responseStub
   let fetchByIdStub
   let requestStub
 
   beforeEach(() => {
-    userMockJSON = { id: 1 }
+    userMockJSON = {
+      organizations: [],
+      id: 1
+    }
     userMock = {
       save: sinon.stub().returnsThis(),
       toJSON: sinon.stub().returns(userMockJSON)
+    }
+    usersMock = {
+      save: sinon.stub().returnsThis(),
+      toJSON: sinon.stub().returns([userMockJSON])
     }
     fetchByIdStub = sinon.stub(User, 'fetchById').resolves(userMock)
     responseStub = {
@@ -49,7 +57,7 @@ describe('HTTP /user', () => {
       requestStub = { query: {} }
       collectionStub = {}
       collectionStub.query = sinon.stub().returns(collectionStub)
-      collectionStub.fetch = sinon.stub().resolves(userMock)
+      collectionStub.fetch = sinon.stub().resolves(usersMock)
       collectionConstructorStub = sinon.stub(User, 'collection').returns(collectionStub)
     })
 
@@ -89,11 +97,11 @@ describe('HTTP /user', () => {
     it('should pass the results to `res.json`', () => {
       return UserRouter.get(requestStub, responseStub)
         .then(() => {
-          sinon.assert.calledOnce(userMock.toJSON)
+          sinon.assert.calledOnce(usersMock.toJSON)
           sinon.assert.calledOnce(responseStub.json)
           sinon.assert.calledWithExactly(
             responseStub.json,
-            userMockJSON
+            [userMockJSON]
           )
         })
     })
