@@ -34,7 +34,7 @@ module.exports = class TestUtil {
         accessToken: 'testing',
         githubId: userGithubId
       }),
-      org: Organization.create(orgGithubId, orgGithubId.toString())
+      org: Organization.create(orgGithubId)
     })
   }
 

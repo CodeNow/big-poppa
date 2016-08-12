@@ -17,9 +17,13 @@ const githubOrganizationFixture = require('../../fixtures/github/organization')
 describe('Organization', () => {
   describe('Prototype Methods', () => {
     let org
+    let baseModel
 
     beforeEach(() => {
       org = new Organization()
+      baseModel = {
+        set: sinon.stub()
+      }
     })
 
     describe('#initialize', () => {
@@ -102,7 +106,7 @@ describe('Organization', () => {
       })
 
       it('should check if the github id exists and is for a org', done => {
-        org.validateCreate({}, attrs)
+        org.validateCreate(baseModel, attrs)
           .then(() => {
             sinon.assert.calledOnce(GithubAPI.prototype.getOrganization)
           })
@@ -113,7 +117,7 @@ describe('Organization', () => {
         let githubErr = new GithubEntityNotFoundError(new Error())
         GithubAPI.prototype.getOrganization.rejects(githubErr)
         let attrs = { githubId: githubId }
-        org.validateCreate({}, attrs)
+        org.validateCreate(baseModel, attrs)
           .asCallback(err => {
             expect(err).to.exist
             expect(err).to.equal(githubErr)
@@ -336,7 +340,7 @@ describe('Organization', () => {
 
       it('should call `save` with the passed options', done => {
         let opts = { transacting: {} }
-        Organization.create(githubId, 'name', opts)
+        Organization.create(githubId, opts)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
             sinon.assert.calledWithExactly(

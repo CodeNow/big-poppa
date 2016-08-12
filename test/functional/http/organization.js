@@ -64,7 +64,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(orgs).to.have.lengthOf(1)
           let org = orgs[0]
           expect(org).to.have.property('id')
-          expect(org).to.have.property('name', orgGithubId.toString())
+          expect(org).to.have.property('name', githubOrganizationFixture.login)
           expect(org).to.have.property('githubId', orgGithubId)
           expect(org).to.have.property('trialEnd')
           expect(org).to.have.property('activePeriodEnd')
@@ -85,7 +85,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(orgs).to.have.lengthOf(1)
           let org = orgs[0]
           expect(org).to.have.property('id')
-          expect(org).to.have.property('name', orgGithubId.toString())
+          expect(org).to.have.property('name', githubOrganizationFixture.login)
           expect(org).to.have.property('githubId', orgGithubId)
           expect(org).to.have.property('trialEnd')
           expect(org).to.have.property('activePeriodEnd')

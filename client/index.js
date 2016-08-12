@@ -9,7 +9,7 @@ Promise.promisifyAll(ApiClient.prototype)
 
 function checkResponseForError (res) {
   if (res.statusCode >= 400) {
-    throw new BigPoppaClientError(res.body.err)
+    throw new BigPoppaClientError(res.body.err, res.body.message)
   }
 }
 
@@ -50,11 +50,9 @@ module.exports = class BigPoppaClient extends ApiClient {
   getOrganizations (opts) {
     var path = '/organization/'
     if (opts) {
-      if (opts.githubId) {
-        path += '?githubId=' + encodeURIComponent(opts.githubId)
-      } else if (opts.name) {
-        path += '?lowerName=' + encodeURIComponent(opts.name.toLowerCase())
-      }
+      Object.keys(opts).forEach(key => {
+        path += '?' + key + '=' + encodeURIComponent(opts[key])
+      })
     }
     return this.getAsync({
       path: path,
