@@ -9,7 +9,9 @@ Promise.promisifyAll(ApiClient.prototype)
 
 function checkResponseForError (res) {
   if (res.statusCode >= 400) {
-    throw new BigPoppaClientError(res.body.err, res.body.message)
+    throw new BigPoppaClientError(res.body.err, res.body.message, {
+      orignalError: res.body
+    })
   }
 }
 

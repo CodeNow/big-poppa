@@ -16,7 +16,7 @@ module.exports = class BigPoppaClientError extends BaseError {
    * @param {Object}  data       - Object with any other data that needs to get reported
    */
   constructor (errorTitle, errMessage, data) {
-    super('BigPoppaClient Error:' + errMessage, data)
+    super('BigPoppaClient Error: ' + errorTitle + ' : '  + errMessage, data)
   }
 
 }
