@@ -50,7 +50,12 @@ describe('#organization.create', () => {
       }
     }
     newOrg = {
-      id: orgId
+      id: orgId,
+      githubId: githubOrganizationFixture.id,
+      name: githubOrganizationFixture.login,
+      get: sinon.spy(function (key) {
+        return newOrg[key]
+      })
     }
     createStub = sinon.stub(Organization, 'create').resolves(newOrg)
     fetchByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(newOrg)
@@ -219,15 +224,6 @@ describe('#organization.create', () => {
         .asCallback(done)
     })
 
-    it('should fetch the github org from Github', done => {
-      CreateOrganization(validJob)
-        .then(() => {
-          sinon.assert.calledOnce(getGithubOrganizationStub)
-          sinon.assert.calledWithExactly(getGithubOrganizationStub, githubId)
-        })
-        .asCallback(done)
-    })
-
     it('should return an organization', done => {
       CreateOrganization(validJob)
         .then(res => {
@@ -282,7 +278,7 @@ describe('#organization.create', () => {
           sinon.assert.calledWithExactly(
             publishASGCreateStub,
             {
-              githubId: githubOrganizationFixture.id.toString()
+              githubId: githubOrganizationFixture.id
             }
           )
         })

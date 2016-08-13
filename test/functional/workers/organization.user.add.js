@@ -7,6 +7,7 @@ require('sinon-as-promised')(Promise)
 
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
+const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
 const githubUserFixture = require('../../fixtures/github/user')
 const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
@@ -41,6 +42,10 @@ describe('Organization.user.add Functional Test', () => {
     githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
       status: 200,
       body: githubOrganizationFixture
+    })
+    githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=testing`).returns({
+      status: 200,
+      body: githubOrgMembershipFixture
     })
     testUtil.createUserAndOrg(orgGithubId, userGithubId)
       .asCallback(done)

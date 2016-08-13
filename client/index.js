@@ -7,6 +7,14 @@ const BigPoppaClientError = require('./errors/big-poppa-client-error')
 Promise.promisifyAll(ApiClient)
 Promise.promisifyAll(ApiClient.prototype)
 
+function checkResponseForError (res) {
+  if (res.statusCode >= 400) {
+    throw new BigPoppaClientError(res.body.err, res.body.message, {
+      orignalError: res.body
+    })
+  }
+}
+
 module.exports = class BigPoppaClient extends ApiClient {
 
   /**
@@ -26,11 +34,7 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
       .get('body')
   }
 
@@ -40,24 +44,25 @@ module.exports = class BigPoppaClient extends ApiClient {
    *
    * @param {Object} opts          - optional parameters
    * @param {String} opts.githubId - githubId of an organization
+   * @param {String} opts.name     - name of an organization
    *
    * @returns  {Promise}
    * @resolves {[Organization]} requested orgs
    */
   getOrganizations (opts) {
     var path = '/organization/'
-    if (opts && opts.githubId) {
-      path += '?githubId=' + encodeURIComponent(opts.githubId)
+    if (opts) {
+      path += '?' + Object.keys(opts)
+        .map(key => {
+          return key + '=' + encodeURIComponent(opts[key])
+        })
+        .join('&')
     }
     return this.getAsync({
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
       .get('body')
   }
 
@@ -81,11 +86,7 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
       .get('body')
   }
 
@@ -107,11 +108,7 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
       .get('body')
   }
 
@@ -123,7 +120,7 @@ module.exports = class BigPoppaClient extends ApiClient {
    * @param {String} opts.githubId - githubId of a user
    *
    * @returns  {Promise}
-   * @resolves {[Organization]} requested users
+   * @resolves {[User]} requested users
    */
   getUsers (opts) {
     var path = '/user/'
@@ -134,11 +131,31 @@ module.exports = class BigPoppaClient extends ApiClient {
       path: path,
       json: true
     })
-      .tap(res => {
-        if (res.statusCode >= 400) {
-          throw BigPoppaClientError(res.body.message)
-        }
-      })
+      .tap(checkResponseForError)
+      .get('body')
+  }
+
+  /**
+   * Given the PostGres IDs of a user and organization, create an association
+   *
+   * @param {Number} orgId  - Organization PostGres ID
+   * @param {Number} userId - User PostGres ID
+   *
+   * @resolves {Organization} organization model containing the updated list of users
+   */
+  addUserToOrganization (orgId, userId) {
+    if (!orgId) {
+      return Promise.reject(new Error('missing orgId'))
+    } else if (!userId) {
+      return Promise.reject(new Error('missing userId'))
+    }
+    var path = '/organization/' + encodeURIComponent(orgId) + '/add'
+    return this.patchAsync({
+      body: { user: { id: userId } },
+      path: path,
+      json: true
+    })
+      .tap(checkResponseForError)
       .get('body')
   }
 }
