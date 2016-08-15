@@ -10,7 +10,7 @@ const Organization = require('models/organization')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const githubOrganizationFixture2 = require('../../fixtures/github/organization-2')
 const githubUserFixture = require('../../fixtures/github/user')
-const githubOtherUserFixture = require('../../fixtures/github/otherUser')
+const githubOtherUserFixture = require('../../fixtures/github/other-user')
 const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
