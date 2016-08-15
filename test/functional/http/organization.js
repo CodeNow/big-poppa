@@ -190,14 +190,15 @@ describe('HTTP Organization Functional Test', () => {
   })
 
   describe('PATCH /:id/add', () => {
-    var otherUser
-    var otherToken = 'otherToken'
+    let otherUser
+    let otherToken = 'otherToken'
+    let orgGithubName = githubOrganizationFixture.login.toLowerCase()
     beforeEach(() => {
       githubAPI.stub('GET', `/user/${otherGithubId}?access_token=testing`).returns({
         status: 200,
         body: githubOtherUserFixture
       })
-      githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=${otherToken}`).returns({
+      githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubName}?access_token=${otherToken}`).returns({
         status: 200,
         body: githubOrgMembershipFixture
       })
@@ -206,6 +207,7 @@ describe('HTTP Organization Functional Test', () => {
           otherUser = user
         })
     })
+
     it('should return a 200 when adding a valid user to an organization', () => {
       return agent
         .addUserToOrganization(orgId, otherUser.id)

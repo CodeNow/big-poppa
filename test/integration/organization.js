@@ -68,6 +68,7 @@ describe('Organization Integration Test', () => {
   })
 
   before(() => {
+    let orgGithubName = githubOrganizationFixture.login.toLowerCase()
     githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
       status: 200,
       body: githubOrganizationFixture
@@ -76,7 +77,7 @@ describe('Organization Integration Test', () => {
       status: 200,
       body: githubUserFixture
     })
-    githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=testing`).returns({
+    githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubName}?access_token=testing`).returns({
       status: 200,
       body: githubOrgMembershipFixture
     })
