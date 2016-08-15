@@ -23,7 +23,7 @@ module.exports = class TestUtil {
 
   static createUser (userGithubId, token) {
     return new User().save({
-      accessToken: token || userGithubId,
+      accessToken: token || process.env.GITHUB_TOKEN || 'testing',
       githubId: userGithubId
     })
   }
@@ -31,7 +31,7 @@ module.exports = class TestUtil {
   static createUserAndOrg (orgGithubId, userGithubId) {
     return Promise.props({
       user: new User().save({
-        accessToken: 'testing',
+        accessToken: process.env.GITHUB_TOKEN || 'testing',
         githubId: userGithubId
       }),
       org: Organization.create(orgGithubId)

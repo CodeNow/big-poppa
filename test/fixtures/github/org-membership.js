@@ -1,8 +1,8 @@
 module.exports = {
-  'url': 'https://api.github.com/orgs/invitocat/memberships/defunkt',
-  'state': 'pending',
+  'url': 'https://api.github.com/orgs/Runnable/memberships/thejsj',
+  'state': 'active',
   'role': 'admin',
-  'organization_url': 'https://api.github.com/orgs/invitocat',
+  'organization_url': 'https://api.github.com/orgs/Runnable',
   'organization': {
     'login': 'Runnable',
     'id': 2828361,
@@ -13,7 +13,8 @@ module.exports = {
     'issues_url': 'https://api.github.com/orgs/Runnable/issues',
     'members_url': 'https://api.github.com/orgs/Runnable/members{/member}',
     'public_members_url': 'https://api.github.com/orgs/Runnable/public_members{/member}',
-    'avatar_url': 'https://avatars.githubusercontent.com/u/2828361?v=3'
+    'avatar_url': 'https://avatars.githubusercontent.com/u/2828361?v=3',
+    'description': 'Sandbox-as-a-service at your service.'
   },
   'user': {
     'login': 'thejsj',
@@ -32,19 +33,14 @@ module.exports = {
     'events_url': 'https://api.github.com/users/thejsj/events{/privacy}',
     'received_events_url': 'https://api.github.com/users/thejsj/received_events',
     'type': 'User',
-    'site_admin': false,
-    'name': 'Jorge Silva',
-    'company': 'Runnable',
-    'blog': 'http://hiphipjorge.com',
-    'location': 'San Francisco, CA',
-    'email': 'jorge.silva@thejsj.com',
-    'hireable': null,
-    'bio': null,
-    'public_repos': 112,
-    'public_gists': 22,
-    'followers': 112,
-    'following': 70,
-    'created_at': '2012-07-16T01:04:19Z',
-    'updated_at': '2016-05-20T15:45:38Z'
+    'site_admin': false
+  },
+  'meta': {
+    'x-ratelimit-limit': '5000',
+    'x-ratelimit-remaining': '4694',
+    'x-ratelimit-reset': '1471299603',
+    'x-oauth-scopes': 'admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete_repo, gist, notifications, repo, user',
+    'etag': '\'4d0041857aa9f7c977abaa4592c53783\'',
+    'status': '200 OK'
   }
 }

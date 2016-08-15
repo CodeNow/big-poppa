@@ -6,9 +6,11 @@ const MockAPI = require('mehpi')
 const moment = require('moment')
 
 const testUtil = require('../../util')
+const Organization = require('models/organization')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
+const githubOrganizationFixture2 = require('../../fixtures/github/organization-2')
 const githubUserFixture = require('../../fixtures/github/user')
-const githubOtherUserFixture = require('../../fixtures/github/otherUser')
+const githubOtherUserFixture = require('../../fixtures/github/other-user')
 const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
@@ -54,7 +56,7 @@ describe('HTTP Organization Functional Test', () => {
       })
   })
 
-  describe('GET /?githubId=GH_ID', () => {
+  describe('GET', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
         .getOrganizations({
@@ -76,6 +78,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users[0]).to.have.property('githubId')
         })
     })
+
     it('should return a 200 for an existing organization', () => {
       return agent
         .getOrganizations({
@@ -116,6 +119,37 @@ describe('HTTP Organization Functional Test', () => {
           expect(body).to.be.an.array
           expect(body).to.have.lengthOf(0)
         })
+    })
+
+    describe('GET /?stripeCustomerId', () => {
+      let orgGithubId = 2335750
+      let stripeCustomerId = 'cus_2342o3i23'
+
+      beforeEach('Create organization', () => {
+        githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
+          status: 200,
+          body: githubOrganizationFixture2
+        })
+        return new Organization().save({
+          githubId: orgGithubId,
+          trialEnd: new Date(),
+          activePeriodEnd: new Date(),
+          gracePeriodEnd: new Date(),
+          stripeCustomerId: stripeCustomerId
+        })
+      })
+
+      it('should return a an array with all organizations with a stripeCustomerId', () => {
+        return agent
+          .getOrganizations({
+            stripeCustomerId: stripeCustomerId
+          })
+          .then(body => {
+            expect(body).to.be.an.array
+            expect(body).to.have.lengthOf(1)
+            expect(body[0]).to.have.property('githubId', orgGithubId)
+          })
+      })
     })
   })
 
@@ -164,10 +198,7 @@ describe('HTTP Organization Functional Test', () => {
               activePeriodEnd: timeCreated
             })
         })
-        .then(() => {
-          return agent
-            .getOrganization(orgId)
-        })
+        .then(() => agent.getOrganization(orgId))
         .then(org => {
           expect(org).to.have.property('id')
           expect(org).to.have.property('githubId', githubId)
@@ -176,6 +207,23 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('activePeriodEnd', time.toISOString())
           expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').toISOString())
           expect(org).to.have.property('firstDockCreated', false)
+        })
+    })
+
+    it('should return a 200 when patching the `hasPaymentMethod` property', () => {
+      return agent
+        .getOrganization(orgId)
+        .then(org => {
+          expect(org).to.have.property('hasPaymentMethod', false) // Default value
+          return agent
+            .updateOrganization(orgId, {
+              hasPaymentMethod: true
+            })
+        })
+        .then(() => agent.getOrganization(orgId))
+        .then(org => {
+          expect(org).to.have.property('id', orgId)
+          expect(org).to.have.property('hasPaymentMethod', true)
         })
     })
 
@@ -190,14 +238,15 @@ describe('HTTP Organization Functional Test', () => {
   })
 
   describe('PATCH /:id/add', () => {
-    var otherUser
-    var otherToken = 'otherToken'
+    let otherUser
+    let otherToken = process.env.GITHUB_TOKEN || 'testing'
+    let orgGithubName = githubOrganizationFixture.login.toLowerCase()
     beforeEach(() => {
       githubAPI.stub('GET', `/user/${otherGithubId}?access_token=testing`).returns({
         status: 200,
         body: githubOtherUserFixture
       })
-      githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=${otherToken}`).returns({
+      githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubName}?access_token=${otherToken}`).returns({
         status: 200,
         body: githubOrgMembershipFixture
       })
@@ -206,6 +255,7 @@ describe('HTTP Organization Functional Test', () => {
           otherUser = user
         })
     })
+
     it('should return a 200 when adding a valid user to an organization', () => {
       return agent
         .addUserToOrganization(orgId, otherUser.id)

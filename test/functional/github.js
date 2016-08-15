@@ -77,7 +77,7 @@ describe('GithubAPI Functional Tests', () => {
   })
 
   describe('getOrgsForUser', () => {
-    let userId = 11111
+    let userId = 1981198
 
     it('should return an array of github organizations ', () => {
       mockGithubApi.stub('GET', '/user/orgs?access_token=testing').returns({
@@ -87,20 +87,21 @@ describe('GithubAPI Functional Tests', () => {
 
       return githubApi.getOrgsForUser(userId)
         .then(orgs => {
-          expect(orgs).to.have.lengthOf(1)
-          expect(orgs[0].login).to.equal(githubOrganizationFixture.login)
-          expect(orgs[0].id).to.equal(githubOrganizationFixture.id)
-          expect(orgs[0].type).to.equal('Organization')
+          expect(orgs).to.not.have.lengthOf(0)
+          let org = orgs.find(x => x.login === githubOrganizationFixture.login)
+          expect(org.login).to.equal(githubOrganizationFixture.login)
+          expect(org.id).to.equal(githubOrganizationFixture.id)
         })
     })
 
     it('should throw a `GithubEntityError` if the fetch fails', done => {
-      userId = 999999999 // Doesn't exist
+      // Start an instance of GithubAPI with an invalid access token
+      let githubApi = new GithubAPI('asdfasd')
+
       mockGithubApi.stub('GET', '/user/orgs?access_token=testing').returns({
         status: 404,
         body: githubNotFoundFixture
       })
-
       return githubApi.getOrgsForUser(userId)
         .asCallback(err => {
           expect(err).to.exist
@@ -161,22 +162,25 @@ describe('GithubAPI Functional Tests', () => {
 
   describe('hasUserOrgMembership', () => {
     let orgGithubId = 1981198
+    let orgGithubName = githubOrganizationFixture.login
 
     it('should return a github organization if the organization exists', () => {
-      mockGithubApi.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=testing`).returns({
+      mockGithubApi.stub('GET', `/user/memberships/orgs/${orgGithubName}?access_token=testing`).returns({
         status: 200,
         body: githubOrgMembershipFixture
       })
 
-      return githubApi.hasUserOrgMembership(orgGithubId)
+      return githubApi.hasUserOrgMembership(orgGithubName)
         .then(res => {
           expect(res).to.be.an('object')
-          expect(res.user).to.deep.equal(githubOrgMembershipFixture.user)
+          expect(res.user.id).to.deep.equal(githubOrgMembershipFixture.user.id)
+          expect(res.user.login).to.deep.equal(githubOrgMembershipFixture.user.login)
+          expect(res.user.type).to.deep.equal(githubOrgMembershipFixture.user.type)
         })
     })
 
     it('should throw a `GithubEntityNoPermissionError` if the call throws anything', done => {
-      orgGithubId = 999999999 // Doesn't exist
+      orgGithubId = 'some-other-org' // Doesn't exist
       mockGithubApi.stub('GET', `/user/memberships/orgs/${orgGithubId}?access_token=testing`).returns({
         status: 404,
         body: githubNotFoundFixture
