@@ -164,10 +164,7 @@ describe('HTTP Organization Functional Test', () => {
               activePeriodEnd: timeCreated
             })
         })
-        .then(() => {
-          return agent
-            .getOrganization(orgId)
-        })
+        .then(() => agent.getOrganization(orgId))
         .then(org => {
           expect(org).to.have.property('id')
           expect(org).to.have.property('githubId', githubId)
@@ -176,6 +173,23 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('activePeriodEnd', time.toISOString())
           expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').toISOString())
           expect(org).to.have.property('firstDockCreated', false)
+        })
+    })
+
+    it('should return a 200 when patching the `hasPaymentMethod` property', () => {
+      return agent
+        .getOrganization(orgId)
+        .then(org => {
+          expect(org).to.have.property('hasPaymentMethod', false) // Default value
+          return agent
+            .updateOrganization(orgId, {
+              hasPaymentMethod: true
+            })
+        })
+        .then(() => agent.getOrganization(orgId))
+        .then(org => {
+          expect(org).to.have.property('id', orgId)
+          expect(org).to.have.property('hasPaymentMethod', true)
         })
     })
 
