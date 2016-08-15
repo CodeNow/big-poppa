@@ -191,7 +191,7 @@ describe('HTTP Organization Functional Test', () => {
 
   describe('PATCH /:id/add', () => {
     let otherUser
-    let otherToken = 'otherToken'
+    let otherToken = process.env.GITHUB_TOKEN || 'testing'
     let orgGithubName = githubOrganizationFixture.login.toLowerCase()
     beforeEach(() => {
       githubAPI.stub('GET', `/user/${otherGithubId}?access_token=testing`).returns({

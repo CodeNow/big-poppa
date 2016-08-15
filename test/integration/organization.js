@@ -85,7 +85,7 @@ describe('Organization Integration Test', () => {
 
   beforeEach(() => {
     return new User().save({
-      accessToken: 'testing',
+      accessToken: process.env.GITHUB_TOKEN || 'testing',
       githubId: userGithubId
     })
   })
