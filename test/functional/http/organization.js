@@ -6,7 +6,9 @@ const MockAPI = require('mehpi')
 const moment = require('moment')
 
 const testUtil = require('../../util')
+const Organization = require('models/organization')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
+const githubOrganizationFixture2 = require('../../fixtures/github/organization-2')
 const githubUserFixture = require('../../fixtures/github/user')
 const githubOtherUserFixture = require('../../fixtures/github/otherUser')
 const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
@@ -54,7 +56,7 @@ describe('HTTP Organization Functional Test', () => {
       })
   })
 
-  describe('GET /?githubId=GH_ID', () => {
+  describe('GET', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
         .getOrganizations({
@@ -76,6 +78,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users[0]).to.have.property('githubId')
         })
     })
+
     it('should return a 200 for an existing organization', () => {
       return agent
         .getOrganizations({
@@ -116,6 +119,37 @@ describe('HTTP Organization Functional Test', () => {
           expect(body).to.be.an.array
           expect(body).to.have.lengthOf(0)
         })
+    })
+
+    describe('GET /?stripeCustomerId', () => {
+      let orgGithubId = 2335750
+      let stripeCustomerId = 'cus_2342o3i23'
+
+      beforeEach('Create organization', () => {
+        githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
+          status: 200,
+          body: githubOrganizationFixture2
+        })
+        return new Organization().save({
+          githubId: orgGithubId,
+          trialEnd: new Date(),
+          activePeriodEnd: new Date(),
+          gracePeriodEnd: new Date(),
+          stripeCustomerId: stripeCustomerId
+        })
+      })
+
+      it('should return a an array with all organizations with a stripeCustomerId', () => {
+        return agent
+          .getOrganizations({
+            stripeCustomerId: stripeCustomerId
+          })
+          .then(body => {
+            expect(body).to.be.an.array
+            expect(body).to.have.lengthOf(1)
+            expect(body[0]).to.have.property('githubId', orgGithubId)
+          })
+      })
     })
   })
 
