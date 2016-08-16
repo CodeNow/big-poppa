@@ -315,6 +315,7 @@ describe('Organization', () => {
           return time => (before <= time && time <= after)
         }
         let beforeTime = (new Date()).getTime()
+        let beforeThirtyDaysFromToday = moment(beforeTime).add(30, 'days').utc().toDate()
         Organization.create(githubId)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
@@ -327,13 +328,14 @@ describe('Organization', () => {
             )
             // Assert timestamps were created now
             let afterTime = (new Date()).getTime()
-            const thirtyDaysFromToday = moment().add(30, 'days').utc().toDate()
+            let afterThirtyDaysFromToday = moment(afterTime).add(30, 'days').utc().toDate()
 
             let compareTime = createCompareTime(beforeTime, afterTime)
+            let thirtyCompareTime = createCompareTime(beforeThirtyDaysFromToday, afterThirtyDaysFromToday)
             let timeMatch = sinon.match(compareTime)
             sinon.assert.calledWithExactly(
               saveStub,
-              sinon.match.has('trialEnd', thirtyDaysFromToday)
+              sinon.match.has('trialEnd', sinon.match(thirtyCompareTime))
                 .and(sinon.match.has('activePeriodEnd', timeMatch)),
               undefined
             )
