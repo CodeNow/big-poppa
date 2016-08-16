@@ -7,6 +7,7 @@ const expect = require('chai').expect
 
 const bookshelf = require('models').bookshelf
 const BaseModel = require('models/base')
+const moment = require('moment')
 const Organization = require('models/organization')
 const User = require('models/user')
 
