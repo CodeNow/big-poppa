@@ -326,11 +326,13 @@ describe('Organization', () => {
             )
             // Assert timestamps were created now
             let afterTime = (new Date()).getTime()
+            const thirtyDaysFromToday = moment().add(30, 'days').utc().toDate()
+
             let compareTime = createCompareTime(beforeTime, afterTime)
             let timeMatch = sinon.match(compareTime)
             sinon.assert.calledWithExactly(
               saveStub,
-              sinon.match.has('trialEnd', timeMatch)
+              sinon.match.has('trialEnd', thirtyDaysFromToday)
                 .and(sinon.match.has('activePeriodEnd', timeMatch)),
               undefined
             )
