@@ -63,10 +63,10 @@ describe('Organization.user.added Functional Test', () => {
     orionUserCreateStub.restore()
   })
 
-  it('should add a user to an organization in intercom', done => {
+  it('should add a user to an organization in intercom', () => {
     let userId
     let orgId
-    Promise.all([
+    return Promise.all([
       User.fetchByGithubId(userGithubId),
       Organization.fetchByGithubId(orgGithubId)
     ])
@@ -100,7 +100,6 @@ describe('Organization.user.added Functional Test', () => {
               }
             )
           })
-          .asCallback(done)
       })
   })
 })
