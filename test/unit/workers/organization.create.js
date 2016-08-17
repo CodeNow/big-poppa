@@ -5,9 +5,6 @@ const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
 
-const orion = require('@runnable/orion')
-const moment = require('moment')
-
 const Organization = require('models/organization')
 const GithubAPI = require('util/github')
 const rabbitMQ = require('util/rabbitmq')
@@ -26,7 +23,6 @@ describe('#organization.create', () => {
   let creatorUsername = 'thejsj'
   let creatorEmail = 'jorge.silva@thejsj.com'
   let creatorCreated = '2016-07-21T21:22:42+0000'
-  let creatorCreatedMoment = moment('2016-07-21T21:22:42+0000')
 
   let newOrg
   let validJob
@@ -37,7 +33,6 @@ describe('#organization.create', () => {
   let publishASGCreateStub
   let publishOrganizationCreatedStub
   let publishOrganizationUserAddStub
-  let orionUserCreateStub
 
   beforeEach(() => {
     validJob = {
@@ -62,7 +57,6 @@ describe('#organization.create', () => {
     getGithubOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
     publishASGCreateStub = sinon.stub(rabbitMQ, 'publishASGCreate')
     publishOrganizationCreatedStub = sinon.stub(rabbitMQ, 'publishOrganizationCreated')
-    orionUserCreateStub = sinon.stub(orion.users, 'create')
     publishOrganizationUserAddStub = sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
   })
 
@@ -72,7 +66,6 @@ describe('#organization.create', () => {
     getGithubOrganizationStub.restore()
     publishASGCreateStub.restore()
     publishOrganizationCreatedStub.restore()
-    orionUserCreateStub.restore()
     publishOrganizationUserAddStub.restore()
   })
 
@@ -229,28 +222,6 @@ describe('#organization.create', () => {
         .then(res => {
           sinon.assert.calledOnce(createStub)
           expect(res).to.equal(newOrg)
-        })
-        .asCallback(done)
-    })
-
-    it('should create the org in intercom with the created user', done => {
-      CreateOrganization(validJob)
-        .then(res => {
-          sinon.assert.calledOnce(orionUserCreateStub)
-          sinon.assert.calledWithExactly(
-            orionUserCreateStub,
-            {
-              name: creatorUsername,
-              email: creatorEmail,
-              created_at: +creatorCreatedMoment.format('X'),
-              update_last_request_at: true,
-              companies: [{
-                company_id: githubOrganizationFixture.login.toLowerCase(),
-                name: githubOrganizationFixture.login,
-                remote_created_at: sinon.match.number
-              }]
-            }
-          )
         })
         .asCallback(done)
     })

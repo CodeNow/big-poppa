@@ -14,6 +14,7 @@ const githubOrgMembershipFixture = require('../fixtures/github/org-membership')
 const githubUserFixture = require('../fixtures/github/user')
 const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
+const orion = require('@runnable/orion')
 
 const RabbitMQ = require('ponos/lib/rabbitmq')
 
@@ -27,6 +28,7 @@ describe('Organization Integration Test', () => {
   let userGithubId = 1981198
   let publisher
   let publishEventStub
+  let orionUserCreateStub
 
   // Start HTTP Server
   before(() => httpServer.start())
@@ -62,9 +64,11 @@ describe('Organization Integration Test', () => {
 
   beforeEach(() => {
     publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent').resolves()
+    orionUserCreateStub = sinon.stub(orion.users, 'create')
   })
   afterEach(() => {
     publishEventStub.restore()
+    orionUserCreateStub.restore()
   })
 
   before(() => {

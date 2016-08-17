@@ -7,12 +7,10 @@ require('sinon-as-promised')(Promise)
 
 const User = require('models/user')
 const Organization = require('models/organization')
-const rabbitMQ = require('util/rabbitmq')
 
 const NotFoundError = require('errors/not-found-error')
 const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
-
 const AddUserToOrganization = require('workers/organization.user.add')
 
 describe('#organization.user.add', () => {
@@ -27,7 +25,6 @@ describe('#organization.user.add', () => {
   let fetchOrgByGithubIdStub
   let fetchUserByGithubIdStub
   let addUserStub
-  let publishUserAddedToOrganizationStub
 
   beforeEach(() => {
     user = new User({ id: userId, githubId: userGithubId })
@@ -37,14 +34,12 @@ describe('#organization.user.add', () => {
     fetchOrgByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(org)
     fetchUserByGithubIdStub = sinon.stub(User, 'fetchByGithubId').resolves(user)
     addUserStub = sinon.stub(Organization.prototype, 'addUser').resolves(user)
-    publishUserAddedToOrganizationStub = sinon.stub(rabbitMQ, 'publishUserAddedToOrganization')
   })
 
   afterEach(() => {
     fetchOrgByGithubIdStub.restore()
     fetchUserByGithubIdStub.restore()
     addUserStub.restore()
-    publishUserAddedToOrganizationStub.restore()
   })
 
   describe('Validation', () => {
@@ -181,26 +176,6 @@ describe('#organization.user.add', () => {
             user
           )
           expect(firstCall.thisValue).to.equal(org)
-        })
-    })
-
-    it('should publish an event with rabbitMQ', () => {
-      return AddUserToOrganization(validJob)
-        .then(() => {
-          sinon.assert.calledOnce(publishUserAddedToOrganizationStub)
-          sinon.assert.calledWithExactly(
-            publishUserAddedToOrganizationStub,
-            {
-              user: {
-                id: userId,
-                githubId: userGithubId
-              },
-              organization: {
-                id: orgId,
-                githubId: orgGithubId
-              }
-            }
-          )
         })
     })
   })
