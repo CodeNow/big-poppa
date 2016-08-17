@@ -25,7 +25,10 @@ describe('HTTP /organization', () => {
   let transformSingleOrgSpy
 
   beforeEach(() => {
-    orgMockJSON = { id: 1 }
+    orgMockJSON = {
+      id: 1,
+      users: []
+    }
     orgMock = {
       save: sinon.stub().returnsThis(),
       addUser: sinon.stub().returnsThis(),

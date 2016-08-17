@@ -84,6 +84,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
           expect(org.users[0]).to.have.property('githubId')
+          expect(org.users[0]).to.not.have.property('accessToken')
         })
     })
 
@@ -106,6 +107,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
           expect(org.users[0]).to.have.property('githubId')
+          expect(org.users[0]).to.not.have.property('accessToken')
         })
     })
 
@@ -176,6 +178,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
           expect(org.users[0]).to.have.property('githubId')
+          expect(org.users[0]).to.not.have.property('accessToken')
         })
     })
 
@@ -273,8 +276,10 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users).to.have.length(2)
           expect(org.users[0]).to.have.property('id')
           expect(org.users[0]).to.have.property('githubId', userGithubId)
+          expect(org.users[0]).to.not.have.property('accessToken')
           expect(org.users[1]).to.have.property('id')
           expect(org.users[1]).to.have.property('githubId', otherGithubId)
+          expect(org.users[1]).to.not.have.property('accessToken')
         })
     })
 

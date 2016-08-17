@@ -66,6 +66,7 @@ describe('#organization.user.added', () => {
       Joi.validateAsync(validJob, OrganizationUserAddedSchema)
         .asCallback(err => {
           expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
           done()
         })
     })
@@ -75,6 +76,7 @@ describe('#organization.user.added', () => {
       Joi.validateAsync(validJob, OrganizationUserAddedSchema)
         .asCallback(err => {
           expect(err).to.exist
+          expect(err.message).to.match(/id/i)
           done()
         })
     })
@@ -84,6 +86,7 @@ describe('#organization.user.added', () => {
       Joi.validateAsync(validJob, OrganizationUserAddedSchema)
         .asCallback(err => {
           expect(err).to.exist
+          expect(err.message).to.match(/organization/i)
           done()
         })
     })
@@ -93,6 +96,7 @@ describe('#organization.user.added', () => {
       Joi.validateAsync(validJob, OrganizationUserAddedSchema)
         .asCallback(err => {
           expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
           done()
         })
     })
@@ -102,6 +106,7 @@ describe('#organization.user.added', () => {
       Joi.validateAsync(validJob, OrganizationUserAddedSchema)
         .asCallback(err => {
           expect(err).to.exist
+          expect(err.message).to.match(/id/i)
           done()
         })
     })
@@ -111,6 +116,7 @@ describe('#organization.user.added', () => {
       Joi.validateAsync(validJob, OrganizationUserAddedSchema)
         .asCallback(err => {
           expect(err).to.exist
+          expect(err.message).to.match(/user/i)
           done()
         })
     })
@@ -120,6 +126,7 @@ describe('#organization.user.added', () => {
       Joi.validateAsync(validJob, OrganizationUserAddedSchema)
         .asCallback(err => {
           expect(err).to.exist
+          expect(err.message).to.match(/a number/i)
           done()
         })
     })
@@ -129,6 +136,7 @@ describe('#organization.user.added', () => {
       Joi.validateAsync(validJob, OrganizationUserAddedSchema)
         .asCallback(err => {
           expect(err).to.exist
+          expect(err.message).to.match(/a number/i)
           done()
         })
     })
@@ -236,12 +244,16 @@ describe('#organization.user.added', () => {
             {
               name: githubUserFixture.login,
               email: githubUserFixture.email,
-              user_id: userId,
+              custom_attributes: {
+                user_id: userId
+              },
               created_at: +(moment(user.get('created')).format('X')),
               update_last_request_at: true,
               companies: [ {
                 company_id: orgId,
-                github_id: orgGithubId,
+                custom_attributes: {
+                  github_id: orgGithubId
+                },
                 name: org.get('name'),
                 remote_created_at: sinon.match.number
               } ]
