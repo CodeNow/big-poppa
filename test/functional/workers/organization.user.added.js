@@ -18,7 +18,7 @@ const rabbitMQ = require('util/rabbitmq')
 const User = require('models/user')
 const Organization = require('models/organization')
 
-const OrganizationUserAddedWorker = require('workers/organization.user.added')
+const OrganizationUserAddedWorker = require('workers/organization.user.added').task
 
 describe('Organization.user.added Functional Test', () => {
   let userGithubId = 1981198
