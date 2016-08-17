@@ -278,27 +278,6 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
-    it('should create a user-added-to-organization job', () => {
-      return agent
-        .addUserToOrganization(orgId, otherUser.id)
-        .then(org => {
-          sinon.assert.calledOnce(publishUserAddedToOrganizationStub)
-          sinon.assert.calledWithExactly(
-            publishUserAddedToOrganizationStub,
-            {
-              user: {
-                id: otherUser.id,
-                githubId: otherGithubId
-              },
-              organization: {
-                id: org.id,
-                githubId: org.githubId
-              }
-            }
-          )
-        })
-    })
-
     it('should return an error when the user is already part of the org', done => {
       return agent
         .addUserToOrganization(orgId, userId)
