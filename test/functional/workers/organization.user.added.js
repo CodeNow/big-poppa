@@ -90,10 +90,12 @@ describe('Organization.user.added Functional Test', () => {
               {
                 name: githubUserFixture.login,
                 email: githubUserFixture.email,
+                user_id: userId,
                 created_at: +(moment(user.get('created')).format('X')),
                 update_last_request_at: true,
                 companies: [ {
-                  company_id: githubOrganizationFixture.login.toLowerCase(),
+                  company_id: orgId,
+                  github_id: orgGithubId,
                   name: githubOrganizationFixture.login,
                   remote_created_at: sinon.match.number
                 } ]
