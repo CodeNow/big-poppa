@@ -7,6 +7,7 @@ const expect = require('chai').expect
 
 const bookshelf = require('models').bookshelf
 const BaseModel = require('models/base')
+const moment = require('moment')
 const Organization = require('models/organization')
 const User = require('models/user')
 
@@ -314,6 +315,7 @@ describe('Organization', () => {
           return time => (before <= time && time <= after)
         }
         let beforeTime = (new Date()).getTime()
+        let beforeThirtyDaysFromToday = moment(beforeTime).add(30, 'days').utc().toDate()
         Organization.create(githubId)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
@@ -326,11 +328,14 @@ describe('Organization', () => {
             )
             // Assert timestamps were created now
             let afterTime = (new Date()).getTime()
+            let afterThirtyDaysFromToday = moment(afterTime).add(30, 'days').utc().toDate()
+
             let compareTime = createCompareTime(beforeTime, afterTime)
+            let thirtyCompareTime = createCompareTime(beforeThirtyDaysFromToday, afterThirtyDaysFromToday)
             let timeMatch = sinon.match(compareTime)
             sinon.assert.calledWithExactly(
               saveStub,
-              sinon.match.has('trialEnd', timeMatch)
+              sinon.match.has('trialEnd', sinon.match(thirtyCompareTime))
                 .and(sinon.match.has('activePeriodEnd', timeMatch)),
               undefined
             )
