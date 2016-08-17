@@ -29,10 +29,9 @@ describe('Organization.user.added Functional Test', () => {
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
 
-  beforeEach(done => {
-    testUtil.truncateAllTables()
-     .asCallback(done)
-  })
+  // Delete everything from the DB after every test
+  beforeEach(() => testUtil.truncateAllTables())
+  afterEach(() => testUtil.truncateAllTables())
 
   beforeEach(done => {
     let orgGithubName = githubOrganizationFixture.login.toLowerCase()
