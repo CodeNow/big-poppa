@@ -1,6 +1,6 @@
 module.exports = [
   {
-    'email': 'octocat@github.com',
+    'email': 'jorge.silva@thejsj.com',
     'verified': true,
     'primary': true
   }
