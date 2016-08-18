@@ -8,6 +8,7 @@ require('sinon-as-promised')(Promise)
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
+const githubEmailFixture = require('../../fixtures/github/email')
 const githubUserFixture = require('../../fixtures/github/user')
 const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
@@ -46,6 +47,10 @@ describe('Organization.user.added Functional Test', () => {
     githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
       status: 200,
       body: githubOrganizationFixture
+    })
+    githubAPI.stub('GET', '/user/emails?page=0&per_page=100&access_token=testing').returns({
+      status: 200,
+      body: JSON.stringify(githubEmailFixture)
     })
     githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubName}?access_token=testing`).returns({
       status: 200,
@@ -93,7 +98,7 @@ describe('Organization.user.added Functional Test', () => {
               orionUserCreateStub,
               {
                 name: githubUserFixture.login,
-                email: githubUserFixture.email,
+                email: githubEmailFixture[0].email,
                 custom_attributes: {
                   user_id: userId
                 },
