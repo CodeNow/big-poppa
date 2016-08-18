@@ -50,7 +50,7 @@ describe('#organization.user.added', () => {
     orionUserCreateStub = sinon.stub(orion.users, 'create')
     fetchOrgByIdStub = sinon.stub(Organization, 'fetchById').resolves(org)
     fetchUserByIdStub = sinon.stub(User, 'fetchById').resolves(user)
-    githubApiStub = sinon.stub(GithubAPI.prototype, 'getUser').resolves(githubUserFixture)
+    githubApiStub = sinon.stub(GithubAPI.prototype, 'getSelf').resolves(githubUserFixture)
   })
 
   afterEach(() => {
@@ -174,19 +174,6 @@ describe('#organization.user.added', () => {
         })
     })
 
-    it('should throw a `WorkerStopError` if a `github.getUser` throws a `GithubEntityNoPermissionError`', done => {
-      let thrownErr = new GithubEntityNoPermissionError('User already added')
-      githubApiStub.rejects(thrownErr)
-
-      OrganizationUserAddedWorker(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.data.err).to.equal(thrownErr)
-          done()
-        })
-    })
-
     it('should throw any other error as a normal error', done => {
       let thrownErr = new Error('Unexpected error')
       fetchOrgByIdStub.rejects(thrownErr)
@@ -229,8 +216,7 @@ describe('#organization.user.added', () => {
         .then(() => {
           sinon.assert.calledOnce(githubApiStub)
           sinon.assert.calledWithExactly(
-            githubApiStub,
-            userGithubId
+            githubApiStub
           )
         })
     })
