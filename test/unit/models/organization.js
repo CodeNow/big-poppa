@@ -10,6 +10,7 @@ const BaseModel = require('models/base')
 const moment = require('moment')
 const Organization = require('models/organization')
 const User = require('models/user')
+const rabbitMQ = require('util/rabbitmq')
 
 const GithubAPI = require('util/github')
 const GithubEntityNotFoundError = require('errors/github-entity-not-found-error')
@@ -134,6 +135,7 @@ describe('Organization', () => {
       let usersStub
       let attachStub
       let collectionStub
+      let publishUserAddedToOrganizationStub
 
       beforeEach(() => {
         attachStub = sinon.stub().resolves()
@@ -142,12 +144,14 @@ describe('Organization', () => {
         }
         usersStub = sinon.stub(Organization.prototype, 'users').returns(collectionStub)
         sinon.stub(GithubAPI.prototype, 'hasUserOrgMembership').resolves({})
+        publishUserAddedToOrganizationStub = sinon.stub(rabbitMQ, 'publishUserAddedToOrganization')
         user = new User({ id: Math.floor(Math.random() * 100) })
       })
 
       afterEach(() => {
         Organization.prototype.users.restore()
         GithubAPI.prototype.hasUserOrgMembership.restore()
+        publishUserAddedToOrganizationStub.restore()
       })
 
       it('should throw a TypeError if no user is passed', done => {
@@ -199,6 +203,26 @@ describe('Organization', () => {
             sinon.assert.calledOnce(attachStub)
             expect(err).to.equal(err)
             done()
+          })
+      })
+
+      it('should publish an event with rabbitMQ', () => {
+        org.addUser(user)
+          .then(() => {
+            sinon.assert.calledOnce(publishUserAddedToOrganizationStub)
+            sinon.assert.calledWithExactly(
+              publishUserAddedToOrganizationStub,
+              {
+                user: {
+                  id: user.id,
+                  githubId: user.githubId
+                },
+                organization: {
+                  id: org.id,
+                  githubId: org.githubId
+                }
+              }
+            )
           })
       })
     })

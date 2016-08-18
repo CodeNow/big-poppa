@@ -90,7 +90,7 @@ Promise.resolve()
   })
   .then(function migrateUsersFromMongo (users) {
     log.trace('Create all users from whitelists. Filter whitelists that dont exist on Github or failed')
-    return Promise.map(users, createUser)
+    return Promise.mapSeries(users, createUser)
   })
   .catch(err => log.error({ err: err }, 'Unhandeled error'))
   .then(function logMigrationResults () {

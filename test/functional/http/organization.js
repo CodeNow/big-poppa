@@ -13,6 +13,8 @@ const githubUserFixture = require('../../fixtures/github/user')
 const githubOtherUserFixture = require('../../fixtures/github/other-user')
 const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
+const sinon = require('sinon')
+const rabbitMQ = require('util/rabbitmq')
 
 const server = require('http/server')
 
@@ -23,6 +25,7 @@ describe('HTTP Organization Functional Test', () => {
   let orgId
   let userId
   let agent
+  let publishUserAddedToOrganizationStub
 
   before(() => {
     return server.start()
@@ -49,11 +52,16 @@ describe('HTTP Organization Functional Test', () => {
       status: 200,
       body: githubOrganizationFixture
     })
+    publishUserAddedToOrganizationStub = sinon.stub(rabbitMQ, 'publishUserAddedToOrganization')
     return testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
       .then(res => {
         orgId = res.org[res.org.idAttribute]
         userId = res.user[res.user.idAttribute]
       })
+  })
+
+  afterEach(() => {
+    publishUserAddedToOrganizationStub.restore()
   })
 
   describe('GET', () => {
@@ -76,6 +84,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
           expect(org.users[0]).to.have.property('githubId')
+          expect(org.users[0]).to.not.have.property('accessToken')
         })
     })
 
@@ -98,6 +107,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
           expect(org.users[0]).to.have.property('githubId')
+          expect(org.users[0]).to.not.have.property('accessToken')
         })
     })
 
@@ -168,6 +178,7 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
           expect(org.users[0]).to.have.property('githubId')
+          expect(org.users[0]).to.not.have.property('accessToken')
         })
     })
 
@@ -265,8 +276,10 @@ describe('HTTP Organization Functional Test', () => {
           expect(org.users).to.have.length(2)
           expect(org.users[0]).to.have.property('id')
           expect(org.users[0]).to.have.property('githubId', userGithubId)
+          expect(org.users[0]).to.not.have.property('accessToken')
           expect(org.users[1]).to.have.property('id')
           expect(org.users[1]).to.have.property('githubId', otherGithubId)
+          expect(org.users[1]).to.not.have.property('accessToken')
         })
     })
 
