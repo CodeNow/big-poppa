@@ -3,6 +3,7 @@
 const logger = require('util/logger').child({ module: 'scripts/user-whitelist-migration-script' })
 const User = require('models/user')
 const Promise = require('bluebird')
+const rabbitMQ = require('util/rabbitmq')
 
 const GithubAPI = require('util/github')
 const AddUserToOrganization = require('workers/organization.user.add')
@@ -16,7 +17,7 @@ let orgDidntExist = []
 let usersWithNoOrgs = []
 let badUsers = []
 let orgsThatFailed = []
-
+rabbitMQ.connect()
 /**
  * This fetches all of the orgs each user belongs to, and attempts to create the relationships for each one.  If the org
  * doesn't exist in our system, AddUserToOrganization will throw an error, which we just ignore.
@@ -77,5 +78,6 @@ User.collection()
       orgDidntExist: orgDidntExist.length,
       badOrgs: badUsers.length
     }, 'Finished. Exiting.')
+    rabbitMQ.disconnect()
     process.exit()
   })
