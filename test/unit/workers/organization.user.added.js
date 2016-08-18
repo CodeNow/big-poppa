@@ -250,7 +250,7 @@ describe('#organization.user.added', () => {
               created_at: +(moment(user.get('created')).format('X')),
               update_last_request_at: true,
               companies: [ {
-                company_id: orgId,
+                company_id: org.get('name').toLowerCase(),
                 custom_attributes: {
                   github_id: orgGithubId
                 },
