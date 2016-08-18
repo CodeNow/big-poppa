@@ -62,6 +62,33 @@ describe('HTTP /organization', () => {
 
   describe('transformSingleOrg', () => {
     let originalObject
+
+    beforeEach(() => {
+      originalObject = {
+        users: []
+      }
+    })
+
+    it('should return the same object when it has no users', () => {
+      let obj = OrganizationRouter.removeUserAccessTokens(originalObject)
+      expect(obj).to.equal(originalObject)
+    })
+
+    it('should remove accessToken from the users', () => {
+      const user = {
+        accessToken: 'asdasdasdsad',
+        id: 1
+      }
+      originalObject.users.push(user)
+      let obj = OrganizationRouter.removeUserAccessTokens(originalObject)
+      expect(obj).to.equal(originalObject)
+      expect(obj.users[0].accessToken).to.equal(undefined)
+      expect(obj.users[0].id).to.equal(user.id)
+    })
+  })
+
+  describe('transformSingleOrg', () => {
+    let originalObject
     let now
 
     beforeEach(() => {
