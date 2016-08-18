@@ -96,7 +96,7 @@ describe('Organization.user.added Functional Test', () => {
                 created_at: +(moment(user.get('created')).format('X')),
                 update_last_request_at: true,
                 companies: [ {
-                  company_id: orgId,
+                  company_id: githubOrganizationFixture.login.toLowerCase(),
                   custom_attributes: {
                     github_id: orgGithubId
                   },
