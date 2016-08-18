@@ -40,7 +40,7 @@ describe('Organization.user.added Functional Test', () => {
       status: 200,
       body: githubUserFixture
     })
-    githubAPI.stub('GET', `/user?access_token=testing`).returns({
+    githubAPI.stub('GET', '/user?access_token=testing').returns({
       status: 200,
       body: githubUserFixture
     })

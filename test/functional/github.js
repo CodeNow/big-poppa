@@ -228,4 +228,3 @@ describe('GithubAPI Functional Tests', () => {
     })
   })
 })
-
