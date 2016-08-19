@@ -2,12 +2,18 @@
 
 const logger = require('util/logger').child({ module: 'scripts/user-whitelist-migration-script' })
 const User = require('models/user')
-const Promise = require('bluebird')
+const MongoClient = require('mongodb').MongoClient
+const keypather = require('keypather')()
 const rabbitMQ = require('util/rabbitmq')
+const Promise = require('bluebird')
 
-const GithubAPI = require('util/github')
-const AddUserToOrganization = require('workers/organization.user.add')
+const Organization = require('models/organization')
 
+// Either set MONGO env with connection query or set host, port and db separately
+const mongoHost = process.env.MONGODB_HOST || 'localhost'
+const mongoPort = process.env.MONGODB_PORT || 27020
+const mongoDatabase = process.env.MONGODB_DB || 'userwhitelist_test'
+const url = process.env.MONGO || `mongodb://${mongoHost}:${mongoPort}/${mongoDatabase}`
 var log = logger.child({})
 
 // Global variables meant to be used reporting/logging at the end of script
@@ -17,67 +23,90 @@ let orgDidntExist = []
 let usersWithNoOrgs = []
 let badUsers = []
 let orgsThatFailed = []
+let userHadNoLocation = []
 rabbitMQ.connect()
 /**
  * This fetches all of the orgs each user belongs to, and attempts to create the relationships for each one.  If the org
  * doesn't exist in our system, AddUserToOrganization will throw an error, which we just ignore.
  */
-function addUserToAllGithubOrgs (user) {
-  const githubApi = new GithubAPI(user.accessToken)
-  return githubApi.getOrgsForUser(user.githubId)
-    .tap(orgs => {
-      if (!orgs.length) {
-        usersWithNoOrgs.push(user)
-      }
+function addUserToAllGithubOrgs (db) {
+  return function (jsonUser) {
+    log.info('Fetching all documents for user')
+    let userCollection = db.collection('users')
+    return Promise.fromCallback(cb => {
+      userCollection.findOne({ 'accounts.github.id': jsonUser.githubId }, cb)
     })
-    .map(org => {
-      log.trace({
-        org: org,
-        member: user
-      }, 'Update newly created orgs')
-      // If the org doesn't exist in our db, it'll just worker_stop
-      return AddUserToOrganization({
-        organizationGithubId: org.id,
-        userGithubId: user.githubId
+      .then(mongoUser => {
+        const orgName = keypather.get(mongoUser, 'userOptions.uiState.previousLocation.org')
+        if (!orgName) {
+          throw new Error('Could not find previousLocation')
+        }
+        return Promise.all([
+          Organization.fetch({ name: orgName }),
+          User.fetchById(jsonUser.id)
+        ])
+          .spread(function (org, user) {
+            log.trace({
+              org: org,
+              member: user
+            }, 'Update newly created orgs')
+            // If the org doesn't exist in our db, it'll just worker_stop
+            return org.users().attach(user.get(user.idAttribute))
+              .tap(membership => {
+                totalMembershipsCreated.push(membership)
+              })
+          })
+          .catch(err => {
+            if (/Organization or user was not found/.test(err.message)) {
+              orgDidntExist.push(orgName)
+            } else if (/User already added to organization/.test(err.message)) {
+              alreadyMembershipsCreated.push(orgName)
+            } else {
+              orgsThatFailed.push(orgName)
+              log.error({ err: err }, 'Error creating relationships')
+            }
+          })
       })
-        .tap(membership => {
-          totalMembershipsCreated.push(membership)
-        })
-        .catch(err => {
-          if (/Organization or user was not found/.test(err.message)) {
-            orgDidntExist.push(org)
-          } else if (/User already added to organization/.test(err.message)) {
-            alreadyMembershipsCreated.push(org)
-          } else {
-            orgsThatFailed.push(org)
-            log.error({ err: err }, 'Error creating relationships')
-          }
-        })
-    })
-    .catch(err => {
-      log.error({ err: err }, `Error creating relationships for ${user.githubId}`)
-    })
+      .catch(err => {
+        if (/Could not find previousLocation/.test(err.message)) {
+          userHadNoLocation.push(jsonUser)
+        } else {
+          log.error({ err: err }, `Error creating relationships for ${jsonUser.githubId}`)
+        }
+      })
+  }
 }
-
-User.collection()
-  .fetch()
-  .then(users => users.toJSON())
-  .then(users => {
-    log.trace({
-      users: users
-    }, 'fetch users')
-    return Promise.mapSeries(users, addUserToAllGithubOrgs)
-  })
-  .catch(err => log.error({ err: err }, 'Unhandeled error'))
-  .then(function logMigrationResults () {
-    log.trace({
-      totalMembershipsCreated: totalMembershipsCreated.length,
-      alreadyMembershipsCreated: alreadyMembershipsCreated.length,
-      orgsWithNoUsers: usersWithNoOrgs.length,
-      orgsThatFailed: orgsThatFailed.length,
-      orgDidntExist: orgDidntExist.length,
-      badOrgs: badUsers.length
-    }, 'Finished. Exiting.')
-    rabbitMQ.disconnect()
-    process.exit()
+Promise.fromCallback(cb => {
+  let opts = {}
+  if (process.env.MONGO_REPLSET_NAME) {
+    opts.replset = {
+      rs_name: process.env.MONGO_REPLSET_NAME
+    }
+  }
+  MongoClient.connect(url, opts, cb)
+})
+  .then((db) => {
+    return User.collection()
+      .fetch()
+      .then(users => users.toJSON())
+      .then(users => {
+        log.trace({
+          users: users
+        }, 'fetch users')
+        return Promise.mapSeries(users, addUserToAllGithubOrgs(db))
+      })
+      .catch(err => log.error({ err: err }, 'Unhandeled error'))
+      .then(function logMigrationResults () {
+        log.trace({
+          totalMembershipsCreated: totalMembershipsCreated.length,
+          alreadyMembershipsCreated: alreadyMembershipsCreated.length,
+          orgsWithNoUsers: usersWithNoOrgs.length,
+          orgsThatFailed: orgsThatFailed.length,
+          orgDidntExist: orgDidntExist.length,
+          userHadNoLocation: userHadNoLocation.length,
+          badOrgs: badUsers.length
+        }, 'Finished. Exiting.')
+        rabbitMQ.disconnect()
+        process.exit()
+      })
   })
