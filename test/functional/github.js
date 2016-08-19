@@ -12,6 +12,7 @@ const githubApi = new GithubAPI()
 const githubOrganizationFixture = require('../fixtures/github/organization')
 const githubUseFixture = require('../fixtures/github/user')
 const githubOrgMembershipFixture = require('../fixtures/github/org-membership')
+const githubEmailFixture = require('../fixtures/github/email')
 const githubNotFoundFixture = require('../fixtures/github/not-found')
 
 const GithubEntityError = require('errors/github-entity-error')
@@ -111,6 +112,38 @@ describe('GithubAPI Functional Tests', () => {
     })
   })
 
+  describe('getPrimaryEmailAddress', () => {
+    let userId = 1981198
+
+    it('should return an array of github organizations ', () => {
+      mockGithubApi.stub('GET', '/user/emails?page=0&per_page=100&access_token=testing').returns({
+        status: 200,
+        body: JSON.stringify(githubEmailFixture)
+      })
+
+      return githubApi.getPrimaryEmailAddress(userId)
+        .then(email => {
+          expect(email).to.equal(githubEmailFixture[0].email)
+        })
+    })
+
+    it('should throw a `GithubEntityError` if the fetch fails', done => {
+      // Start an instance of GithubAPI with an invalid access token
+      let githubApi = new GithubAPI('asdfasd')
+
+      mockGithubApi.stub('GET', '/user/emails?page=0&per_page=100&access_token=testing').returns({
+        status: 404,
+        body: githubNotFoundFixture
+      })
+      return githubApi.getOrgsForUser(userId)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err).to.be.an.instanceOf(GithubEntityError)
+          done()
+        })
+    })
+  })
+
   describe('getUser', () => {
     let userGithubId = 1981198
 
@@ -195,4 +228,3 @@ describe('GithubAPI Functional Tests', () => {
     })
   })
 })
-

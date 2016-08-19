@@ -10,11 +10,10 @@ const User = require('models/user')
 const Organization = require('models/organization')
 
 const NotFoundError = require('errors/not-found-error')
-const GithubEntityNoPermissionError = require('errors/github-entity-no-permission-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const GithubAPI = require('util/github')
 const moment = require('moment')
-const OrganizationUserAddedSchema = require('workers/organization.user.added').schema
+const OrganizationUserAddedSchema = require('workers/organization.user.added').jobSchema
 const OrganizationUserAddedWorker = require('workers/organization.user.added').task
 const orion = require('@runnable/orion')
 const githubUserFixture = require('../../fixtures/github/user')
@@ -32,6 +31,8 @@ describe('#organization.user.added', () => {
   let fetchOrgByIdStub
   let fetchUserByIdStub
   let githubApiStub
+  let getEmailStub
+  let email = 'sdfxdsfgsdff'
 
   beforeEach(() => {
     user = new User({ id: userId, githubId: userGithubId })
@@ -50,7 +51,8 @@ describe('#organization.user.added', () => {
     orionUserCreateStub = sinon.stub(orion.users, 'create')
     fetchOrgByIdStub = sinon.stub(Organization, 'fetchById').resolves(org)
     fetchUserByIdStub = sinon.stub(User, 'fetchById').resolves(user)
-    githubApiStub = sinon.stub(GithubAPI.prototype, 'getUser').resolves(githubUserFixture)
+    githubApiStub = sinon.stub(GithubAPI.prototype, 'getSelf').resolves(githubUserFixture)
+    getEmailStub = sinon.stub(GithubAPI.prototype, 'getPrimaryEmailAddress').resolves(email)
   })
 
   afterEach(() => {
@@ -58,6 +60,7 @@ describe('#organization.user.added', () => {
     fetchUserByIdStub.restore()
     githubApiStub.restore()
     orionUserCreateStub.restore()
+    getEmailStub.restore()
   })
 
   describe('Validation', () => {
@@ -174,19 +177,6 @@ describe('#organization.user.added', () => {
         })
     })
 
-    it('should throw a `WorkerStopError` if a `github.getUser` throws a `GithubEntityNoPermissionError`', done => {
-      let thrownErr = new GithubEntityNoPermissionError('User already added')
-      githubApiStub.rejects(thrownErr)
-
-      OrganizationUserAddedWorker(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.data.err).to.equal(thrownErr)
-          done()
-        })
-    })
-
     it('should throw any other error as a normal error', done => {
       let thrownErr = new Error('Unexpected error')
       fetchOrgByIdStub.rejects(thrownErr)
@@ -229,7 +219,17 @@ describe('#organization.user.added', () => {
         .then(() => {
           sinon.assert.calledOnce(githubApiStub)
           sinon.assert.calledWithExactly(
-            githubApiStub,
+            githubApiStub
+          )
+        })
+    })
+
+    it('should fetch the email from github', () => {
+      return OrganizationUserAddedWorker(validJob)
+        .then(() => {
+          sinon.assert.calledOnce(getEmailStub)
+          sinon.assert.calledWithExactly(
+            getEmailStub,
             userGithubId
           )
         })
@@ -243,7 +243,7 @@ describe('#organization.user.added', () => {
             orionUserCreateStub,
             {
               name: githubUserFixture.login,
-              email: githubUserFixture.email,
+              email: email,
               custom_attributes: {
                 user_id: userId
               },
