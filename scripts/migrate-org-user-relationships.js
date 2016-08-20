@@ -101,7 +101,7 @@ Promise.fromCallback(cb => {
         })
       })
       .catch(err => log.error({ err: err }, 'Unhandeled error'))
-      .then(function logMigrationResults () {
+      .finally(function logMigrationResults () {
         log.trace({
           totalMembershipsCreated: totalMembershipsCreated.length,
           alreadyMembershipsCreated: alreadyMembershipsCreated.length,
