@@ -29,56 +29,54 @@ rabbitMQ.connect()
  * This fetches all of the orgs each user belongs to, and attempts to create the relationships for each one.  If the org
  * doesn't exist in our system, AddUserToOrganization will throw an error, which we just ignore.
  */
-function addUserToAllGithubOrgs (db) {
-  return function (jsonUser) {
-    log.info('Fetching all documents for user')
-    let userCollection = db.collection('users')
-    return Promise.fromCallback(cb => {
-      userCollection.findOne({ 'accounts.github.id': jsonUser.githubId }, cb)
-    })
-      .then(mongoUser => {
-        let orgName = keypather.get(mongoUser, 'userOptions.uiState.previousLocation.org')
-        log.trace({
-          orgName: orgName,
-          mongoUser: mongoUser
-        }, 'Attaching user to org')
-        if (!orgName) {
-          throw new Error('Could not find previousLocation')
-        }
-        return Promise.all([
+function addUserToAllGithubOrgs (db, jsonUser) {
+  log.info('Fetching all documents for user')
+  let userCollection = db.collection('users')
+  return Promise.fromCallback(cb => {
+    userCollection.findOne({ 'accounts.github.id': jsonUser.githubId }, cb)
+  })
+    .then(mongoUser => {
+      let orgName = keypather.get(mongoUser, 'userOptions.uiState.previousLocation.org')
+      log.trace({
+        orgName: orgName,
+        mongoUser: mongoUser
+      }, 'Attaching user to org')
+      if (!orgName) {
+        throw new Error('Could not find previousLocation')
+      }
+      return Promise.all([
           Organization.fetch({ name: orgName }),
           User.fetchById(jsonUser.id)
         ])
-          .spread(function (org, user) {
-            log.trace({
-              org: org,
-              member: user
-            }, 'Update newly created orgs')
-            // If the org doesn't exist in our db, it'll just worker_stop
-            return org.users().attach(user.get(user.idAttribute))
-              .tap(membership => {
-                totalMembershipsCreated.push(membership)
-              })
-          })
-          .catch(err => {
-            if (/Organization or user was not found/.test(err.message)) {
-              orgDidntExist.push(orgName)
-            } else if (/User already added to organization/.test(err.message)) {
-              alreadyMembershipsCreated.push(orgName)
-            } else {
-              orgsThatFailed.push(orgName)
-              log.error({ err: err }, 'Error creating relationships')
-            }
-          })
-      })
-      .catch(err => {
-        if (/Could not find previousLocation/.test(err.message)) {
-          userHadNoLocation.push(jsonUser)
-        } else {
-          log.error({ err: err }, `Error creating relationships for ${jsonUser.githubId}`)
-        }
-      })
-  }
+        .spread(function (org, user) {
+          log.trace({
+            org: org,
+            member: user
+          }, 'Update newly created orgs')
+          // If the org doesn't exist in our db, it'll just worker_stop
+          return org.users().attach(user.get(user.idAttribute))
+            .tap(membership => {
+              totalMembershipsCreated.push(membership)
+            })
+        })
+        .catch(err => {
+          if (/Organization or user was not found/.test(err.message)) {
+            orgDidntExist.push(orgName)
+          } else if (/User already added to organization/.test(err.message)) {
+            alreadyMembershipsCreated.push(orgName)
+          } else {
+            orgsThatFailed.push(orgName)
+            log.error({ err: err }, 'Error creating relationships')
+          }
+        })
+    })
+    .catch(err => {
+      if (/Could not find previousLocation/.test(err.message)) {
+        userHadNoLocation.push(jsonUser)
+      } else {
+        log.error({ err: err }, `Error creating relationships for ${jsonUser.githubId}`)
+      }
+    })
 }
 Promise.fromCallback(cb => {
   let opts = {}
@@ -97,7 +95,9 @@ Promise.fromCallback(cb => {
         log.trace({
           users: users
         }, 'fetch users')
-        return Promise.mapSeries(users, addUserToAllGithubOrgs(db))
+        return Promise.mapSeries(users, (user) => {
+          return addUserToAllGithubOrgs(db, user)
+        })
       })
       .catch(err => log.error({ err: err }, 'Unhandeled error'))
       .then(function logMigrationResults () {
