@@ -54,7 +54,8 @@ function addUserToAllGithubOrgs (db, jsonUser) {
             member: user,
             orgName: orgName
           }, 'Update newly created orgs')
-          // If the org doesn't exist in our db, it'll just worker_stop
+          // Don't use the model function, since it will hurt intercom
+          // Also, if the user org relationship already exists, then it'll just .catch
           return org.users().attach(user.get(user.idAttribute))
             .tap(membership => {
               totalMembershipsCreated.push(membership)
