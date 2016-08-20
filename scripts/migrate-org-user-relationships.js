@@ -39,35 +39,38 @@ function addUserToAllGithubOrgs (db, jsonUser) {
       let orgName = keypather.get(mongoUser, 'userOptions.uiState.previousLocation.org')
       log.trace({
         orgName: orgName,
-        mongoUser: mongoUser
+        mongoUser: mongoUser.accounts.github.username
       }, 'Attaching user to org')
       if (!orgName) {
         throw new Error('Could not find previousLocation')
       }
-      return Promise.all([
-          Organization.fetch({ name: orgName }),
-          User.fetchById(jsonUser.id)
-        ])
-        .spread(function (org, user) {
+      return Promise.props({
+        org: Organization.fetch({ lowerName: orgName.toLowerCase() }),
+        user: User.fetchById(jsonUser.id)
+      })
+        .then(function (res) {
+          let org = res.org
+          let user = res.user
           log.trace({
             org: org,
-            member: user
+            member: user,
+            orgName: orgName
           }, 'Update newly created orgs')
           // If the org doesn't exist in our db, it'll just worker_stop
           return org.users().attach(user.get(user.idAttribute))
             .tap(membership => {
               totalMembershipsCreated.push(membership)
             })
-        })
-        .catch(err => {
-          if (/Organization or user was not found/.test(err.message)) {
-            orgDidntExist.push(orgName)
-          } else if (/User already added to organization/.test(err.message)) {
-            alreadyMembershipsCreated.push(orgName)
-          } else {
-            orgsThatFailed.push(orgName)
-            log.error({ err: err }, 'Error creating relationships')
-          }
+            .catch(err => {
+              if (/Organization or user was not found/.test(err.message)) {
+                orgDidntExist.push(orgName)
+              } else if (/User already added to organization/.test(err.message)) {
+                alreadyMembershipsCreated.push(orgName)
+              } else {
+                orgsThatFailed.push(orgName)
+                log.error({ err: err }, 'Error creating relationships')
+              }
+            })
         })
     })
     .catch(err => {
