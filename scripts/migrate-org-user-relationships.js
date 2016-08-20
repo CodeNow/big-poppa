@@ -44,13 +44,11 @@ function addUserToAllGithubOrgs (db, jsonUser) {
       if (!orgName) {
         throw new Error('Could not find previousLocation')
       }
-      return Promise.props({
-        org: Organization.fetch({ lowerName: orgName.toLowerCase() }),
-        user: User.fetchById(jsonUser.id)
-      })
-        .then(function (res) {
-          let org = res.org
-          let user = res.user
+      return Promise.all([
+        Organization.fetch({ lowerName: orgName.toLowerCase() }),
+        User.fetchById(jsonUser.id)
+      ])
+        .spread(function (org, user) {
           log.trace({
             org: org,
             member: user,
