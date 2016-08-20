@@ -37,7 +37,11 @@ function addUserToAllGithubOrgs (db) {
       userCollection.findOne({ 'accounts.github.id': jsonUser.githubId }, cb)
     })
       .then(mongoUser => {
-        const orgName = keypather.get(mongoUser, 'userOptions.uiState.previousLocation.org')
+        let orgName = keypather.get(mongoUser, 'userOptions.uiState.previousLocation.org')
+        log.trace({
+          orgName: orgName,
+          mongoUser: mongoUser
+        }, 'Attaching user to org')
         if (!orgName) {
           throw new Error('Could not find previousLocation')
         }
