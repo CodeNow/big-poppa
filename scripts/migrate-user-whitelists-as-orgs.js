@@ -73,6 +73,7 @@ function updateOrganization (userWhitelist) {
       log.trace({ org: org }, 'Update organization')
       return org.save({
         trialEnd: moment(trialEndDate, 'MM-DD-YYYY').toDate(),
+        isActive: userWhitelist.allowed,
         firstDockCreated: userWhitelist.firstDockCreated || false
       })
     })
