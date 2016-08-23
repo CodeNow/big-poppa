@@ -23,6 +23,7 @@ describe('HTTP Organization Functional Test', () => {
   let otherGithubId = 6379413
   let orgGithubId = 2828361
   let orgId
+  let orgName
   let userId
   let agent
   let publishUserAddedToOrganizationStub
@@ -56,6 +57,7 @@ describe('HTTP Organization Functional Test', () => {
     return testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
       .then(res => {
         orgId = res.org[res.org.idAttribute]
+        orgName = res.org.attributes.name
         userId = res.user[res.user.idAttribute]
       })
   })
@@ -91,7 +93,7 @@ describe('HTTP Organization Functional Test', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
         .getOrganizations({
-          name: orgGithubId.toString()
+          name: orgName
         })
         .then(orgs => {
           expect(orgs).to.have.lengthOf(1)
