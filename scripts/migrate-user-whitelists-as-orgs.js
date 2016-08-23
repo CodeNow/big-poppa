@@ -72,7 +72,9 @@ function updateOrganization (userWhitelist) {
     .then(org => {
       log.trace({ org: org }, 'Update organization')
       let updates = {
-        firstDockCreated: userWhitelist.firstDockCreated || false
+        isActive: userWhitelist.allowed,
+        // Set `firstDockCreated` if set in the userwhitelist or in the org
+        firstDockCreated: userWhitelist.firstDockCreated || org.get('firstDockCreated') || false
       }
       if (!org.get('stripeCustomerId')) {
         // Only update the `trialEnd` if they are NOT in Stripe
