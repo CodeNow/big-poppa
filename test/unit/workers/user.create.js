@@ -10,24 +10,31 @@ const User = require('models/user')
 const GithubEntityError = require('errors/github-entity-error')
 const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
+const NotFoundError = require('errors/not-found-error')
 
 const CreateUser = require('workers/user.create')
 
 describe('#user.create', () => {
   let saveStub
+  let accessToken = '282398423230239423'
   let newUser
   let validJob
+  let userMock
+  let fetchByGithubIdStub
 
   beforeEach(() => {
     validJob = {
-      accessToken: 'asdasdasdasasdasdas',
+      accessToken: accessToken,
       githubId: 123
     }
     newUser = {}
+    userMock = new User()
     saveStub = sinon.stub(User.prototype, 'save').resolves(newUser)
+    fetchByGithubIdStub = sinon.stub(User, 'fetchByGithubId').rejects(new NotFoundError('not found'))
   })
 
   afterEach(() => {
+    fetchByGithubIdStub.restore()
     User.prototype.save.restore()
   })
 
@@ -102,7 +109,35 @@ describe('#user.create', () => {
   })
 
   describe('Main Functionality', done => {
-    it('should call `save`', done => {
+    it('should call `fetchByGithubId`', done => {
+      CreateUser(validJob)
+        .then(() => {
+          sinon.assert.calledOnce(fetchByGithubIdStub)
+          sinon.assert.calledWithExactly(
+            fetchByGithubIdStub,
+            validJob.githubId
+          )
+        })
+        .asCallback(done)
+    })
+
+    it('should update the user with the new access token if the user exists', () => {
+      fetchByGithubIdStub.resolves(userMock)
+
+      CreateUser(validJob)
+        .then(() => {
+          sinon.assert.calledOnce(saveStub)
+          sinon.assert.calledWithExactly(
+            saveStub,
+            {
+              accessToken: accessToken
+            }
+          )
+        })
+        .asCallback(done)
+    })
+
+    it('should call `save` if the user doesnt exist', done => {
       CreateUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(saveStub)
