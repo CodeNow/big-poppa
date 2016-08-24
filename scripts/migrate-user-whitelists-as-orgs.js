@@ -71,11 +71,16 @@ function updateOrganization (userWhitelist) {
   return Organization.fetchByGithubId(userWhitelist.githubId)
     .then(org => {
       log.trace({ org: org }, 'Update organization')
-      return org.save({
-        trialEnd: moment(trialEndDate, 'MM-DD-YYYY').toDate(),
+      let updates = {
         isActive: userWhitelist.allowed,
-        firstDockCreated: userWhitelist.firstDockCreated || false
-      })
+        // Set `firstDockCreated` if set in the userwhitelist or in the org
+        firstDockCreated: userWhitelist.firstDockCreated || org.get('firstDockCreated') || false
+      }
+      if (!org.get('stripeCustomerId')) {
+        // Only update the `trialEnd` if they are NOT in Stripe
+        updates.trialEnd = moment(trialEndDate, 'MM-DD-YYYY').toDate()
+      }
+      return org.save(updates)
     })
     .tap(function (orgResult) {
       log.trace({ orgResult: orgResult }, 'Update organization')
