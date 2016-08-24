@@ -12,9 +12,9 @@ const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const NotFoundError = require('errors/not-found-error')
 
-const CreateUser = require('workers/user.create')
+const CreateOrUpdateUser = require('workers/user.create-or-update')
 
-describe('#user.create', () => {
+describe('#user.create-or-update', () => {
   let saveStub
   let accessToken = '282398423230239423'
   let newUser
@@ -40,7 +40,7 @@ describe('#user.create', () => {
 
   describe('Validation', () => {
     it('should throw a validation error if no `githubId` is passed', done => {
-      CreateUser({ hello: 'World' })
+      CreateOrUpdateUser({ hello: 'World' })
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -50,7 +50,7 @@ describe('#user.create', () => {
     })
 
     it('should throw a validation error if the `githubId` is not a number', done => {
-      CreateUser({ githubId: 'hello' })
+      CreateOrUpdateUser({ githubId: 'hello' })
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -60,7 +60,7 @@ describe('#user.create', () => {
     })
 
     it('should not throw a validation error if a valid job is passed', done => {
-      CreateUser(validJob)
+      CreateOrUpdateUser(validJob)
         .asCallback(done)
     })
   })
@@ -70,7 +70,7 @@ describe('#user.create', () => {
       let originalErr = new GithubEntityError('hello')
       saveStub.rejects(originalErr)
 
-      CreateUser(validJob)
+      CreateOrUpdateUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -84,7 +84,7 @@ describe('#user.create', () => {
       let originalErr = new UniqueError('hello')
       saveStub.rejects(originalErr)
 
-      CreateUser(validJob)
+      CreateOrUpdateUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -98,7 +98,7 @@ describe('#user.create', () => {
       let originalErr = new Error('hello')
       saveStub.rejects(originalErr)
 
-      CreateUser(validJob)
+      CreateOrUpdateUser(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.not.be.an.instanceof(WorkerStopError)
@@ -110,7 +110,7 @@ describe('#user.create', () => {
 
   describe('Main Functionality', done => {
     it('should call `fetchByGithubId`', done => {
-      CreateUser(validJob)
+      CreateOrUpdateUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(fetchByGithubIdStub)
           sinon.assert.calledWithExactly(
@@ -124,7 +124,7 @@ describe('#user.create', () => {
     it('should update the user with the new access token if the user exists', () => {
       fetchByGithubIdStub.resolves(userMock)
 
-      CreateUser(validJob)
+      CreateOrUpdateUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(saveStub)
           sinon.assert.calledWithExactly(
@@ -138,7 +138,7 @@ describe('#user.create', () => {
     })
 
     it('should call `save` if the user doesnt exist', done => {
-      CreateUser(validJob)
+      CreateOrUpdateUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(saveStub)
           sinon.assert.calledWithExactly(
@@ -153,7 +153,7 @@ describe('#user.create', () => {
     })
 
     it('should return a user', done => {
-      CreateUser(validJob)
+      CreateOrUpdateUser(validJob)
         .then(res => {
           sinon.assert.calledOnce(saveStub)
           expect(res).to.equal(newUser)
