@@ -210,16 +210,16 @@ describe('HTTP Organization Functional Test', () => {
               trialEnd: timeCreated,
               activePeriodEnd: timeCreated
             })
-        })
-        .then(() => agent.getOrganization(orgId))
-        .then(org => {
-          expect(org).to.have.property('id')
-          expect(org).to.have.property('githubId', githubId)
-          expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
-          expect(org).to.have.property('trialEnd', time.toISOString())
-          expect(org).to.have.property('activePeriodEnd', time.toISOString())
-          expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').toISOString())
-          expect(org).to.have.property('firstDockCreated', false)
+            // A patch should always return an updated org
+            .then(org => {
+              expect(org).to.have.property('id')
+              expect(org).to.have.property('githubId', githubId)
+              expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
+              expect(org).to.have.property('trialEnd', time.toISOString())
+              expect(org).to.have.property('activePeriodEnd', time.toISOString())
+              expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').toISOString())
+              expect(org).to.have.property('firstDockCreated', false)
+            })
         })
     })
 

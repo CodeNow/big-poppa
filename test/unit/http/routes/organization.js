@@ -346,7 +346,7 @@ describe('HTTP /organization', () => {
     it('should fetch with `fetchById`', () => {
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
-          sinon.assert.calledOnce(fetchByIdStub)
+          sinon.assert.calledTwice(fetchByIdStub)
           sinon.assert.calledWithExactly(
             fetchByIdStub,
             orgId
