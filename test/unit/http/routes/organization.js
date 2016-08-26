@@ -387,6 +387,30 @@ describe('HTTP /organization', () => {
           expect(err).to.equal(err)
         })
     })
+
+    it('should save the JSON results in the body using `save`', () => {
+      let requestStub = {
+        params: { id: orgId },
+        body: {
+          metadata: {
+            completedAhaGuide: true
+          }
+        }
+      }
+
+      return OrganizationRouter.patchOne(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(orgMock.save)
+          sinon.assert.calledWithExactly(
+            orgMock.save,
+            {
+              metadata: {
+                completedAhaGuide: true
+              }
+            }
+          )
+        })
+    })
   })
 
   describe('addUser', () => {

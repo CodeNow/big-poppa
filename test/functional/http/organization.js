@@ -240,6 +240,44 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it('should return a 200 when patching the `metadata` json property', () => {
+      return agent
+        .getOrganization(orgId)
+        .then(org => {
+          expect(org).to.have.property('metadata', null) // Default value
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                completedAhaGuide: true
+              }
+            })
+        })
+        .then(() => agent.getOrganization(orgId))
+        .then(org => {
+          expect(org).to.have.property('id', orgId)
+          expect(org).to.have.property('metadata')
+          expect(org.metadata).to.deep.equal({completedAhaGuide: true})
+        })
+    })
+
+    it('should return an error if the property is not a boolean', done => {
+      return agent
+        .getOrganization(orgId)
+        .then(org => {
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                completedAhaGuide: "string"
+              }
+            })
+        })
+        .asCallback(err => {
+          expect(err.data.orignalError.statusCode).to.equal(400)
+          expect(err.data.orignalError.message).to.equal('Validation Error')
+          done()
+        })
+    })
+
     it('should return a 404 for an non existing organization', done => {
       return agent
         .updateOrganization(2342, {})
