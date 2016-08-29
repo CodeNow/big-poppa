@@ -256,7 +256,7 @@ describe('HTTP Organization Functional Test', () => {
         .then(org => {
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('metadata')
-          expect(org.metadata).to.deep.equal({completedAhaGuide: true})
+          expect(org).to.have.deep.property('metadata.completedAhaGuide', true)
         })
     })
 
@@ -267,13 +267,13 @@ describe('HTTP Organization Functional Test', () => {
           return agent
             .updateOrganization(orgId, {
               metadata: {
-                completedAhaGuide: "string"
+                completedAhaGuide: 'string'
               }
             })
         })
         .asCallback(err => {
-          expect(err.data.orignalError.statusCode).to.equal(400)
-          expect(err.data.orignalError.message).to.equal('Validation Error')
+          expect(err).to.have.deep.property('data.orignalError.statusCode', 400)
+          expect(err).to.have.deep.property('data.orignalError.message', 'Validation Error')
           done()
         })
     })
