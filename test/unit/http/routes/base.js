@@ -176,7 +176,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 400,
           message: sinon.match(/unique.*error/i),
-          err: err.message
+          err: err
         }
       )
     })
@@ -192,7 +192,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 400,
           message: sinon.match(/github.*error/i),
-          err: err.message
+          err: err
         }
       )
     })
@@ -208,7 +208,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 400,
           message: sinon.match(/notnull.*error/i),
-          err: err.message
+          err: err
         }
       )
     })
@@ -224,7 +224,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 400,
           message: sinon.match(/foreignkey.*error/i),
-          err: err.message
+          err: err
         }
       )
     })
@@ -240,7 +240,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 404,
           message: sinon.match(/not.*found/i),
-          err: err.message
+          err: err
         }
       )
     })
