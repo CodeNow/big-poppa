@@ -411,6 +411,39 @@ describe('HTTP /organization', () => {
           )
         })
     })
+
+    it('should extend the metadata object in the db with the request body', () => {
+      let requestStub = {
+        params: { id: orgId },
+        body: {
+          metadata: {
+            completedAhaGuide: true
+          }
+        }
+      }
+
+      orgMock = Object.assign(orgMock, {
+        attributes: {
+          metadata: {
+            testMetadataProperty: true
+          }
+        }
+      })
+
+      return OrganizationRouter.patchOne(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(orgMock.save)
+          sinon.assert.calledWithExactly(
+            orgMock.save,
+            {
+              metadata: {
+                testMetadataProperty: true,
+                completedAhaGuide: true
+              }
+            }
+          )
+        })
+    })
   })
 
   describe('addUser', () => {

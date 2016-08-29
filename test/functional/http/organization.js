@@ -278,6 +278,34 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it ('should not replace the metadata JSON in the db if the value is invalid', () => {
+      return agent.getOrganization(orgId)
+        .then(org => {
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                completedAhaGuide: true
+              }
+            })
+        })
+        .then(org => {
+          expect(org).to.have.deep.property('metadata.completedAhaGuide', true) // Updated value
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                totallyBogusProperty: false
+              }
+            })
+        })
+        .then(() => agent.getOrganization(orgId))
+        .then(org => {
+          expect(org).to.have.property('id', orgId)
+          expect(org).to.have.property('metadata')
+          expect(org).to.have.deep.property('metadata.completedAhaGuide', true)
+          expect(org).not.to.have.deep.property('metadata.totallyBogusProperty')
+        })
+    })
+
     it('should return a 404 for an non existing organization', done => {
       return agent
         .updateOrganization(2342, {})
