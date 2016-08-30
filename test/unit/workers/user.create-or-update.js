@@ -10,17 +10,15 @@ const User = require('models/user')
 const GithubEntityError = require('errors/github-entity-error')
 const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
-const NotFoundError = require('errors/not-found-error')
 
 const CreateOrUpdateUser = require('workers/user.create-or-update')
 
 describe('#user.create-or-update', () => {
-  let saveStub
   let accessToken = '282398423230239423'
   let newUser
   let validJob
   let userMock
-  let fetchByGithubIdStub
+  let updateOrCreateByGithubIdStub
 
   beforeEach(() => {
     validJob = {
@@ -29,13 +27,11 @@ describe('#user.create-or-update', () => {
     }
     newUser = {}
     userMock = new User()
-    saveStub = sinon.stub(User.prototype, 'save').resolves(newUser)
-    fetchByGithubIdStub = sinon.stub(User, 'fetchByGithubId').rejects(new NotFoundError('not found'))
+    updateOrCreateByGithubIdStub = sinon.stub(User, 'updateOrCreateByGithubId').resolves(newUser)
   })
 
   afterEach(() => {
-    fetchByGithubIdStub.restore()
-    User.prototype.save.restore()
+    updateOrCreateByGithubIdStub.restore()
   })
 
   describe('Validation', () => {
@@ -66,9 +62,9 @@ describe('#user.create-or-update', () => {
   })
 
   describe('Errors', () => {
-    it('should throw a `WorkerStopError` if a `User.save` throws a `GithubEntityError`', done => {
+    it('should throw a `WorkerStopError` if a `User.updateOrCreateByGithubIdStub` throws a `GithubEntityError`', done => {
       let originalErr = new GithubEntityError('hello')
-      saveStub.rejects(originalErr)
+      updateOrCreateByGithubIdStub.rejects(originalErr)
 
       CreateOrUpdateUser(validJob)
         .asCallback(err => {
@@ -80,9 +76,9 @@ describe('#user.create-or-update', () => {
         })
     })
 
-    it('should throw a `WorkerStopError` if a `User.save` throws a `UniqueError`', done => {
+    it('should throw a `WorkerStopError` if a `User.updateOrCreateByGithubIdStub` throws a `UniqueError`', done => {
       let originalErr = new UniqueError('hello')
-      saveStub.rejects(originalErr)
+      updateOrCreateByGithubIdStub.rejects(originalErr)
 
       CreateOrUpdateUser(validJob)
         .asCallback(err => {
@@ -96,7 +92,7 @@ describe('#user.create-or-update', () => {
 
     it('should not throw a `WorkerStopError` if a normal error is thrown', done => {
       let originalErr = new Error('hello')
-      saveStub.rejects(originalErr)
+      updateOrCreateByGithubIdStub.rejects(originalErr)
 
       CreateOrUpdateUser(validJob)
         .asCallback(err => {
@@ -109,54 +105,16 @@ describe('#user.create-or-update', () => {
   })
 
   describe('Main Functionality', done => {
-    it('should call `fetchByGithubId`', done => {
-      CreateOrUpdateUser(validJob)
-        .then(() => {
-          sinon.assert.calledOnce(fetchByGithubIdStub)
-          sinon.assert.calledWithExactly(
-            fetchByGithubIdStub,
-            validJob.githubId
-          )
-        })
-        .asCallback(done)
-    })
-
-    it('should update the user with the new access token if the user exists', () => {
-      fetchByGithubIdStub.resolves(userMock)
+    it('should call `updateOrCreateByGithubId`', done => {
 
       CreateOrUpdateUser(validJob)
         .then(() => {
-          sinon.assert.calledOnce(saveStub)
+          sinon.assert.calledOnce(updateOrCreateByGithubIdStub)
           sinon.assert.calledWithExactly(
-            saveStub,
-            {
-              accessToken: accessToken
-            }
+            updateOrCreateByGithubIdStub,
+            validJob.githubId,
+            validJob.accessToken
           )
-        })
-        .asCallback(done)
-    })
-
-    it('should call `save` if the user doesnt exist', done => {
-      CreateOrUpdateUser(validJob)
-        .then(() => {
-          sinon.assert.calledOnce(saveStub)
-          sinon.assert.calledWithExactly(
-            saveStub,
-            {
-              accessToken: validJob.accessToken,
-              githubId: validJob.githubId
-            }
-          )
-        })
-        .asCallback(done)
-    })
-
-    it('should return a user', done => {
-      CreateOrUpdateUser(validJob)
-        .then(res => {
-          sinon.assert.calledOnce(saveStub)
-          expect(res).to.equal(newUser)
         })
         .asCallback(done)
     })
