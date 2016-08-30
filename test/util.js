@@ -59,4 +59,8 @@ module.exports = class TestUtil {
     return pollRecursive()
       .timeout(timeout)
   }
+
+  static throwIfSuccess () {
+    throw new Error('Should not be called')
+  }
 }
