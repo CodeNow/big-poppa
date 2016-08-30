@@ -4,14 +4,12 @@ const Promise = require('bluebird')
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
 const expect = require('chai').expect
+const testUtil = require('../../util')
 
 const BigPoppaClient = require('../../../client')
 
 describe('BigPoppa Client', () => {
   let bigPoppaClient
-  const throwIfSuccess = () => {
-    throw new Error('Should not be called')
-  }
 
   beforeEach(() => {
     sinon.stub(BigPoppaClient.prototype, 'getAsync').resolves()
@@ -33,14 +31,14 @@ describe('BigPoppa Client', () => {
   describe('addUserToOrganization', () => {
     it('should reject if no orgId', () => {
       return bigPoppaClient.addUserToOrganization()
-        .then(throwIfSuccess)
+        .then(testUtil.throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing orgId')
         })
     })
     it('should reject if no userId', () => {
       return bigPoppaClient.addUserToOrganization(23)
-        .then(throwIfSuccess)
+        .then(testUtil.throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing userId')
         })
@@ -50,7 +48,7 @@ describe('BigPoppa Client', () => {
   describe('getUser', () => {
     it('should reject if no userId', () => {
       return bigPoppaClient.getUser()
-        .then(throwIfSuccess)
+        .then(testUtil.throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing userId')
         })
@@ -59,7 +57,7 @@ describe('BigPoppa Client', () => {
   describe('updateOrganization', () => {
     it('should reject if no orgId', () => {
       return bigPoppaClient.updateOrganization()
-        .then(throwIfSuccess)
+        .then(testUtil.throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing orgId')
         })
@@ -68,7 +66,7 @@ describe('BigPoppa Client', () => {
   describe('getOrganization', () => {
     it('should reject if no orgId', () => {
       return bigPoppaClient.getOrganization()
-        .then(throwIfSuccess)
+        .then(testUtil.throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing orgId')
         })
