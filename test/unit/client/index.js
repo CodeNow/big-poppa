@@ -28,46 +28,41 @@ describe('BigPoppa Client', () => {
   })
 
   describe('addUserToOrganization', () => {
-    it('should reject if no orgId', done => {
+    it('should reject if no orgId', () => {
       return bigPoppaClient.addUserToOrganization()
-        .asCallback(err => {
+        .catch(err => {
           expect(err.message).to.equal('missing orgId')
-          done()
         })
     })
-    it('should reject if no userId', done => {
+    it('should reject if no userId', () => {
       return bigPoppaClient.addUserToOrganization(23)
-        .asCallback(err => {
+        .catch(err => {
           expect(err.message).to.equal('missing userId')
-          done()
         })
     })
   })
 
   describe('getUser', () => {
-    it('should reject if no userId', done => {
+    it('should reject if no userId', () => {
       return bigPoppaClient.getUser()
-        .asCallback(err => {
+        .catch(err => {
           expect(err.message).to.equal('missing userId')
-          done()
         })
     })
   })
   describe('updateOrganization', () => {
-    it('should reject if no orgId', done => {
+    it('should reject if no orgId', () => {
       return bigPoppaClient.updateOrganization()
-        .asCallback(err => {
+        .catch(err => {
           expect(err.message).to.equal('missing orgId')
-          done()
         })
     })
   })
   describe('getOrganization', () => {
-    it('should reject if no orgId', done => {
+    it('should reject if no orgId', () => {
       return bigPoppaClient.getOrganization()
-        .asCallback(err => {
+        .catch(err => {
           expect(err.message).to.equal('missing orgId')
-          done()
         })
     })
   })
@@ -75,7 +70,7 @@ describe('BigPoppa Client', () => {
     const githubId = 123
     const authToken = 'authToken123'
 
-    it('should post user parameters', done => {
+    it('should post user parameters', () => {
       return bigPoppaClient.createOrUpdateUser(githubId, authToken)
         .then(() => {
           sinon.assert.calledOnce(BigPoppaClient.prototype.postAsync)
@@ -85,7 +80,6 @@ describe('BigPoppa Client', () => {
             json: true
           })
         })
-        .asCallback(done)
     })
   })
 })
