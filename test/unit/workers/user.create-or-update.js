@@ -17,7 +17,6 @@ describe('#user.create-or-update', () => {
   let accessToken = '282398423230239423'
   let newUser
   let validJob
-  let userMock
   let updateOrCreateByGithubIdStub
 
   beforeEach(() => {
@@ -26,7 +25,6 @@ describe('#user.create-or-update', () => {
       githubId: 123
     }
     newUser = {}
-    userMock = new User()
     updateOrCreateByGithubIdStub = sinon.stub(User, 'updateOrCreateByGithubId').resolves(newUser)
   })
 
@@ -106,7 +104,6 @@ describe('#user.create-or-update', () => {
 
   describe('Main Functionality', done => {
     it('should call `updateOrCreateByGithubId`', done => {
-
       CreateOrUpdateUser(validJob)
         .then(() => {
           sinon.assert.calledOnce(updateOrCreateByGithubIdStub)
