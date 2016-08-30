@@ -123,14 +123,9 @@ describe('User', () => {
 
       let fetchByGithubIdStub
       let userMock
-      let userMockJSON
       let saveStub
 
       beforeEach(() => {
-        userMockJSON = {
-          organizations: [],
-          id: 1
-        }
         userMock = {
           save: sinon.stub().returnsThis()
         }
@@ -215,7 +210,6 @@ describe('User', () => {
             )
           })
       })
-
     })
   })
 })
