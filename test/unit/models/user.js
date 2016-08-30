@@ -12,6 +12,7 @@ const User = require('models/user')
 const GithubAPI = require('util/github')
 const GithubEntityNotFoundError = require('errors/github-entity-not-found-error')
 const githubUserFixture = require('../../fixtures/github/user')
+const NotFoundError = require('errors/not-found-error')
 
 describe('User', () => {
   describe('Prototype Methods', () => {
@@ -110,6 +111,103 @@ describe('User', () => {
             sinon.assert.calledOnce(GithubAPI.prototype.getUser)
             sinon.assert.calledWithExactly(GithubAPI.prototype.getUser, githubId)
             done()
+          })
+      })
+    })
+  })
+
+  describe('Static Methods', () => {
+    describe('#updateOrCreateByGithubId', () => {
+      const githubId = 1234
+      const githubAccessToken = 'deadbeef'
+
+      let fetchByGithubIdStub
+      let userMock
+      let saveStub
+
+      beforeEach(() => {
+        userMock = {
+          save: sinon.stub().returnsThis()
+        }
+        fetchByGithubIdStub = sinon.stub(User, 'fetchByGithubId').resolves(userMock)
+        saveStub = sinon.stub(User.prototype, 'save').resolves(userMock)
+      })
+
+      afterEach(() => {
+        fetchByGithubIdStub.restore()
+        saveStub.restore()
+      })
+
+      it('should fetch user by githubId', () => {
+        return User.updateOrCreateByGithubId(githubId, githubAccessToken)
+          .then(() => {
+            sinon.assert.calledTwice(fetchByGithubIdStub)
+            sinon.assert.calledWithExactly(
+              fetchByGithubIdStub,
+              githubId
+            )
+          })
+      })
+
+      it('should save the access token on the user if found', () => {
+        return User.updateOrCreateByGithubId(githubId, githubAccessToken)
+          .then(() => {
+            sinon.assert.calledOnce(userMock.save)
+            sinon.assert.calledWithExactly(
+              userMock.save,
+              {
+                accessToken: githubAccessToken
+              }
+            )
+          })
+      })
+
+      it('should refetch the user after user has been updated', () => {
+        return User.updateOrCreateByGithubId(githubId, githubAccessToken)
+          .then(() => {
+            sinon.assert.callOrder(
+              fetchByGithubIdStub,
+              userMock.save,
+              fetchByGithubIdStub
+            )
+          })
+      })
+
+      it('should resolve the saved user object', () => {
+        return User.updateOrCreateByGithubId(githubId, githubAccessToken)
+          .then((user) => {
+            expect(user).to.equal(userMock)
+          })
+      })
+
+      it('should create a new user if none is found', () => {
+        let err = new NotFoundError('User Not Found')
+        fetchByGithubIdStub.onFirstCall().rejects(err)
+
+        return User.updateOrCreateByGithubId(githubId, githubAccessToken)
+          .then(() => {
+            sinon.assert.calledOnce(saveStub)
+            sinon.assert.calledWithExactly(
+              saveStub,
+              {
+                githubId: githubId,
+                accessToken: githubAccessToken
+              }
+            )
+          })
+      })
+
+      it('should refetch the user after user has been created', () => {
+        let err = new NotFoundError('User Not Found')
+        fetchByGithubIdStub.onFirstCall().rejects(err)
+
+        return User.updateOrCreateByGithubId(githubId, githubAccessToken)
+          .then(() => {
+            sinon.assert.callOrder(
+              fetchByGithubIdStub,
+              saveStub,
+              fetchByGithubIdStub
+            )
           })
       })
     })

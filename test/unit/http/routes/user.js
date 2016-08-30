@@ -173,4 +173,47 @@ describe('HTTP /user', () => {
         })
     })
   })
+
+  describe('updateOrCreate', () => {
+    const githubId = 1234
+    const githubAccessToken = 'deadbeef'
+
+    beforeEach(() => {
+      requestStub = {
+        body: {
+          githubId: githubId,
+          accessToken: githubAccessToken
+        }
+      }
+      sinon.stub(User, 'updateOrCreateByGithubId').resolves(userMock)
+    })
+
+    afterEach(() => {
+      User.updateOrCreateByGithubId.restore()
+    })
+
+    it('should call updateOrCreateByGithubId on the user object', () => {
+      return UserRouter.updateOrCreate(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(User.updateOrCreateByGithubId)
+          sinon.assert.calledWithExactly(
+            User.updateOrCreateByGithubId,
+            githubId,
+            githubAccessToken
+          )
+        })
+    })
+
+    it('should return the JSON results of the user', () => {
+      return UserRouter.updateOrCreate(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(userMock.toJSON)
+          sinon.assert.calledOnce(responseStub.json)
+          sinon.assert.calledWithExactly(
+            responseStub.json,
+            userMockJSON
+          )
+        })
+    })
+  })
 })
