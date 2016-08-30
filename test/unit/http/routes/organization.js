@@ -33,7 +33,8 @@ describe('HTTP /organization', () => {
       save: sinon.stub().returnsThis(),
       addUser: sinon.stub().returnsThis(),
       fetch: sinon.stub().returnsThis(),
-      toJSON: sinon.stub().returns(orgMockJSON)
+      toJSON: sinon.stub().returns(orgMockJSON),
+      attributes: {}
     }
     userMock = {
       save: sinon.stub().returnsThis(),
@@ -389,12 +390,9 @@ describe('HTTP /organization', () => {
     })
 
     it('should save the JSON results in the body using `save`', () => {
-      let requestStub = {
-        params: { id: orgId },
-        body: {
-          metadata: {
-            completedAhaGuide: true
-          }
+      requestStub.body = {
+        metadata: {
+          completedAhaGuide: true
         }
       }
 
@@ -413,22 +411,15 @@ describe('HTTP /organization', () => {
     })
 
     it('should extend the metadata object in the db with the request body', () => {
-      let requestStub = {
-        params: { id: orgId },
-        body: {
-          metadata: {
-            completedAhaGuide: true
-          }
+      requestStub.body = {
+        metadata: {
+          completedAhaGuide: true
         }
       }
 
-      orgMock = Object.assign(orgMock, {
-        attributes: {
-          metadata: {
-            testMetadataProperty: true
-          }
-        }
-      })
+      orgMock.attributes.metadata = {
+        testMetadataProperty: true
+      }
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
