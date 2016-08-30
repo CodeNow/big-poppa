@@ -278,7 +278,7 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
-    it ('should not replace the metadata JSON in the db if the value is invalid', () => {
+    it('should not replace the metadata JSON in the db if the value is invalid', () => {
       return agent.getOrganization(orgId)
         .then(org => {
           return agent
