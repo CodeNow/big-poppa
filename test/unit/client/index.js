@@ -9,6 +9,9 @@ const BigPoppaClient = require('../../../client')
 
 describe('BigPoppa Client', () => {
   let bigPoppaClient
+  const throwIfSuccess = () => {
+    throw new Error('Should not be called')
+  }
 
   beforeEach(() => {
     sinon.stub(BigPoppaClient.prototype, 'getAsync').resolves()
@@ -30,12 +33,14 @@ describe('BigPoppa Client', () => {
   describe('addUserToOrganization', () => {
     it('should reject if no orgId', () => {
       return bigPoppaClient.addUserToOrganization()
+        .then(throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing orgId')
         })
     })
     it('should reject if no userId', () => {
       return bigPoppaClient.addUserToOrganization(23)
+        .then(throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing userId')
         })
@@ -45,6 +50,7 @@ describe('BigPoppa Client', () => {
   describe('getUser', () => {
     it('should reject if no userId', () => {
       return bigPoppaClient.getUser()
+        .then(throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing userId')
         })
@@ -53,6 +59,7 @@ describe('BigPoppa Client', () => {
   describe('updateOrganization', () => {
     it('should reject if no orgId', () => {
       return bigPoppaClient.updateOrganization()
+        .then(throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing orgId')
         })
@@ -61,6 +68,7 @@ describe('BigPoppa Client', () => {
   describe('getOrganization', () => {
     it('should reject if no orgId', () => {
       return bigPoppaClient.getOrganization()
+        .then(throwIfSuccess)
         .catch(err => {
           expect(err.message).to.equal('missing orgId')
         })
