@@ -13,6 +13,9 @@ describe('BigPoppa Client', () => {
   beforeEach(() => {
     sinon.stub(BigPoppaClient.prototype, 'getAsync').resolves()
     sinon.stub(BigPoppaClient.prototype, 'patchAsync').resolves()
+    sinon.stub(BigPoppaClient.prototype, 'postAsync').resolves({
+      statusCode: 200
+    })
   })
   beforeEach(() => {
     bigPoppaClient = new BigPoppaClient('asdasdasd')
@@ -21,6 +24,7 @@ describe('BigPoppa Client', () => {
   afterEach(() => {
     BigPoppaClient.prototype.getAsync.restore()
     BigPoppaClient.prototype.patchAsync.restore()
+    BigPoppaClient.prototype.postAsync.restore()
   })
 
   describe('addUserToOrganization', () => {
@@ -65,6 +69,23 @@ describe('BigPoppa Client', () => {
           expect(err.message).to.equal('missing orgId')
           done()
         })
+    })
+  })
+  describe('createOrUpdateUser', () => {
+    const githubId = 123
+    const authToken = 'authToken123'
+
+    it('should post user parameters', done => {
+      return bigPoppaClient.createOrUpdateUser(githubId, authToken)
+        .then(() => {
+          sinon.assert.calledOnce(BigPoppaClient.prototype.postAsync)
+          sinon.assert.calledWith(BigPoppaClient.prototype.postAsync, {
+            path: '/user/',
+            body: { githubId: githubId, authToken: authToken },
+            json: true
+          })
+        })
+        .asCallback(done)
     })
   })
 })
