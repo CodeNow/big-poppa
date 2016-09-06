@@ -248,7 +248,7 @@ describe('HTTP Organization Functional Test', () => {
           return agent
             .updateOrganization(orgId, {
               metadata: {
-                completedAhaGuide: true
+                hasAha: true
               }
             })
         })
@@ -256,7 +256,7 @@ describe('HTTP Organization Functional Test', () => {
         .then(org => {
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('metadata')
-          expect(org).to.have.deep.property('metadata.completedAhaGuide', true)
+          expect(org).to.have.deep.property('metadata.hasAha', true)
         })
     })
 
@@ -267,7 +267,7 @@ describe('HTTP Organization Functional Test', () => {
           return agent
             .updateOrganization(orgId, {
               metadata: {
-                completedAhaGuide: 'string'
+                hasAha: 'string'
               }
             })
         })
@@ -284,12 +284,12 @@ describe('HTTP Organization Functional Test', () => {
           return agent
             .updateOrganization(orgId, {
               metadata: {
-                completedAhaGuide: true
+                hasAha: true
               }
             })
         })
         .then(org => {
-          expect(org).to.have.deep.property('metadata.completedAhaGuide', true) // Updated value
+          expect(org).to.have.deep.property('metadata.hasAha', true) // Updated value
           return agent
             .updateOrganization(orgId, {
               metadata: {
@@ -301,7 +301,7 @@ describe('HTTP Organization Functional Test', () => {
         .then(org => {
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('metadata')
-          expect(org).to.have.deep.property('metadata.completedAhaGuide', true)
+          expect(org).to.have.deep.property('metadata.hasAha', true)
           expect(org).not.to.have.deep.property('metadata.totallyBogusProperty')
         })
     })

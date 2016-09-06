@@ -392,7 +392,7 @@ describe('HTTP /organization', () => {
     it('should save the JSON results in the body using `save`', () => {
       requestStub.body = {
         metadata: {
-          completedAhaGuide: true
+          hasAha: true
         }
       }
 
@@ -403,7 +403,7 @@ describe('HTTP /organization', () => {
             orgMock.save,
             {
               metadata: {
-                completedAhaGuide: true
+                hasAha: true
               }
             }
           )
@@ -413,7 +413,7 @@ describe('HTTP /organization', () => {
     it('should extend the metadata object in the db with the request body', () => {
       requestStub.body = {
         metadata: {
-          completedAhaGuide: true
+          hasAha: true
         }
       }
 
@@ -429,7 +429,7 @@ describe('HTTP /organization', () => {
             {
               metadata: {
                 testMetadataProperty: true,
-                completedAhaGuide: true
+                hasAha: true
               }
             }
           )
