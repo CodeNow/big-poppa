@@ -25,10 +25,7 @@ describe('Organization.integration.prbot.disabled Functional Test', () => {
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
 
-  beforeEach(done => {
-    testUtil.truncateAllTables()
-      .asCallback(done)
-  })
+  beforeEach(() => testUtil.truncateAllTables())
 
   beforeEach(done => {
     let orgGithubName = githubOrganizationFixture.login.toLowerCase()
