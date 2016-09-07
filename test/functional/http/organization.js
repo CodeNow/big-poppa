@@ -152,7 +152,7 @@ describe('HTTP Organization Functional Test', () => {
           const time = moment().subtract(1, 'days')
           return agent
             .getOrganizations({
-              trialEndFrom: time
+              'trialEnd.moreThan': time.toISOString()
             })
             .then(orgs => {
               expect(orgs).to.be.an.array
@@ -166,7 +166,7 @@ describe('HTTP Organization Functional Test', () => {
           const time = moment().add(7, 'months')
           return agent
             .getOrganizations({
-              trialEndFrom: time
+              'trialEnd.moreThan': time.toISOString()
             })
             .then(body => {
               expect(body).to.be.an.array
