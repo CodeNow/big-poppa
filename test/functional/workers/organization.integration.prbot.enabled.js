@@ -15,9 +15,9 @@ const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 const rabbitMQ = require('util/rabbitmq')
 const Organization = require('models/organization')
 
-const RunnabotEnabled = require('workers/organization.integration.runnabot.enabled').task
+const PrBotEnabled = require('workers/organization.integration.prbot.enabled').task
 
-describe('Organization.integration.runnabot.enabled Functional Test', () => {
+describe('Organization.integration.prbot.enabled Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
   let publishEventStub
@@ -57,10 +57,10 @@ describe('Organization.integration.runnabot.enabled Functional Test', () => {
     publishEventStub.restore()
   })
 
-  it('should enable runnabot on org', done => {
+  it('should enable prbot on org', done => {
     return Organization.fetchByGithubId(orgGithubId)
       .then(org => {
-        return RunnabotEnabled({
+        return PrBotEnabled({
           organizationId: org.get(org.idAttribute)
         })
       })
@@ -69,7 +69,7 @@ describe('Organization.integration.runnabot.enabled Functional Test', () => {
       })
       .then(org => {
         expect(org).to.be.an('object')
-        expect(org.get('runnabotEnabled')).to.equal(true)
+        expect(org.get('prBotEnabled')).to.equal(true)
       })
       .asCallback(done)
   })

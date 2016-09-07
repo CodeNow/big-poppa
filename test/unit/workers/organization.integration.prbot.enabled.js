@@ -11,10 +11,10 @@ const Organization = require('models/organization')
 
 const NotFoundError = require('errors/not-found-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
-const RunnabotEnabledWorker = require('workers/organization.integration.runnabot.enabled').task
-const RunnabotEnabledSchema = require('workers/organization.integration.runnabot.enabled').jobSchema
+const PrBotEnabledWorker = require('workers/organization.integration.prbot.enabled').task
+const PrBotEnabledSchema = require('workers/organization.integration.prbot.enabled').jobSchema
 
-describe('#organization.integration.runnabot.enabled', () => {
+describe('#organization.integration.prbot.enabled', () => {
   let org
   let orgId = 12223
   let orgGithubId = 123
@@ -45,7 +45,7 @@ describe('#organization.integration.runnabot.enabled', () => {
   describe('Validation', () => {
     it('should not validate if a `organizationId` is not passed', done => {
       delete validJob.organizationId
-      Joi.validateAsync(validJob, RunnabotEnabledSchema)
+      Joi.validateAsync(validJob, PrBotEnabledSchema)
         .asCallback(err => {
           expect(err).to.exist
           expect(err.message).to.match(/organizationId/i)
@@ -54,7 +54,7 @@ describe('#organization.integration.runnabot.enabled', () => {
     })
 
     it('should validate if a valid job is passed', done => {
-      Joi.validateAsync(validJob, RunnabotEnabledSchema)
+      Joi.validateAsync(validJob, PrBotEnabledSchema)
         .asCallback(done)
     })
   })
@@ -64,7 +64,7 @@ describe('#organization.integration.runnabot.enabled', () => {
       let thrownErr = new NotFoundError('Organization not found')
       fetchOrgByIdStub.rejects(thrownErr)
 
-      RunnabotEnabledWorker(validJob)
+      PrBotEnabledWorker(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -73,12 +73,12 @@ describe('#organization.integration.runnabot.enabled', () => {
         })
     })
 
-    it('should throw a `WorkerStopError` if a `org.runnabotEnabled` is already true', done => {
+    it('should throw a `WorkerStopError` if a `org.prBotEnabled` is already true', done => {
       org.set({
-        runnabotEnabled: true
+        prBotEnabled: true
       })
 
-      RunnabotEnabledWorker(validJob)
+      PrBotEnabledWorker(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -89,7 +89,7 @@ describe('#organization.integration.runnabot.enabled', () => {
 
   describe('Main Functionality', () => {
     it('should fetch the organization by its id', () => {
-      return RunnabotEnabledWorker(validJob)
+      return PrBotEnabledWorker(validJob)
         .then(() => {
           sinon.assert.calledOnce(fetchOrgByIdStub)
           sinon.assert.calledWithExactly(
@@ -100,14 +100,14 @@ describe('#organization.integration.runnabot.enabled', () => {
         })
     })
 
-    it('should save the runnabotEnabled: true to the org', () => {
-      return RunnabotEnabledWorker(validJob)
+    it('should save the prBotEnabled: true to the org', () => {
+      return PrBotEnabledWorker(validJob)
         .then(() => {
           sinon.assert.calledOnce(orgSaveStub)
           let firstCall = orgSaveStub.firstCall
           sinon.assert.calledWith(
             firstCall,
-            { runnabotEnabled: true },
+            { prBotEnabled: true },
             { transacting: transaction }
           )
         })

@@ -4,7 +4,7 @@ var debug = require('debug')('big-poppa:migration')
 
 exports.up = function (knex, Promise) {
   var modifyTable = knex.schema.table('organizations', function (table) {
-    table.boolean('runnabot_enabled')
+    table.boolean('pr_bot_enabled')
       .defaultTo(false)
       .notNullable()
   })
@@ -14,7 +14,7 @@ exports.up = function (knex, Promise) {
 
 exports.down = function (knex, Promise) {
   var modifyTable = knex.schema.table('organizations', function (table) {
-    table.dropColumn('runnabot_enabled')
+    table.dropColumn('pr_bot_enabled')
   })
   debug(modifyTable.toString())
   return modifyTable

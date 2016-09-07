@@ -16,9 +16,9 @@ const rabbitMQ = require('util/rabbitmq')
 
 const Organization = require('models/organization')
 
-const RunnabotDisabled = require('workers/organization.integration.runnabot.disabled').task
+const PrBotDisabled = require('workers/organization.integration.prbot.disabled').task
 
-describe('Organization.integration.runnabot.disabled Functional Test', () => {
+describe('Organization.integration.prbot.disabled Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
   let publishEventStub
@@ -62,15 +62,15 @@ describe('Organization.integration.runnabot.disabled Functional Test', () => {
     return Organization.fetchByGithubId(orgGithubId)
       .then(org => {
         return org.save({
-          runnabotEnabled: true
+          prBotEnabled: true
         })
       })
   })
 
-  it('should enable runnabot on org', done => {
+  it('should disable prBot on org', done => {
     return Organization.fetchByGithubId(orgGithubId)
       .then(org => {
-        return RunnabotDisabled({
+        return PrBotDisabled({
           organizationId: org.get(org.idAttribute)
         })
       })
@@ -79,7 +79,7 @@ describe('Organization.integration.runnabot.disabled Functional Test', () => {
       })
       .then(org => {
         expect(org).to.be.an('object')
-        expect(org.get('runnabotEnabled')).to.equal(false)
+        expect(org.get('prBotEnabled')).to.equal(false)
       })
       .asCallback(done)
   })
