@@ -77,12 +77,17 @@ describe('HTTP Base Router', () => {
       it('should validate the request against the schema', () => {
         return route(rawRequest, responseStub)
           .then(() => {
-            sinon.assert.calledOnce(validateAsyncStub)
+            sinon.assert.calledTwice(validateAsyncStub)
             sinon.assert.calledWithExactly(
               validateAsyncStub,
               rawRequest,
               schema,
               { stripUnknown: true }
+            )
+            sinon.assert.calledWithExactly(
+              validateAsyncStub,
+              rawRequest,
+              schema
             )
           })
       })
