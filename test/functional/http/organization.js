@@ -273,7 +273,7 @@ describe('HTTP Organization Functional Test', () => {
         })
         .asCallback(err => {
           expect(err).to.have.deep.property('data.orignalError.statusCode', 400)
-          expect(err).to.have.deep.property('data.orignalError.message', 'Validation Error')
+          expect(err.data.orignalError.message).match(/validation.*error/i)
           done()
         })
     })
