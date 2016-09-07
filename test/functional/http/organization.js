@@ -133,10 +133,10 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
-    it.only('should return an error if an uncrecognized property is passed', () => {
+    it('should return an error if an unrecognized property is passed', () => {
       return agent
         .getOrganizations({
-          trialEnd: [moment().toISOString(), moment().add(2, 'days').toISOString()]
+          thisPropertyDoesntExist: 2343
         })
         .then(testUtil.throwIfSuccess)
         .catch(err => {
@@ -144,6 +144,36 @@ describe('HTTP Organization Functional Test', () => {
           expect(err.message).to.match(/validation.*error/i)
           expect(err.message).to.match(/thisPropertyDoesntExist/i)
         })
+    })
+
+    describe.only('Time Queries', () => {
+      describe('GET /?trialEndFrom', () => {
+        it('should get the org if the trial is more than `trialEndFrom`', () => {
+          const time = moment().subtract(1, 'days')
+          return agent
+            .getOrganizations({
+              trialEndFrom: time
+            })
+            .then(orgs => {
+              expect(orgs).to.be.an.array
+              expect(orgs).to.have.lengthOf(1)
+              let org = orgs[0]
+              expect(org).to.have.property('githubId', orgGithubId)
+            })
+        })
+
+        it('should get the org if the trial is more than `trialEndFrom`', () => {
+          const time = moment().add(7, 'months')
+          return agent
+            .getOrganizations({
+              trialEndFrom: time
+            })
+            .then(body => {
+              expect(body).to.be.an.array
+              expect(body).to.have.lengthOf(0)
+            })
+        })
+      })
     })
 
     describe('GET /?stripeCustomerId', () => {
@@ -286,7 +316,8 @@ describe('HTTP Organization Functional Test', () => {
         })
         .asCallback(err => {
           expect(err).to.have.deep.property('data.orignalError.statusCode', 400)
-          expect(err).to.have.deep.property('data.orignalError.message', 'ValidationError: child "body" fails because [child "metadata" fails because [child "hasAha" fails because ["hasAha" must be a boolean]]]')
+          expect(err.data.orignalError.message).match(/validation.*error/i)
+          expect(err.data.orignalError.message).match(/metadata.*aha.*boolean/i)
           done()
         })
     })
@@ -310,12 +341,11 @@ describe('HTTP Organization Functional Test', () => {
               }
             })
         })
-        .then(() => agent.getOrganization(orgId))
-        .then(org => {
-          expect(org).to.have.property('id', orgId)
-          expect(org).to.have.property('metadata')
-          expect(org).to.have.deep.property('metadata.hasAha', true)
-          expect(org).not.to.have.deep.property('metadata.totallyBogusProperty')
+        .then(testUtil.throwIfSuccess)
+        .catch(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/validation.*error/i)
+          expect(err.message).to.match(/totallyBogusProperty/i)
         })
     })
 

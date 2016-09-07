@@ -52,15 +52,14 @@ describe('HTTP Base Router', () => {
       let route
       let rawRequest
       let strippedRequest
-      let responseStub
       let routerResponse
       let routerFunctionStub
       let validateAsyncStub
       let errorHandlerStub
 
       beforeEach(() => {
-        rawRequest = {}
-        strippedRequest = {}
+        rawRequest = { hasPaymentMethod: false, blablabla: false }
+        strippedRequest = { hasPaymentMethod: false }
         routerResponse = { a: 2 }
         validateAsyncStub = sinon.stub(Joi, 'validateAsync').resolves(strippedRequest)
         // Stub out error handler before it gets bound in `createRoute`
@@ -77,12 +76,17 @@ describe('HTTP Base Router', () => {
       it('should validate the request against the schema', () => {
         return route(rawRequest, responseStub)
           .then(() => {
-            sinon.assert.calledOnce(validateAsyncStub)
+            sinon.assert.calledTwice(validateAsyncStub)
             sinon.assert.calledWithExactly(
               validateAsyncStub,
               rawRequest,
               schema,
               { stripUnknown: true }
+            )
+            sinon.assert.calledWithExactly(
+              validateAsyncStub,
+              rawRequest,
+              schema
             )
           })
       })
