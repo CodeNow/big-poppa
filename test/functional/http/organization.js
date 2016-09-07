@@ -240,6 +240,72 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it('should return a 200 when patching the `metadata` json property', () => {
+      return agent
+        .getOrganization(orgId)
+        .then(org => {
+          expect(org).to.have.property('metadata', null) // Default value
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                hasAha: true
+              }
+            })
+        })
+        .then(() => agent.getOrganization(orgId))
+        .then(org => {
+          expect(org).to.have.property('id', orgId)
+          expect(org).to.have.property('metadata')
+          expect(org).to.have.deep.property('metadata.hasAha', true)
+        })
+    })
+
+    it('should return an error if the property is not a boolean', done => {
+      return agent
+        .getOrganization(orgId)
+        .then(org => {
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                hasAha: 'string'
+              }
+            })
+        })
+        .asCallback(err => {
+          expect(err).to.have.deep.property('data.orignalError.statusCode', 400)
+          expect(err).to.have.deep.property('data.orignalError.message', 'Validation Error')
+          done()
+        })
+    })
+
+    it('should not replace the metadata JSON in the db if the value is invalid', () => {
+      return agent.getOrganization(orgId)
+        .then(org => {
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                hasAha: true
+              }
+            })
+        })
+        .then(org => {
+          expect(org).to.have.deep.property('metadata.hasAha', true) // Updated value
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                totallyBogusProperty: false
+              }
+            })
+        })
+        .then(() => agent.getOrganization(orgId))
+        .then(org => {
+          expect(org).to.have.property('id', orgId)
+          expect(org).to.have.property('metadata')
+          expect(org).to.have.deep.property('metadata.hasAha', true)
+          expect(org).not.to.have.deep.property('metadata.totallyBogusProperty')
+        })
+    })
+
     it('should return a 404 for an non existing organization', done => {
       return agent
         .updateOrganization(2342, {})

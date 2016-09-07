@@ -33,7 +33,8 @@ describe('HTTP /organization', () => {
       save: sinon.stub().returnsThis(),
       addUser: sinon.stub().returnsThis(),
       fetch: sinon.stub().returnsThis(),
-      toJSON: sinon.stub().returns(orgMockJSON)
+      toJSON: sinon.stub().returns(orgMockJSON),
+      attributes: {}
     }
     userMock = {
       save: sinon.stub().returnsThis(),
@@ -385,6 +386,53 @@ describe('HTTP /organization', () => {
         .catch(err => {
           expect(err).to.exist
           expect(err).to.equal(err)
+        })
+    })
+
+    it('should save the JSON results in the body using `save`', () => {
+      requestStub.body = {
+        metadata: {
+          hasAha: true
+        }
+      }
+
+      return OrganizationRouter.patchOne(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(orgMock.save)
+          sinon.assert.calledWithExactly(
+            orgMock.save,
+            {
+              metadata: {
+                hasAha: true
+              }
+            }
+          )
+        })
+    })
+
+    it('should extend the metadata object in the db with the request body', () => {
+      requestStub.body = {
+        metadata: {
+          hasAha: true
+        }
+      }
+
+      orgMock.attributes.metadata = {
+        testMetadataProperty: true
+      }
+
+      return OrganizationRouter.patchOne(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(orgMock.save)
+          sinon.assert.calledWithExactly(
+            orgMock.save,
+            {
+              metadata: {
+                testMetadataProperty: true,
+                hasAha: true
+              }
+            }
+          )
         })
     })
   })
