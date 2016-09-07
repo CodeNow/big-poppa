@@ -51,15 +51,9 @@ module.exports = class BigPoppaClient extends ApiClient {
    */
   getOrganizations (opts) {
     var path = '/organization/'
-    if (opts) {
-      path += '?' + Object.keys(opts)
-        .map(key => {
-          return key + '=' + encodeURIComponent(opts[key])
-        })
-        .join('&')
-    }
     return this.getAsync({
       path: path,
+      body: opts,
       json: true
     })
       .tap(checkResponseForError)

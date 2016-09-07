@@ -133,6 +133,19 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it.only('should return an error if an uncrecognized property is passed', () => {
+      return agent
+        .getOrganizations({
+          trialEnd: [moment().toISOString(), moment().add(2, 'days').toISOString()]
+        })
+        .then(testUtil.throwIfSuccess)
+        .catch(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/validation.*error/i)
+          expect(err.message).to.match(/thisPropertyDoesntExist/i)
+        })
+    })
+
     describe('GET /?stripeCustomerId', () => {
       let orgGithubId = 2335750
       let stripeCustomerId = 'cus_2342o3i23'
