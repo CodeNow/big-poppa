@@ -133,6 +133,19 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it('should return an error if an uncrecognized property is passed', () => {
+      return agent
+        .getOrganizations({
+          thisPropertyDoesntExist: 2343
+        })
+        .then(testUtil.throwIfSuccess)
+        .catch(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/validation.*error/i)
+          expect(err.message).to.match(/thisPropertyDoesntExist/i)
+        })
+    })
+
     describe('GET /?stripeCustomerId', () => {
       let orgGithubId = 2335750
       let stripeCustomerId = 'cus_2342o3i23'
@@ -273,7 +286,8 @@ describe('HTTP Organization Functional Test', () => {
         })
         .asCallback(err => {
           expect(err).to.have.deep.property('data.orignalError.statusCode', 400)
-          expect(err).to.have.deep.property('data.orignalError.message', 'ValidationError: child "body" fails because [child "metadata" fails because [child "hasAha" fails because ["hasAha" must be a boolean]]]')
+          expect(err.data.orignalError.message).match(/validation.*error/i)
+          expect(err.data.orignalError.message).match(/metadata.*aha.*boolean/i)
           done()
         })
     })
@@ -297,12 +311,11 @@ describe('HTTP Organization Functional Test', () => {
               }
             })
         })
-        .then(() => agent.getOrganization(orgId))
-        .then(org => {
-          expect(org).to.have.property('id', orgId)
-          expect(org).to.have.property('metadata')
-          expect(org).to.have.deep.property('metadata.hasAha', true)
-          expect(org).not.to.have.deep.property('metadata.totallyBogusProperty')
+        .then(testUtil.throwIfSuccess)
+        .catch(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/validation.*error/i)
+          expect(err.message).to.match(/totallyBogusProperty/i)
         })
     })
 
