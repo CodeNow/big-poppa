@@ -61,7 +61,9 @@ describe('Organization.integration.prbot.enabled Functional Test', () => {
     return Organization.fetchByGithubId(orgGithubId)
       .then(org => {
         return PrBotEnabled({
-          organizationId: org.get(org.idAttribute)
+          organization: {
+            id: org.get(org.idAttribute)
+          }
         })
       })
       .then(() => {

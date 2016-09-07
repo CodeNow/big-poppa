@@ -71,7 +71,9 @@ describe('Organization.integration.prbot.disabled Functional Test', () => {
     return Organization.fetchByGithubId(orgGithubId)
       .then(org => {
         return PrBotDisabled({
-          organizationId: org.get(org.idAttribute)
+          organization: {
+            id: org.get(org.idAttribute)
+          }
         })
       })
       .then(() => {

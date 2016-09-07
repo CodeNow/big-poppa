@@ -27,7 +27,7 @@ describe('#organization.integration.prbot.enabled', () => {
 
   beforeEach(() => {
     org = new Organization({ id: orgId, githubId: orgGithubId })
-    validJob = { organizationId: orgId }
+    validJob = { organization: { id: orgId } }
     transaction = {}
     transactionStub = sinon.stub(bookshelf, 'transaction', (cb) => {
       return Promise.resolve(cb(transaction))
@@ -44,11 +44,11 @@ describe('#organization.integration.prbot.enabled', () => {
 
   describe('Validation', () => {
     it('should not validate if a `organizationId` is not passed', done => {
-      delete validJob.organizationId
+      delete validJob.organization.id
       Joi.validateAsync(validJob, PrBotEnabledSchema)
         .asCallback(err => {
           expect(err).to.exist
-          expect(err.message).to.match(/organizationId/i)
+          expect(err.message).to.match(/organization/i)
           done()
         })
     })
