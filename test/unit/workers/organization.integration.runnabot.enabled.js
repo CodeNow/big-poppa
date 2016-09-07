@@ -6,6 +6,7 @@ const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
 
+const bookshelf = require('models').bookshelf
 const Organization = require('models/organization')
 
 const NotFoundError = require('errors/not-found-error')
@@ -18,19 +19,25 @@ describe('#organization.integration.runnabot.enabled', () => {
   let orgId = 12223
   let orgGithubId = 123
   let validJob
+  let transaction
 
   let fetchOrgByIdStub
+  let transactionStub
   let orgSaveStub
 
   beforeEach(() => {
     org = new Organization({ id: orgId, githubId: orgGithubId })
     validJob = { organizationId: orgId }
-
+    transaction = {}
+    transactionStub = sinon.stub(bookshelf, 'transaction', (cb) => {
+      return Promise.resolve(cb(transaction))
+    })
     fetchOrgByIdStub = sinon.stub(Organization, 'fetchById').resolves(org)
     orgSaveStub = sinon.stub(Organization.prototype, 'save').resolves(org)
   })
 
   afterEach(() => {
+    transactionStub.restore()
     orgSaveStub.restore()
     fetchOrgByIdStub.restore()
   })
@@ -87,7 +94,8 @@ describe('#organization.integration.runnabot.enabled', () => {
           sinon.assert.calledOnce(fetchOrgByIdStub)
           sinon.assert.calledWithExactly(
             fetchOrgByIdStub,
-            orgId
+            orgId,
+            { transacting: transaction }
           )
         })
     })
@@ -99,7 +107,8 @@ describe('#organization.integration.runnabot.enabled', () => {
           let firstCall = orgSaveStub.firstCall
           sinon.assert.calledWith(
             firstCall,
-            { runnabotEnabled: true }
+            { runnabotEnabled: true },
+            { transacting: transaction }
           )
         })
     })
