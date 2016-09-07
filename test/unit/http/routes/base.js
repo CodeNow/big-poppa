@@ -21,7 +21,6 @@ describe('HTTP Base Router', () => {
   beforeEach(() => {
     responseStub = {}
     responseStub.status = sinon.stub().returnsThis()
-    responseStub.set = sinon.stub().returnsThis()
     responseStub.json = sinon.stub().resolves()
   })
 
@@ -88,18 +87,6 @@ describe('HTTP Base Router', () => {
               validateAsyncStub,
               rawRequest,
               schema
-            )
-          })
-      })
-
-      it('should publish a header with the validated request', () => {
-        return route(rawRequest, responseStub)
-          .then(() => {
-            sinon.assert.calledOnce(responseStub.set)
-            sinon.assert.calledWithExactly(
-              responseStub.set,
-              'ValidatedRequest',
-              JSON.stringify(strippedRequest)
             )
           })
       })
