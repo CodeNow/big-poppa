@@ -205,16 +205,16 @@ describe('HTTP Organization Functional Test', () => {
     })
 
     describe('GET /?stripeCustomerId', () => {
-      let orgGithubId = 2335750
+      let stripeOrgGithubId = 2335750
       let stripeCustomerId = 'cus_2342o3i23'
 
       beforeEach('Create organization', () => {
-        githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
+        githubAPI.stub('GET', `/user/${stripeOrgGithubId}?access_token=testing`).returns({
           status: 200,
           body: githubOrganizationFixture2
         })
         return new Organization().save({
-          githubId: orgGithubId,
+          githubId: stripeOrgGithubId,
           trialEnd: new Date(),
           activePeriodEnd: new Date(),
           gracePeriodEnd: new Date(),
@@ -230,8 +230,34 @@ describe('HTTP Organization Functional Test', () => {
           .then(body => {
             expect(body).to.be.an.array
             expect(body).to.have.lengthOf(1)
-            expect(body[0]).to.have.property('githubId', orgGithubId)
+            expect(body[0]).to.have.property('githubId', stripeOrgGithubId)
           })
+      })
+
+      describe('isNull', () => {
+        it('should return the org when querying orgs with a stripeCustomerId', () => {
+          return agent
+            .getOrganizations({
+              'stripeCustomerId.isNull': false
+            })
+            .then(body => {
+              expect(body).to.be.an.array
+              expect(body).to.have.lengthOf(1)
+              expect(body[0]).to.have.property('githubId', stripeOrgGithubId)
+            })
+        })
+
+        it('should return a an empty array if passed', () => {
+          return agent
+            .getOrganizations({
+              'stripeCustomerId.isNull': true
+            })
+            .then(body => {
+              expect(body).to.be.an.array
+              expect(body).to.have.lengthOf(1)
+              expect(body[0]).to.have.property('githubId', orgGithubId)
+            })
+        })
       })
     })
   })
