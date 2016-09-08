@@ -218,6 +218,25 @@ describe('HTTP Organization Functional Test', () => {
             })
         })
       })
+
+      describe('Multiple Queries', () => {
+        it('should get the org if multiple properties are set', () => {
+          const lessThan = moment().add(7, 'months')
+          const moreThan = moment().subtract(7, 'months')
+          return agent
+            .getOrganizations({
+              githubId: orgGithubId,
+              name: orgName,
+              'trialEnd': { lessThan, moreThan }
+            })
+            .then(orgs => {
+              expect(orgs).to.be.an.array
+              expect(orgs).to.have.lengthOf(1)
+              let org = orgs[0]
+              expect(org).to.have.property('githubId', orgGithubId)
+            })
+        })
+      })
     })
 
     describe('GET /?stripeCustomerId', () => {

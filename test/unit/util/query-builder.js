@@ -69,6 +69,27 @@ describe('QueryBuilder', () => {
       )
     })
 
+    it('should add `whereNull` statement for `isNull: true`', () => {
+      const lessThan = moment().toISOString()
+      const moreThan = moment().toISOString()
+      const jsonString = JSON.stringify({ isNull: true, lessThan, moreThan })
+      QueryBuilder.generate({ hello: jsonString }, queryBuilderStub)
+      sinon.assert.calledOnce(queryBuilderStub.whereNull)
+      sinon.assert.calledWithExactly(
+        queryBuilderStub.whereNull,
+        'hello'
+      )
+      sinon.assert.calledTwice(queryBuilderStub.where)
+      sinon.assert.calledWithExactly(
+        queryBuilderStub.where,
+        'hello', '<', lessThan
+      )
+      sinon.assert.calledWithExactly(
+        queryBuilderStub.where,
+        'hello', '>', moreThan
+      )
+    })
+
     it('should handle `null`', () => {
       const jsonString = JSON.stringify(null)
       QueryBuilder.generate({ hello: jsonString }, queryBuilderStub)
