@@ -57,7 +57,7 @@ module.exports = class BigPoppaClient extends ApiClient {
         .map(key => {
           let value = opts[key]
           let transformedValue = value
-          if (isObject(value)) {
+          if (isObject(value)) { // Handle sub queries
             transformedValue = JSON.stringify(value)
           }
           return key + '=' + encodeURIComponent(transformedValue)

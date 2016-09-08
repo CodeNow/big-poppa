@@ -3,6 +3,7 @@
 const sinon = require('sinon')
 const expect = require('chai').expect
 
+const moment = require('moment')
 const QueryBuilder = require('util/query-builder')
 
 describe('QueryBuilder', () => {
@@ -27,25 +28,30 @@ describe('QueryBuilder', () => {
     })
 
     it('should add `>` statement for `moreThan`', () => {
-      QueryBuilder.generate({ 'hello.moreThan': 1 }, queryBuilderStub)
+      const time = moment().toISOString()
+      const jsonString = JSON.stringify({ moreThan: time })
+      QueryBuilder.generate({ hello: jsonString }, queryBuilderStub)
       sinon.assert.calledOnce(queryBuilderStub.where)
       sinon.assert.calledWithExactly(
         queryBuilderStub.where,
-        'hello', '>', 1
+        'hello', '>', time
       )
     })
 
     it('should add `<` statement for `lessThan`', () => {
-      QueryBuilder.generate({ 'hello.lessThan': 1 }, queryBuilderStub)
+      const time = moment().toISOString()
+      const jsonString = JSON.stringify({ lessThan: time })
+      QueryBuilder.generate({ hello: jsonString }, queryBuilderStub)
       sinon.assert.calledOnce(queryBuilderStub.where)
       sinon.assert.calledWithExactly(
         queryBuilderStub.where,
-        'hello', '<', 1
+        'hello', '<', time
       )
     })
 
     it('should add `whereNotNull` statement for `isNull: false`', () => {
-      QueryBuilder.generate({ 'hello.isNull': false }, queryBuilderStub)
+      const jsonString = JSON.stringify({ isNull: false })
+      QueryBuilder.generate({ hello: jsonString }, queryBuilderStub)
       sinon.assert.calledOnce(queryBuilderStub.whereNotNull)
       sinon.assert.calledWithExactly(
         queryBuilderStub.whereNotNull,
@@ -54,11 +60,31 @@ describe('QueryBuilder', () => {
     })
 
     it('should add `whereNull` statement for `isNull: true`', () => {
-      QueryBuilder.generate({ 'hello.isNull': true }, queryBuilderStub)
+      const jsonString = JSON.stringify({ isNull: true })
+      QueryBuilder.generate({ hello: jsonString }, queryBuilderStub)
       sinon.assert.calledOnce(queryBuilderStub.whereNull)
       sinon.assert.calledWithExactly(
         queryBuilderStub.whereNull,
         'hello'
+      )
+    })
+
+    it('should handle `null`', () => {
+      const jsonString = JSON.stringify(null)
+      QueryBuilder.generate({ hello: jsonString }, queryBuilderStub)
+      sinon.assert.calledOnce(queryBuilderStub.where)
+      sinon.assert.calledWithExactly(
+        queryBuilderStub.where,
+        'hello', 'null'
+      )
+    })
+
+    it('should handle `null`', () => {
+      QueryBuilder.generate({ hello: null }, queryBuilderStub)
+      sinon.assert.calledOnce(queryBuilderStub.where)
+      sinon.assert.calledWithExactly(
+        queryBuilderStub.where,
+        'hello', null
       )
     })
 
@@ -93,10 +119,10 @@ describe('QueryBuilder', () => {
       it('should call `where`, `whereNull`, `whereNotNull`, `>`, and `<` if they are all called together', () => {
         QueryBuilder.generate({
           'super': 'hello1',
-          'mega.isNull': true,
-          'totally.isNull': false,
-          'jorge.lessThan': 7,
-          'raul.moreThan': 3
+          mega: JSON.stringify({ isNull: true }),
+          totally: JSON.stringify({ isNull: false }),
+          jorge: JSON.stringify({ lessThan: 7 }),
+          raul: JSON.stringify({ moreThan: 3 })
         }, queryBuilderStub)
         expect(queryBuilderStub.where.callCount).to.equal(3)
         sinon.assert.calledOnce(queryBuilderStub.whereNotNull)

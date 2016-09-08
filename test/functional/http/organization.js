@@ -147,12 +147,12 @@ describe('HTTP Organization Functional Test', () => {
     })
 
     describe('Time Queries', () => {
-      describe('GET /?trialEnd.moreThan', () => {
+      describe('GET /?trialEnd={ moreThan }', () => {
         it('should get the org if the trial is more than `trialEndFrom`', () => {
           const time = moment().subtract(1, 'days')
           return agent
             .getOrganizations({
-              'trialEnd.moreThan': time.toISOString()
+              'trialEnd': { moreThan: time.toISOString() }
             })
             .then(orgs => {
               expect(orgs).to.be.an.array
@@ -166,7 +166,7 @@ describe('HTTP Organization Functional Test', () => {
           const time = moment().add(7, 'months')
           return agent
             .getOrganizations({
-              'trialEnd.moreThan': time.toISOString()
+              'trialEnd': { moreThan: time.toISOString() }
             })
             .then(body => {
               expect(body).to.be.an.array
@@ -175,12 +175,12 @@ describe('HTTP Organization Functional Test', () => {
         })
       })
 
-      describe.only('GET /?trialEnd.lessThan', () => {
-        it('should get the org if the trial is more than `trialEndFrom`', () => {
+      describe('GET /?trialEnd={ lessThan }', () => {
+        it('should not get the org if the trial is not less than `trialEnd`', () => {
           const time = moment().subtract(1, 'days')
           return agent
             .getOrganizations({
-              'trialEnd': { lt: time.toISOString() }
+              'trialEnd': { lessThan: time.toISOString() }
             })
             .then(orgs => {
               expect(orgs).to.be.an.array
@@ -188,11 +188,11 @@ describe('HTTP Organization Functional Test', () => {
             })
         })
 
-        it('should get the org if the trial is more than `trialEndFrom`', () => {
+        it('should get the org if the trial is less than `trialEnd`', () => {
           const time = moment().add(7, 'months')
           return agent
             .getOrganizations({
-              'trialEnd': { lt: time.toISOString() }
+              'trialEnd': { lessThan: time.toISOString() }
             })
             .then(orgs => {
               expect(orgs).to.be.an.array
@@ -208,7 +208,7 @@ describe('HTTP Organization Functional Test', () => {
             .getOrganizations({
               githubId: orgGithubId,
               name: orgName,
-              'trialEnd': { lt: time.toISOString() }
+              'trialEnd': { lessThan: time.toISOString() }
             })
             .then(orgs => {
               expect(orgs).to.be.an.array
@@ -254,7 +254,7 @@ describe('HTTP Organization Functional Test', () => {
         it('should return the org when querying orgs with a stripeCustomerId', () => {
           return agent
             .getOrganizations({
-              'stripeCustomerId.isNull': false
+              stripeCustomerId: { isNull: false }
             })
             .then(body => {
               expect(body).to.be.an.array
@@ -266,7 +266,7 @@ describe('HTTP Organization Functional Test', () => {
         it('should return a an empty array if passed', () => {
           return agent
             .getOrganizations({
-              'stripeCustomerId.isNull': true
+              stripeCustomerId: { isNull: true }
             })
             .then(body => {
               expect(body).to.be.an.array
