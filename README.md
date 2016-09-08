@@ -76,6 +76,15 @@ For more information on how to build migrations, take a look at the source code
 for the existing migrations in the `migrations/` directory and read the
 [knex schema documentation](http://knexjs.org/#Schema).
 
+## Updating Client
+
+In order to update the big-poppa client, do the following:
+
+1. Run `npm version ...` in the `/client` diretory
+2. Push your changes to the repository through a PR
+3. Create and push a new BP version
+4. Run `npm publish` in the client directory
+
 ## Testing
 
 ### Testing Environments
