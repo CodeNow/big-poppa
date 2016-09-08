@@ -72,13 +72,13 @@ describe('HTTP /user', () => {
         })
     })
 
-    it('should pass the query to `where`', () => {
+    it('should pass a function to `query`', () => {
       return UserRouter.get(requestStub, responseStub)
         .then(() => {
           sinon.assert.calledOnce(collectionStub.query)
           sinon.assert.calledWithExactly(
             collectionStub.query,
-            { where: requestStub.query }
+            sinon.match.func
           )
         })
     })
