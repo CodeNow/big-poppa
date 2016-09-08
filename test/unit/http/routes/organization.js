@@ -226,7 +226,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(collectionStub.query)
           sinon.assert.calledWithExactly(
             collectionStub.query,
-            { where: requestStub.query }
+            sinon.match.func
           )
         })
     })
