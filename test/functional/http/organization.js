@@ -175,12 +175,12 @@ describe('HTTP Organization Functional Test', () => {
         })
       })
 
-      describe('GET /?trialEnd.lessThan', () => {
+      describe.only('GET /?trialEnd.lessThan', () => {
         it('should get the org if the trial is more than `trialEndFrom`', () => {
           const time = moment().subtract(1, 'days')
           return agent
             .getOrganizations({
-              'trialEnd.lessThan': time.toISOString()
+              'trialEnd': { lt: time.toISOString() }
             })
             .then(orgs => {
               expect(orgs).to.be.an.array
@@ -192,7 +192,7 @@ describe('HTTP Organization Functional Test', () => {
           const time = moment().add(7, 'months')
           return agent
             .getOrganizations({
-              'trialEnd.lessThan': time.toISOString()
+              'trialEnd': { lt: time.toISOString() }
             })
             .then(orgs => {
               expect(orgs).to.be.an.array
@@ -208,7 +208,7 @@ describe('HTTP Organization Functional Test', () => {
             .getOrganizations({
               githubId: orgGithubId,
               name: orgName,
-              'trialEnd.lessThan': time.toISOString()
+              'trialEnd': { lt: time.toISOString() }
             })
             .then(orgs => {
               expect(orgs).to.be.an.array
