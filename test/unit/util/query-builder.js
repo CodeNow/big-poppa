@@ -5,7 +5,7 @@ const expect = require('chai').expect
 
 const QueryBuilder = require('util/query-builder')
 
-describe.only('QueryBuilder', () => {
+describe('QueryBuilder', () => {
   describe('#generate', () => {
     let queryBuilderStub
 
