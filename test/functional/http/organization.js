@@ -201,6 +201,22 @@ describe('HTTP Organization Functional Test', () => {
               expect(org).to.have.property('githubId', orgGithubId)
             })
         })
+
+        it('should get the org if multiple properties are set', () => {
+          const time = moment().add(7, 'months')
+          return agent
+            .getOrganizations({
+              githubId: orgGithubId,
+              name: orgName,
+              'trialEnd.lessThan': time.toISOString()
+            })
+            .then(orgs => {
+              expect(orgs).to.be.an.array
+              expect(orgs).to.have.lengthOf(1)
+              let org = orgs[0]
+              expect(org).to.have.property('githubId', orgGithubId)
+            })
+        })
       })
     })
 
