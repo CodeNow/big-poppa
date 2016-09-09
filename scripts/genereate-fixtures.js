@@ -38,12 +38,12 @@ const getGithubUser = (fileName, githubId) => {
     .then(org => convertToJSModule(fileName, org))
 }
 
-const getMembership = (fileName, githubOrgName) => {
-  return Promise.fromCallback(cb => {
-    return github.users.getOrganizationMembership({ org: githubOrgName }, cb)
-  })
-    .then(org => convertToJSModule(fileName, org))
-}
+// const getMembership = (fileName, githubOrgName) => {
+  // return Promise.fromCallback(cb => {
+    // return github.users.getOrganizationMembership({ org: githubOrgName }, cb)
+  // })
+    // .then(org => convertToJSModule(fileName, org))
+// }
 
 const getNotFound = (fileName, githubId) => {
   return Promise.fromCallback(cb => {
@@ -56,7 +56,8 @@ Promise.all([
   getGithubUser('organization.js', 2828361),
   getGithubUser('organization-2.js', 2335750),
   getGithubUser('user.js', 1981198),
+  getGithubUser('user2.js', 718305),
   getNotFound('not-found.js', 999999999999999),
-  getGithubUser('other-user.js', 6379413),
-  getMembership('org-membership.js', 'runnable')
+  getGithubUser('other-user.js', 6379413)
+  // getMembership('org-membership.js', 'code-friends')
 ])

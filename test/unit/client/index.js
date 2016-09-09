@@ -74,15 +74,15 @@ describe('BigPoppa Client', () => {
   })
   describe('createOrUpdateUser', () => {
     const githubId = 123
-    const authToken = 'authToken123'
+    const accessToken = 'accessToken123'
 
     it('should post user parameters', () => {
-      return bigPoppaClient.createOrUpdateUser(githubId, authToken)
+      return bigPoppaClient.createOrUpdateUser(githubId, accessToken)
         .then(() => {
           sinon.assert.calledOnce(BigPoppaClient.prototype.postAsync)
           sinon.assert.calledWith(BigPoppaClient.prototype.postAsync, {
             path: '/user/',
-            body: { githubId: githubId, authToken: authToken },
+            body: { githubId: githubId, accessToken: accessToken },
             json: true
           })
         })

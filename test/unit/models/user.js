@@ -146,6 +146,11 @@ describe('User', () => {
               fetchByGithubIdStub,
               githubId
             )
+            sinon.assert.calledWithExactly(
+              fetchByGithubIdStub,
+              githubId,
+              { withRelated: 'organizations' }
+            )
           })
       })
 

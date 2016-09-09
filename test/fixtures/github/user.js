@@ -24,29 +24,17 @@ module.exports = {
   'hireable': null,
   'bio': null,
   'public_repos': 112,
-  'public_gists': 22,
-  'followers': 111,
+  'public_gists': 25,
+  'followers': 112,
   'following': 71,
   'created_at': '2012-07-16T01:04:19Z',
-  'updated_at': '2016-07-23T21:34:18Z',
-  'private_gists': 5,
-  'total_private_repos': 13,
-  'owned_private_repos': 0,
-  'disk_usage': 627479,
-  'collaborators': 0,
-  'plan': {
-    'name': 'free',
-    'space': 976562499,
-    'collaborators': 0,
-    'private_repos': 0
-  },
+  'updated_at': '2016-08-23T20:12:12Z',
   'meta': {
     'x-ratelimit-limit': '5000',
-    'x-ratelimit-remaining': '4690',
-    'x-ratelimit-reset': '1471299603',
-    'x-oauth-scopes': 'admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete_repo, gist, notifications, repo, user',
-    'last-modified': 'Sat, 23 Jul 2016 21:34:18 GMT',
-    'etag': '\'575b5e6f990402d013f7e36792888739\'',
+    'x-ratelimit-remaining': '4654',
+    'x-ratelimit-reset': '1473379502',
+    'last-modified': 'Tue, 23 Aug 2016 20:12:12 GMT',
+    'etag': '\'61247c45cd4488f1f891b574969860e5\'',
     'status': '200 OK'
   }
 }
