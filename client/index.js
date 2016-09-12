@@ -169,16 +169,16 @@ module.exports = class BigPoppaClient extends ApiClient {
    * Creates or updates the big poppa user then returns the user object
    *
    * @param {Number} githubId - githubId of a user
-   * @param {String} authToken - Github auth token
+   * @param {String} accessToken - Github access token
    *
    * @returns  {Promise}
    * @resolves {User} updated user
    */
-  createOrUpdateUser (githubId, authToken) {
+  createOrUpdateUser (githubId, accessToken) {
     var path = '/user/'
     return this.postAsync({
       path: path,
-      body: { githubId: githubId, authToken: authToken },
+      body: { githubId: githubId, accessToken: accessToken },
       json: true
     })
       .tap(checkResponseForError)
