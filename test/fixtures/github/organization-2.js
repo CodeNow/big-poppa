@@ -23,7 +23,7 @@ module.exports = {
   'email': 'info@runnable.com',
   'hireable': null,
   'bio': null,
-  'public_repos': 17,
+  'public_repos': 18,
   'public_gists': 0,
   'followers': 0,
   'following': 0,
@@ -31,10 +31,11 @@ module.exports = {
   'updated_at': '2016-08-20T09:56:14Z',
   'meta': {
     'x-ratelimit-limit': '5000',
-    'x-ratelimit-remaining': '4655',
-    'x-ratelimit-reset': '1473379502',
+    'x-ratelimit-remaining': '4868',
+    'x-ratelimit-reset': '1473722103',
+    'x-oauth-scopes': 'admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete_repo, gist, notifications, repo, user',
     'last-modified': 'Sat, 20 Aug 2016 09:56:14 GMT',
-    'etag': '\'bf575c2d017a88b3ec2d487b2aada307\'',
+    'etag': '\'ab3a44cf2a7465a7c502e343675bb491\'',
     'status': '200 OK'
   }
 }

@@ -23,7 +23,7 @@ let github = new GitHub({
 
 github.authenticate({
   type: 'oauth',
-  token: process.env.GITHUB_TOKEN
+  token: process.env.FIXTURE_GITHUB_TOKEN || process.env.GITHUB_TOKEN
 })
 
 const convertToJSModule = (fileName, jsonObject) => {
@@ -38,12 +38,13 @@ const getGithubUser = (fileName, githubId) => {
     .then(org => convertToJSModule(fileName, org))
 }
 
-// const getMembership = (fileName, githubOrgName) => {
-  // return Promise.fromCallback(cb => {
-    // return github.users.getOrganizationMembership({ org: githubOrgName }, cb)
-  // })
-    // .then(org => convertToJSModule(fileName, org))
-// }
+//  Won't work with `HelloRunnable` GH token
+const getMembership = (fileName, githubOrgName) => {
+  return Promise.fromCallback(cb => {
+    return github.users.getOrganizationMembership({ org: githubOrgName }, cb)
+  })
+    .then(org => convertToJSModule(fileName, org))
+}
 
 const getNotFound = (fileName, githubId) => {
   return Promise.fromCallback(cb => {
@@ -58,6 +59,6 @@ Promise.all([
   getGithubUser('user.js', 1981198),
   getGithubUser('user2.js', 718305),
   getNotFound('not-found.js', 999999999999999),
-  getGithubUser('other-user.js', 6379413)
-  // getMembership('org-membership.js', 'code-friends')
+  getGithubUser('other-user.js', 6379413),
+  getMembership('org-membership.js', 'code-friends')
 ])

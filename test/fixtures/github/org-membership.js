@@ -1,20 +1,20 @@
 module.exports = {
-  'url': 'https://api.github.com/orgs/Runnable/memberships/thejsj',
+  'url': 'https://api.github.com/orgs/code-friends/memberships/thejsj',
   'state': 'active',
   'role': 'admin',
-  'organization_url': 'https://api.github.com/orgs/Runnable',
+  'organization_url': 'https://api.github.com/orgs/code-friends',
   'organization': {
-    'login': 'Runnable',
-    'id': 2828361,
-    'url': 'https://api.github.com/orgs/Runnable',
-    'repos_url': 'https://api.github.com/orgs/Runnable/repos',
-    'events_url': 'https://api.github.com/orgs/Runnable/events',
-    'hooks_url': 'https://api.github.com/orgs/Runnable/hooks',
-    'issues_url': 'https://api.github.com/orgs/Runnable/issues',
-    'members_url': 'https://api.github.com/orgs/Runnable/members{/member}',
-    'public_members_url': 'https://api.github.com/orgs/Runnable/public_members{/member}',
-    'avatar_url': 'https://avatars.githubusercontent.com/u/2828361?v=3',
-    'description': 'Sandbox-as-a-service at your service.'
+    'login': 'code-friends',
+    'id': 10224621,
+    'url': 'https://api.github.com/orgs/code-friends',
+    'repos_url': 'https://api.github.com/orgs/code-friends/repos',
+    'events_url': 'https://api.github.com/orgs/code-friends/events',
+    'hooks_url': 'https://api.github.com/orgs/code-friends/hooks',
+    'issues_url': 'https://api.github.com/orgs/code-friends/issues',
+    'members_url': 'https://api.github.com/orgs/code-friends/members{/member}',
+    'public_members_url': 'https://api.github.com/orgs/code-friends/public_members{/member}',
+    'avatar_url': 'https://avatars.githubusercontent.com/u/10224621?v=3',
+    'description': ''
   },
   'user': {
     'login': 'thejsj',
@@ -37,10 +37,10 @@ module.exports = {
   },
   'meta': {
     'x-ratelimit-limit': '5000',
-    'x-ratelimit-remaining': '4694',
-    'x-ratelimit-reset': '1471299603',
+    'x-ratelimit-remaining': '4867',
+    'x-ratelimit-reset': '1473722103',
     'x-oauth-scopes': 'admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete_repo, gist, notifications, repo, user',
-    'etag': '\'4d0041857aa9f7c977abaa4592c53783\'',
+    'etag': '\'5b731474fef924bf99b8593fea67447e\'',
     'status': '200 OK'
   }
 }

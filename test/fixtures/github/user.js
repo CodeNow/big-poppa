@@ -28,13 +28,25 @@ module.exports = {
   'followers': 112,
   'following': 71,
   'created_at': '2012-07-16T01:04:19Z',
-  'updated_at': '2016-08-23T20:12:12Z',
+  'updated_at': '2016-09-10T19:23:42Z',
+  'private_gists': 6,
+  'total_private_repos': 13,
+  'owned_private_repos': 0,
+  'disk_usage': 627481,
+  'collaborators': 0,
+  'plan': {
+    'name': 'free',
+    'space': 976562499,
+    'collaborators': 0,
+    'private_repos': 0
+  },
   'meta': {
     'x-ratelimit-limit': '5000',
-    'x-ratelimit-remaining': '4654',
-    'x-ratelimit-reset': '1473379502',
-    'last-modified': 'Tue, 23 Aug 2016 20:12:12 GMT',
-    'etag': '\'61247c45cd4488f1f891b574969860e5\'',
+    'x-ratelimit-remaining': '4866',
+    'x-ratelimit-reset': '1473722103',
+    'x-oauth-scopes': 'admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete_repo, gist, notifications, repo, user',
+    'last-modified': 'Sat, 10 Sep 2016 19:23:42 GMT',
+    'etag': '\'ec172aab1b7ad0c4eeeeb7fa51f43b4a\'',
     'status': '200 OK'
   }
 }

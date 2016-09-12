@@ -31,8 +31,9 @@ module.exports = {
   'updated_at': '2016-08-25T04:26:12Z',
   'meta': {
     'x-ratelimit-limit': '5000',
-    'x-ratelimit-remaining': '4653',
-    'x-ratelimit-reset': '1473379502',
+    'x-ratelimit-remaining': '4865',
+    'x-ratelimit-reset': '1473722103',
+    'x-oauth-scopes': 'admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete_repo, gist, notifications, repo, user',
     'last-modified': 'Thu, 25 Aug 2016 04:26:12 GMT',
     'etag': '\'f6641d32355b16e628b5099a5cfe6285\'',
     'status': '200 OK'

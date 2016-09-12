@@ -28,13 +28,14 @@ module.exports = {
   'followers': 12,
   'following': 10,
   'created_at': '2011-04-08T20:55:54Z',
-  'updated_at': '2016-09-01T18:30:03Z',
+  'updated_at': '2016-09-11T04:54:08Z',
   'meta': {
     'x-ratelimit-limit': '5000',
-    'x-ratelimit-remaining': '4652',
-    'x-ratelimit-reset': '1473379502',
-    'last-modified': 'Thu, 01 Sep 2016 18:30:03 GMT',
-    'etag': '\'13d05c44c4ee528ae8b293a6d0bca978\'',
+    'x-ratelimit-remaining': '4870',
+    'x-ratelimit-reset': '1473722103',
+    'x-oauth-scopes': 'admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete_repo, gist, notifications, repo, user',
+    'last-modified': 'Sun, 11 Sep 2016 04:54:08 GMT',
+    'etag': '\'b855103e1fc6e021106dbe99991c7b5e\'',
     'status': '200 OK'
   }
 }
