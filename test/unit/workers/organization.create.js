@@ -21,8 +21,6 @@ describe('#organization.create', () => {
   let githubId = 123
   let creatorGithubId = 123231
   let creatorUsername = 'thejsj'
-  let creatorEmail = 'jorge.silva@thejsj.com'
-  let creatorCreated = '2016-07-21T21:22:42+0000'
 
   let newOrg
   let validJob
@@ -39,9 +37,7 @@ describe('#organization.create', () => {
       githubId: githubId,
       creator: {
         githubId: creatorGithubId,
-        githubUsername: creatorUsername,
-        email: creatorEmail,
-        created: creatorCreated
+        githubUsername: creatorUsername
       }
     }
     newOrg = {
@@ -237,7 +233,8 @@ describe('#organization.create', () => {
                 name: githubOrganizationFixture.login
               },
               creator: {
-                githubId: creatorGithubId
+                githubId: creatorGithubId,
+                githubUsername: creatorUsername
               },
               createdAt: sinon.match.string
             }

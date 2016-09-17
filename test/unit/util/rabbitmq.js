@@ -135,6 +135,7 @@ describe('RabbitMQ', () => {
   describe('publishOrganizationCreated', () => {
     let githubId = 4567
     let userGithubId = 1981198
+    let userGithuUsername = 'thejsj'
     let orgId = 897
     let orgName = 'CodeNow'
     let createdAt = new Date('2016-07-21T21:22:42+0000')
@@ -148,7 +149,8 @@ describe('RabbitMQ', () => {
           name: orgName
         },
         creator: {
-          githubId: userGithubId
+          githubId: userGithubId,
+          githubUsername: userGithuUsername
         },
         createdAt: createdAt
       }
@@ -191,6 +193,16 @@ describe('RabbitMQ', () => {
           .asCallback(err => {
             expect(err).to.exist
             expect(err.message).to.match(/githubId/i)
+            done()
+          })
+      })
+
+      it('shoud required a `creator.githubUsername` property', done => {
+        delete validJob.creator.githubUsername
+        rabbitMQ.publishOrganizationCreated(validJob)
+          .asCallback(err => {
+            expect(err).to.exist
+            expect(err.message).to.match(/githubUsername/i)
             done()
           })
       })
