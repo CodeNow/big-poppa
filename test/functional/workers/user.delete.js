@@ -8,6 +8,7 @@ require('sinon-as-promised')(Promise)
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const githubUserFixture = require('../../fixtures/github/user')
+const githubUserFixture2 = require('../../fixtures/github/user2')
 const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
@@ -20,8 +21,9 @@ const User = require('models/user')
 const DeleteUser = require('workers/user.delete')
 
 describe('User.delete Functional Test', () => {
-  let userGithubId = 1981198
-  let orgGithubId = 2828361
+  const userGithubId = githubUserFixture.id
+  const creatorGithubId = githubUserFixture2.id
+  const orgGithubId = githubOrganizationFixture.id
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
@@ -31,8 +33,12 @@ describe('User.delete Functional Test', () => {
      .asCallback(done)
   })
 
-  beforeEach(done => {
+  beforeEach(() => {
     githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
+      status: 200,
+      body: githubUserFixture
+    })
+    githubAPI.stub('GET', `/user/${creatorGithubId}?access_token=testing`).returns({
       status: 200,
       body: githubUserFixture
     })
@@ -40,8 +46,7 @@ describe('User.delete Functional Test', () => {
       status: 200,
       body: githubOrganizationFixture
     })
-    testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
-      .asCallback(done)
+    return testUtil.createTwoAttachedUsersAndOrg(orgGithubId, creatorGithubId, userGithubId)
   })
 
   it('should delete a user', done => {
