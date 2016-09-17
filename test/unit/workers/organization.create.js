@@ -100,16 +100,6 @@ describe('#organization.create', () => {
         })
     })
 
-    it('should throw a validation error if no `creator.githubUsername` is passed', done => {
-      delete validJob.creator.githubUsername
-      CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/creator.*githubUsername/i)
-          done()
-        })
-    })
     it('should throw a validation error if no `creator.githubId` is passed', done => {
       delete validJob.creator.githubId
       CreateOrganization(validJob)
@@ -128,28 +118,6 @@ describe('#organization.create', () => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.message).to.match(/githubId/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if no `creator.email` is passed', done => {
-      delete validJob.creator.email
-      CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/creator.*email/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if no `creator.created` is passed', done => {
-      delete validJob.creator.created
-      CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/creator.*created/i)
           done()
         })
     })
@@ -267,6 +235,9 @@ describe('#organization.create', () => {
                 id: orgId,
                 githubId: githubOrganizationFixture.id,
                 name: githubOrganizationFixture.login
+              },
+              creator: {
+                githubId: creatorGithubId
               },
               createdAt: sinon.match.string
             }
