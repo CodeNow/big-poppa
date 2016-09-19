@@ -21,8 +21,6 @@ describe('#organization.create', () => {
   let githubId = 123
   let creatorGithubId = 123231
   let creatorUsername = 'thejsj'
-  let creatorEmail = 'jorge.silva@thejsj.com'
-  let creatorCreated = '2016-07-21T21:22:42+0000'
 
   let newOrg
   let validJob
@@ -39,9 +37,7 @@ describe('#organization.create', () => {
       githubId: githubId,
       creator: {
         githubId: creatorGithubId,
-        githubUsername: creatorUsername,
-        email: creatorEmail,
-        created: creatorCreated
+        githubUsername: creatorUsername
       }
     }
     newOrg = {
@@ -100,16 +96,6 @@ describe('#organization.create', () => {
         })
     })
 
-    it('should throw a validation error if no `creator.githubUsername` is passed', done => {
-      delete validJob.creator.githubUsername
-      CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/creator.*githubUsername/i)
-          done()
-        })
-    })
     it('should throw a validation error if no `creator.githubId` is passed', done => {
       delete validJob.creator.githubId
       CreateOrganization(validJob)
@@ -128,28 +114,6 @@ describe('#organization.create', () => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.message).to.match(/githubId/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if no `creator.email` is passed', done => {
-      delete validJob.creator.email
-      CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/creator.*email/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if no `creator.created` is passed', done => {
-      delete validJob.creator.created
-      CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/creator.*created/i)
           done()
         })
     })
@@ -267,6 +231,10 @@ describe('#organization.create', () => {
                 id: orgId,
                 githubId: githubOrganizationFixture.id,
                 name: githubOrganizationFixture.login
+              },
+              creator: {
+                githubId: creatorGithubId,
+                githubUsername: creatorUsername
               },
               createdAt: sinon.match.string
             }
