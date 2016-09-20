@@ -16,7 +16,7 @@ const JOIN_QUERY = `
   ON ${orgTableName}.id = ${orgUsersTableName}.organization_id
   INNER JOIN ${usersTableName}
   ON users.id = ${orgUsersTableName}.user_id
-  ORDER BY ${orgTableName}.id, ${usersTableName}.created_at DESC
+  ORDER BY ${orgTableName}.id, ${usersTableName}.created_at ASC
 `
 // Update the creator field with a user that already belongs to an org
 const UPDATE_QUERY = `
@@ -24,7 +24,8 @@ const UPDATE_QUERY = `
   SET ${creatorColumnName} = org.user_id
   FROM (
     ${JOIN_QUERY}
-  ) org;
+  ) org
+  WHERE organizations.id = org.id;
 `
 
 const ALTER_TABLE_QUERY = `
