@@ -5,6 +5,7 @@ let debug = require('debug')('big-poppa:migration')
 const orgUsersTableName = 'organizations_users'
 const orgTableName = 'organizations'
 const usersTableName = 'users'
+const log = require('util/logger').child({ module: 'migrations/add_org_creator' })
 
 // Get the first created user for every organization
 const JOIN_QUERY = `
@@ -22,20 +23,26 @@ const UPDATE_QUERY = `
   SET creator = org.user_id
   FROM (
     ${JOIN_QUERY}
-  ) org
-  WHERE ${orgTableName}.id = org.id;
+  ) org;
 `
+
+log.info({ UPDATE_QUERY }, 'Update query')
 
 exports.up = function (knex, Promise) {
   var modifyTable = knex.schema.table('organizations', function addField (table) {
     // Currently nullable, but will later be not-nullable after we migrate
     // all organizations
+    log.trace('Add `creator` field')
     table.integer('creator')
       .notNullable()
       .defaultTo(0)
   })
-  .then(() => knex.schema.raw(UPDATE_QUERY))
   .then(() => {
+    log.trace('Execute raw migration')
+    return knex.raw(UPDATE_QUERY)
+  })
+  .then(() => {
+    log.trace('Add `creator` field')
     // If there is an org with out any users, this will fail
     return knex.schema.table('organizations', function addField (table) {
       table.foreign('creator')
