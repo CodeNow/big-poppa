@@ -383,11 +383,12 @@ describe('HTTP Organization Functional Test', () => {
       return agent
         .getOrganization(orgId)
         .then(org => {
-          expect(org).to.have.property('metadata', null) // Default value
+          expect(org).to.have.property('metadata')
+          expect(org.metadata).to.deep.equal({ hasAha: true }) // Default value
           return agent
             .updateOrganization(orgId, {
               metadata: {
-                hasAha: true
+                hasAha: false
               }
             })
         })
@@ -395,7 +396,7 @@ describe('HTTP Organization Functional Test', () => {
         .then(org => {
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('metadata')
-          expect(org).to.have.deep.property('metadata.hasAha', true)
+          expect(org).to.have.deep.property('metadata.hasAha', false)
         })
     })
 
