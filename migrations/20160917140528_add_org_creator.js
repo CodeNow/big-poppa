@@ -5,7 +5,7 @@ let debug = require('debug')('big-poppa:migration')
 const orgUsersTableName = 'organizations_users'
 const orgTableName = 'organizations'
 const usersTableName = 'users'
-const log = require('util/logger').child({ module: 'migrations/add_org_creator' })
+const log = require('../lib/util/logger').child({ module: 'migrations/add_org_creator' })
 
 // Get the first created user for every organization
 const JOIN_QUERY = `
