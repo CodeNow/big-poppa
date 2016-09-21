@@ -24,15 +24,41 @@ big-poppa project repository directory:
 This script creates a super user named `big_poppa` and two databases on your machine:
 `big_poppa` (used for local development) and `big_poppa_test` (used by the test suite).
 
-### Running Migrations
+### Migrations
+
+#### Running Migrations
 
 big-poppa uses [knex](https://www.npmjs.com/package/knex) to access the postgresql
-database. The first thing you'll need to do after installing postgres is to
+database. It also uses [knex-migrate](https://github.com/sheerun/knex-migrate) for
+handling migration. **You should always use `knex-migrate` instead of `knex` for
+migrations**. `knex-migrate` allows for finer grain control over which migrations
+to run at any given point.
+
+The first thing you'll need to do after installing postgres is to
 run the knex migrations to create the database schema. From the big-poppa project
 repository directory run the following:
 
 1. `npm install` - Install required libraries
-2. `npm run migrate` - Migrates the test and local development databases.
+2. `npm run migrate` - Migrates the test and local development databases to the latest migration.
+
+#### Rolling Back
+
+In order to rollback a migration, do the following:
+
+1. Run `knex-migrate pending` to list all pending migrations.
+2. Run `knex-migrate list` to make sure you're in the correct migration.
+3. After confirming, you're where you expetecd to be, run `npm run rollback`
+ (short for `knex-migrate down`) which will rollback a single migration (a single file).
+
+#### Create new migrations
+
+In order to create a new migration:
+
+1. Run `knex migrate:make NAME_OF_MIGRATION`
+2. Write your migration. **Migrations should be not depend on any other scripts**. `migrate-...` script is an anti-pattern, because it means migrations can't be run correctly.
+3. Test your migration with `knex-migrate redo` (rollbacks last migration and re-runs it) with your local database
+4. Test your migration against the gamma and delta database locally
+5. Test your migration against gamma.
 
 ### RabbitMQ
 In order to fully test the codebase you will need to install RabbitMQ locally
