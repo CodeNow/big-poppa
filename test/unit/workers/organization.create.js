@@ -6,13 +6,16 @@ const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
 
 const Organization = require('models/organization')
+const User = require('models/user')
 const GithubAPI = require('util/github')
 const rabbitMQ = require('util/rabbitmq')
 
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const GithubEntityError = require('errors/github-entity-error')
 const UniqueError = require('errors/unique-error')
+const NotFoundError = require('errors/not-found-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
+const WorkerError = require('error-cat/errors/worker-error')
 
 const CreateOrganization = require('workers/organization.create')
 
@@ -23,6 +26,7 @@ describe('#organization.create', () => {
   let creatorUsername = 'thejsj'
 
   let newOrg
+  let user
   let validJob
 
   let createStub
@@ -31,6 +35,7 @@ describe('#organization.create', () => {
   let publishASGCreateStub
   let publishOrganizationCreatedStub
   let publishOrganizationUserAddStub
+  let fetchUserByGithubIdStub
 
   beforeEach(() => {
     validJob = {
@@ -40,6 +45,7 @@ describe('#organization.create', () => {
         githubUsername: creatorUsername
       }
     }
+    user = {}
     newOrg = {
       id: orgId,
       githubId: githubOrganizationFixture.id,
@@ -50,6 +56,7 @@ describe('#organization.create', () => {
     }
     createStub = sinon.stub(Organization, 'create').resolves(newOrg)
     fetchByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(newOrg)
+    fetchUserByGithubIdStub = sinon.stub(User, 'fetchByGithubId').resolves(user)
     getGithubOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
     publishASGCreateStub = sinon.stub(rabbitMQ, 'publishASGCreate')
     publishOrganizationCreatedStub = sinon.stub(rabbitMQ, 'publishOrganizationCreated')
@@ -59,6 +66,7 @@ describe('#organization.create', () => {
   afterEach(() => {
     createStub.restore()
     fetchByGithubIdStub.restore()
+    fetchUserByGithubIdStub.restore()
     getGithubOrganizationStub.restore()
     publishASGCreateStub.restore()
     publishOrganizationCreatedStub.restore()
@@ -125,6 +133,19 @@ describe('#organization.create', () => {
   })
 
   describe('Errors', () => {
+    it('should throw a `WorkerError` if `User.fetchByGithubId` throws a `NotFoundError`', done => {
+      let originalErr = new NotFoundError('hello')
+      fetchUserByGithubIdStub.rejects(originalErr)
+
+      CreateOrganization(validJob)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err).to.be.an.instanceof(WorkerError)
+          expect(err.data.err).to.equal(originalErr)
+          expect(err.message).to.match(/organization.*creator.*not.*exist/i)
+          done()
+        })
+    })
     it('should throw a `WorkerStopError` if a `Organization.create` throws a `GithubEntityError`', done => {
       let originalErr = new GithubEntityError('hello')
       createStub.rejects(originalErr)
@@ -168,13 +189,26 @@ describe('#organization.create', () => {
   })
 
   describe('Main Functionality', done => {
+    it('should call `User.fetchByGithubId`', done => {
+      CreateOrganization(validJob)
+        .then(() => {
+          sinon.assert.calledOnce(fetchUserByGithubIdStub)
+          sinon.assert.calledWithExactly(
+            fetchUserByGithubIdStub,
+            creatorGithubId
+          )
+        })
+        .asCallback(done)
+    })
+
     it('should call `Organization.create`', done => {
       CreateOrganization(validJob)
         .then(() => {
           sinon.assert.calledOnce(createStub)
           sinon.assert.calledWithExactly(
             createStub,
-            githubId
+            githubId,
+            user
           )
           sinon.assert.notCalled(fetchByGithubIdStub)
         })

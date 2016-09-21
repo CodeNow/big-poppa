@@ -19,13 +19,14 @@ const rabbitMQ = require('util/rabbitmq')
 const server = require('http/server')
 
 describe('HTTP Organization Functional Test', () => {
-  let userGithubId = 1981198
+  let userGithubId = githubUserFixture.id
   let otherGithubId = 6379413
   let orgGithubId = 2828361
   let orgId
   let orgName
   let userId
   let agent
+  let user
   let publishUserAddedToOrganizationStub
 
   before(() => {
@@ -38,6 +39,8 @@ describe('HTTP Organization Functional Test', () => {
   after(() => {
     return server.stop()
   })
+
+  beforeEach('Truncate All Tables', () => testUtil.truncateAllTables())
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
@@ -58,7 +61,8 @@ describe('HTTP Organization Functional Test', () => {
       .then(res => {
         orgId = res.org[res.org.idAttribute]
         orgName = res.org.attributes.name
-        userId = res.user[res.user.idAttribute]
+        user = res.user
+        userId = user[user.idAttribute]
       })
   })
 
@@ -240,8 +244,9 @@ describe('HTTP Organization Functional Test', () => {
     })
 
     describe('GET /?stripeCustomerId', () => {
-      let stripeOrgGithubId = 2335750
-      let stripeCustomerId = 'cus_2342o3i23'
+      const stripeOrgGithubId = githubOrganizationFixture2.id
+      const orgGithubName = githubOrganizationFixture2.login.toLowerCase()
+      const stripeCustomerId = 'cus_2342o3i23'
 
       beforeEach('Create organization', () => {
         githubAPI.stub('GET', `/user/${stripeOrgGithubId}?access_token=testing`).returns({
@@ -253,7 +258,9 @@ describe('HTTP Organization Functional Test', () => {
           trialEnd: new Date(),
           activePeriodEnd: new Date(),
           gracePeriodEnd: new Date(),
-          stripeCustomerId: stripeCustomerId
+          name: orgGithubName,
+          stripeCustomerId: stripeCustomerId,
+          creator: user.get(user.idAttribute)
         })
       })
 
