@@ -193,7 +193,7 @@ describe('#organization.user.remove', () => {
           sinon.assert.calledOnce(publishEventStub)
           sinon.assert.calledWithExactly(
             publishEventStub,
-            'organization.user.remove',
+            'organization.user.removed',
             {
               organization: {
                 id: orgId,

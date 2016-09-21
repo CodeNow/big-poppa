@@ -1,4 +1,5 @@
 'use strict'
+require('loadenv')()
 
 const Promise = require('bluebird')
 const expect = require('chai').expect
@@ -16,8 +17,6 @@ const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 const orion = require('@runnable/orion')
 
-const RabbitMQ = require('ponos/lib/rabbitmq')
-
 const workerServer = require('workers/server')
 const httpServer = require('http/server')
 const User = require('models/user')
@@ -31,38 +30,30 @@ describe('Organization Integration Test', () => {
   let orionUserCreateStub
 
   // Start HTTP Server
-  before(() => httpServer.start())
+  before('Start HTTP server', () => httpServer.start())
   after(() => httpServer.stop())
 
-  // Start Worker Server
-  before(() => workerServer.start())
-  after(() => workerServer.stop())
-
-  // Conect to RabbitMQ
-  beforeEach(() => {
-    publisher = new RabbitMQ({
-      name: process.env.APP_NAME + '-test',
-      hostname: process.env.RABBITMQ_HOSTNAME,
-      port: process.env.RABBITMQ_PORT,
-      username: process.env.RABBITMQ_USERNAME,
-      password: process.env.RABBITMQ_PASSWORD
-    })
-    return publisher.connect()
+  // RabbitMQ
+  before('Connect to RabbitMQ', () => {
+    return testUtil.connectToRabbitMQ(workerServer)
+      .then(p => { publisher = p })
   })
-  afterEach(() => publisher.disconnect())
+  after('Disconnect from RabbitMQ', () => {
+    return testUtil.disconnectToRabbitMQ(publisher, workerServer)
+  })
+
+  beforeEach('Connect to RabbitMQ', () => rabbitMQ.connect())
+  afterEach('Disconnect from RabbitMQ', () => rabbitMQ.disconnect())
 
   // Delete everything from the DB after every test
-  beforeEach(() => testUtil.truncateAllTables())
+  beforeEach('Truncate all tables', () => testUtil.truncateAllTables())
   afterEach(() => testUtil.truncateAllTables())
 
   // Set GH stubs
-  before(done => githubAPI.start(done))
+  before('Start GH API mock server', done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
 
-  beforeEach(() => rabbitMQ.connect())
-  afterEach(() => rabbitMQ.disconnect())
-
-  beforeEach(() => {
+  beforeEach('Stub methods', () => {
     publishEventStub = sinon.stub(rabbitMQ, 'publishEvent').resolves()
     orionUserCreateStub = sinon.stub(orion.users, 'create')
   })
@@ -71,7 +62,7 @@ describe('Organization Integration Test', () => {
     orionUserCreateStub.restore()
   })
 
-  before(() => {
+  before('Stub out BP calls', () => {
     let orgGithubName = githubOrganizationFixture.login.toLowerCase()
     githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
       status: 200,
@@ -87,7 +78,7 @@ describe('Organization Integration Test', () => {
     })
   })
 
-  beforeEach(() => {
+  beforeEach('Create new user', () => {
     return new User().save({
       accessToken: process.env.GITHUB_TOKEN || 'testing',
       githubId: userGithubId
