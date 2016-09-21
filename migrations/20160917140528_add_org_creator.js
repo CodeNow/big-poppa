@@ -25,7 +25,7 @@ const UPDATE_QUERY = `
   FROM (
     ${JOIN_QUERY}
   ) org
-  WHERE organizations.id = org.id;
+  WHERE ${orgTableName}.id = org.id;
 `
 
 const ALTER_TABLE_QUERY = `
