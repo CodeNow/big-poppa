@@ -53,7 +53,7 @@ describe('HTTP Organization Functional Test', () => {
       status: 200,
       body: githubOrganizationFixture
     })
-    publishEventStub = sinon.stub(rabbitMQ, 'publishEventStub')
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
     return testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
       .then(res => {
         orgId = res.org[res.org.idAttribute]

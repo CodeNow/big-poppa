@@ -63,7 +63,7 @@ describe('Organization Integration Test', () => {
   afterEach(() => rabbitMQ.disconnect())
 
   beforeEach(() => {
-    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent').resolves()
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent').resolves()
     orionUserCreateStub = sinon.stub(orion.users, 'create')
   })
   afterEach(() => {

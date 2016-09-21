@@ -28,9 +28,8 @@ describe('#organization.create', () => {
   let createStub
   let fetchByGithubIdStub
   let getGithubOrganizationStub
-  let publishASGCreateStub
-  let publishOrganizationCreatedStub
-  let publishOrganizationUserAddStub
+  let publishTaskStub
+  let publishEventStub
 
   beforeEach(() => {
     validJob = {
@@ -51,18 +50,16 @@ describe('#organization.create', () => {
     createStub = sinon.stub(Organization, 'create').resolves(newOrg)
     fetchByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(newOrg)
     getGithubOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
-    publishASGCreateStub = sinon.stub(rabbitMQ, 'publishASGCreate')
-    publishOrganizationCreatedStub = sinon.stub(rabbitMQ, 'publishOrganizationCreated')
-    publishOrganizationUserAddStub = sinon.stub(rabbitMQ, 'publishOrganizationUserAdd').resolves()
+    publishTaskStub = sinon.stub(rabbitMQ, 'publishTask')
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
   })
 
   afterEach(() => {
     createStub.restore()
     fetchByGithubIdStub.restore()
     getGithubOrganizationStub.restore()
-    publishASGCreateStub.restore()
-    publishOrganizationCreatedStub.restore()
-    publishOrganizationUserAddStub.restore()
+    publishTaskStub.restore()
+    publishEventStub.restore()
   })
 
   describe('Validation', () => {
@@ -193,9 +190,10 @@ describe('#organization.create', () => {
     it('should publish an `organization.user.add` job', done => {
       CreateOrganization(validJob)
         .then(res => {
-          sinon.assert.calledOnce(publishOrganizationUserAddStub)
+          sinon.assert.calledTwice(publishTaskStub)
           sinon.assert.calledWithExactly(
-            publishOrganizationUserAddStub,
+            publishTaskStub,
+            'organization.user.add',
             {
               tid: sinon.match.any,
               organizationGithubId: githubId,
@@ -209,9 +207,10 @@ describe('#organization.create', () => {
     it('should publish an `asg.create` job', done => {
       CreateOrganization(validJob)
         .then(res => {
-          sinon.assert.calledOnce(publishASGCreateStub)
+          sinon.assert.calledTwice(publishTaskStub)
           sinon.assert.calledWithExactly(
-            publishASGCreateStub,
+            publishTaskStub,
+            'asg.create',
             {
               githubId: githubOrganizationFixture.id
             }
@@ -223,9 +222,10 @@ describe('#organization.create', () => {
     it('should publish an `organization.created` job', done => {
       CreateOrganization(validJob)
         .then(res => {
-          sinon.assert.calledOnce(publishOrganizationCreatedStub)
+          sinon.assert.calledOnce(publishEventStub)
           sinon.assert.calledWithExactly(
-            publishOrganizationCreatedStub,
+            publishEventStub,
+            'organization.created',
             {
               organization: {
                 id: orgId,
