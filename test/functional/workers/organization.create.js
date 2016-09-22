@@ -8,6 +8,11 @@ require('sinon-as-promised')(Promise)
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const MockAPI = require('mehpi')
+// const githubOrganizationFixture = require('../../fixtures/github/organization')
+// const githubOrganizationFixture2 = require('../../fixtures/github/organization-2')
+const githubUserFixture = require('../../fixtures/github/user')
+// const githubOtherUserFixture = require('../../fixtures/github/other-user')
+const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const bookshelf = require('models').bookshelf
@@ -17,8 +22,9 @@ const knex = bookshelf.knex
 const CreateOrganization = require('workers/organization.create')
 
 describe('Organization.create Functional Test', () => {
-  let githubId = 2828361
-  let userGithubId = 1981198
+  let githubId = githubOrganizationFixture.id
+  let userGithubId = githubUserFixture.id
+  let orgGithubName = githubOrganizationFixture.login.toLowerCase()
   let job
   let publishEventStub
 
@@ -37,16 +43,25 @@ describe('Organization.create Functional Test', () => {
     }
   })
 
-  beforeEach(done => {
-    testUtil.truncateAllTables()
-     .asCallback(done)
-  })
+  beforeEach('Truncate All Tables', () => testUtil.truncateAllTables())
 
   beforeEach(() => {
     githubAPI.stub('GET', `/user/${githubId}?access_token=testing`).returns({
       status: 200,
       body: githubOrganizationFixture
     })
+  })
+
+  beforeEach('Create user', () => {
+    githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
+      status: 200,
+      body: githubUserFixture
+    })
+    githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubName}?access_token=testing`).returns({
+      status: 200,
+      body: githubOrgMembershipFixture
+    })
+    return testUtil.createUser(userGithubId)
   })
 
   beforeEach(() => rabbitMQ.connect())

@@ -31,12 +31,15 @@ module.exports = class TestUtil {
   }
 
   static createUserAndOrg (orgGithubId, userGithubId) {
-    return Promise.props({
-      user: new User().save({
-        accessToken: process.env.GITHUB_TOKEN || 'testing',
-        githubId: userGithubId
-      }),
-      org: Organization.create(orgGithubId)
+    return new User().save({
+      accessToken: process.env.GITHUB_TOKEN || 'testing',
+      githubId: userGithubId
+    })
+    .then(user => {
+      return Promise.props({
+        user,
+        org: Organization.create(orgGithubId, user)
+      })
     })
   }
 
@@ -46,6 +49,22 @@ module.exports = class TestUtil {
         let user = res.user
         let org = res.org
         return org.users().attach(user.get(user.idAttribute))
+      })
+  }
+
+  static createTwoAttachedUsersAndOrg (orgGithubId, userGithubId1, userGithubId2) {
+    let org
+    return this.createUserAndOrg(orgGithubId, userGithubId1)
+      .tap(res => {
+        let user = res.user
+        org = res.org
+        return org.users().attach(user.get(user.idAttribute))
+      })
+      .then(() => {
+        return this.createUser(userGithubId2)
+        .then(newUser => {
+          return org.users().attach(newUser.get(newUser.idAttribute))
+        })
       })
   }
 
