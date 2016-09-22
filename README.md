@@ -57,7 +57,7 @@ In order to create a new migration:
 1. Run `knex migrate:make NAME_OF_MIGRATION`
 2. Write your migration. **Migrations should be not depend on any other scripts**. `migrate-...` script is an anti-pattern, because it means migrations can't be run correctly.
 3. Test your migration with `knex-migrate redo` (rollbacks last migration and re-runs it) with your local database
-4. Test your migration against the gamma and delta database locally
+4. Recommended: Test your migration against a local copy of gamma and delta locally
 5. Test your migration against gamma.
 
 ### RabbitMQ
