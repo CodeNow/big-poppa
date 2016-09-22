@@ -1,6 +1,6 @@
 {
   "name": "big-poppa",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "User management and billing",
   "main": "index.js",
   "scripts": {
@@ -22,10 +22,10 @@
     "start-worker": "npm run migrate-dev && NODE_PATH=./lib node lib/workers",
     "start-http": "npm run migrate-dev && NODE_PATH=./lib node lib/http",
     "rollback": "npm run rollback-dev && npm run rollback-test",
-    "migrate-dev": "knex migrate:latest",
-    "rollback-dev": "knex migrate:rollback",
-    "migrate-test": "NODE_ENV=test knex migrate:latest",
-    "rollback-test": "NODE_ENV=test knex migrate:rollback"
+    "migrate-dev": "knex-migrate up",
+    "rollback-dev": "knex-migrate down",
+    "migrate-test": "NODE_ENV=test knex-migrate up",
+    "rollback-test": "NODE_ENV=test knex-migrate down"
   },
   "directories": {
     "test": "test"
@@ -72,6 +72,7 @@
     "@runnable/big-poppa-client": "^0.2.0",
     "debug": "^2.2.0",
     "istanbul": "^0.4.4",
+    "knex-migrate": "^1.1.2",
     "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
     "mocha": "^2.5.3",
     "mongodb": "^2.1.17",
