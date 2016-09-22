@@ -35,11 +35,12 @@ describe('Organization Integration Test', () => {
 
   // RabbitMQ
   before('Connect to RabbitMQ', () => {
-    return testUtil.connectToRabbitMQ(workerServer)
+    return testUtil.connectToRabbitMQ(workerServer, [], ['organization.authorized'])
       .then(p => { publisher = p })
   })
   after('Disconnect from RabbitMQ', () => {
     return testUtil.disconnectToRabbitMQ(publisher, workerServer)
+      .then(() => testUtil.deleteAllExchangesAndQueues())
   })
 
   beforeEach('Connect to RabbitMQ', () => rabbitMQ.connect())
@@ -86,7 +87,7 @@ describe('Organization Integration Test', () => {
   })
 
   it('should create an organization, and create the org-user relationship', () => {
-    return publisher.publishTask('organization.create', {
+    return publisher.publishEvent('organization.authorized', {
       githubId: orgGithubId,
       creator: {
         githubId: userGithubId,
