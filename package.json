@@ -60,6 +60,7 @@
     "joi": "^8.4.2",
     "keypather": "^2.0.0",
     "knex": "^0.11.7",
+    "knex-migrate": "^1.1.2",
     "loadenv": "^2.2.0",
     "lodash": "^4.13.1",
     "moment": "^2.13.0",
