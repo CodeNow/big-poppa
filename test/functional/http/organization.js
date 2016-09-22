@@ -26,8 +26,8 @@ describe('HTTP Organization Functional Test', () => {
   let orgName
   let userId
   let agent
+  let publishEventStub
   let user
-  let publishUserAddedToOrganizationStub
 
   before(() => {
     return server.start()
@@ -56,7 +56,7 @@ describe('HTTP Organization Functional Test', () => {
       status: 200,
       body: githubOrganizationFixture
     })
-    publishUserAddedToOrganizationStub = sinon.stub(rabbitMQ, 'publishUserAddedToOrganization')
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
     return testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
       .then(res => {
         orgId = res.org[res.org.idAttribute]
@@ -67,7 +67,7 @@ describe('HTTP Organization Functional Test', () => {
   })
 
   afterEach(() => {
-    publishUserAddedToOrganizationStub.restore()
+    publishEventStub.restore()
   })
 
   describe('GET', () => {

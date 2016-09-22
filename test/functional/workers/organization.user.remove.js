@@ -50,7 +50,7 @@ describe('Organization.user.remove Functional Test', () => {
   afterEach(() => rabbitMQ.disconnect())
 
   beforeEach(() => {
-    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent')
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
   })
   afterEach(() => {
     publishEventStub.restore()

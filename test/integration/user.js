@@ -9,8 +9,7 @@ const testUtil = require('../util')
 const githubUserFixture = require('../fixtures/github/user')
 const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
-
-const RabbitMQ = require('ponos/lib/rabbitmq')
+const rabbitMQ = require('util/rabbitmq')
 
 const workerServer = require('workers/server')
 const httpServer = require('http/server')
@@ -23,22 +22,17 @@ describe('User Integration Test', () => {
   before(() => httpServer.start())
   after(() => httpServer.stop())
 
-  // Start Worker Server
-  before(() => workerServer.start())
-  after(() => workerServer.stop())
-
-  // Conect to RabbitMQ
-  beforeEach(() => {
-    publisher = new RabbitMQ({
-      name: process.env.APP_NAME + '-test',
-      hostname: process.env.RABBITMQ_HOSTNAME,
-      port: process.env.RABBITMQ_PORT,
-      username: process.env.RABBITMQ_USERNAME,
-      password: process.env.RABBITMQ_PASSWORD
-    })
-    return publisher.connect()
+  // RabbitMQ
+  before('Connect to RabbitMQ', () => {
+    return testUtil.connectToRabbitMQ(workerServer)
+      .then(p => { publisher = p })
   })
-  afterEach(() => publisher.disconnect())
+  after('Disconnect from RabbitMQ', () => {
+    return testUtil.disconnectToRabbitMQ(publisher, workerServer)
+  })
+
+  beforeEach('Connect to RabbitMQ', () => rabbitMQ.connect())
+  afterEach('Disconnect from RabbitMQ', () => rabbitMQ.disconnect())
 
   // Delete everything from the DB after every test
   beforeEach(() => testUtil.truncateAllTables())

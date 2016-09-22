@@ -135,7 +135,7 @@ describe('Organization', () => {
       let usersStub
       let attachStub
       let collectionStub
-      let publishUserAddedToOrganizationStub
+      let publishEventStub
 
       beforeEach(() => {
         attachStub = sinon.stub().resolves()
@@ -144,14 +144,14 @@ describe('Organization', () => {
         }
         usersStub = sinon.stub(Organization.prototype, 'users').returns(collectionStub)
         sinon.stub(GithubAPI.prototype, 'hasUserOrgMembership').resolves({})
-        publishUserAddedToOrganizationStub = sinon.stub(rabbitMQ, 'publishUserAddedToOrganization')
+        publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
         user = new User({ id: Math.floor(Math.random() * 100) })
       })
 
       afterEach(() => {
         Organization.prototype.users.restore()
         GithubAPI.prototype.hasUserOrgMembership.restore()
-        publishUserAddedToOrganizationStub.restore()
+        publishEventStub.restore()
       })
 
       it('should throw a TypeError if no user is passed', done => {
@@ -209,9 +209,10 @@ describe('Organization', () => {
       it('should publish an event with rabbitMQ', () => {
         org.addUser(user)
           .then(() => {
-            sinon.assert.calledOnce(publishUserAddedToOrganizationStub)
+            sinon.assert.calledOnce(publishEventStub)
             sinon.assert.calledWithExactly(
-              publishUserAddedToOrganizationStub,
+              publishEventStub,
+              'organization.user.added',
               {
                 user: {
                   id: user.id,

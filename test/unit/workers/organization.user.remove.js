@@ -27,7 +27,7 @@ describe('#organization.user.remove', () => {
   let fetchOrgByGithubIdStub
   let fetchUserByGithubIdStub
   let removeUserStub
-  let publishUserRemovedFromOrganizationStub
+  let publishEventStub
 
   beforeEach(() => {
     user = new User({ id: userId, githubId: userGithubId })
@@ -37,14 +37,14 @@ describe('#organization.user.remove', () => {
     fetchOrgByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(org)
     fetchUserByGithubIdStub = sinon.stub(User, 'fetchByGithubId').resolves(user)
     removeUserStub = sinon.stub(Organization.prototype, 'removeUser').resolves(user)
-    publishUserRemovedFromOrganizationStub = sinon.stub(rabbitMQ, 'publishUserRemovedFromOrganization')
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
   })
 
   afterEach(() => {
     fetchOrgByGithubIdStub.restore()
     fetchUserByGithubIdStub.restore()
     removeUserStub.restore()
-    publishUserRemovedFromOrganizationStub.restore()
+    publishEventStub.restore()
   })
 
   describe('Validation', () => {
@@ -190,17 +190,18 @@ describe('#organization.user.remove', () => {
     it('should publish an event with rabbitMQ', () => {
       return RemoveUserFromOrganization(validJob)
         .then(() => {
-          sinon.assert.calledOnce(publishUserRemovedFromOrganizationStub)
+          sinon.assert.calledOnce(publishEventStub)
           sinon.assert.calledWithExactly(
-            publishUserRemovedFromOrganizationStub,
+            publishEventStub,
+            'organization.user.removed',
             {
-              user: {
-                id: userId,
-                githubId: userGithubId
-              },
               organization: {
                 id: orgId,
                 githubId: orgGithubId
+              },
+              user: {
+                id: userId,
+                githubId: userGithubId
               }
             }
           )
