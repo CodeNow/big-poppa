@@ -237,7 +237,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(collectionStub.fetch)
           sinon.assert.calledWithExactly(
             collectionStub.fetch,
-            { withRelated: 'users' }
+            { withRelated: Organization.withRelatedProps }
           )
         })
     })
@@ -292,7 +292,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledWithExactly(
             fetchByIdStub,
             orgId,
-            { withRelated: 'users' }
+            { withRelated: Organization.withRelatedProps }
           )
         })
     })
@@ -304,7 +304,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledWithExactly(
             fetchByIdStub,
             orgId,
-            { withRelated: 'users' }
+            { withRelated: Organization.withRelatedProps }
           )
         })
     })
@@ -481,7 +481,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(orgMock.fetch)
           sinon.assert.calledWithExactly(
             orgMock.fetch,
-            { withRelated: 'users' }
+            { withRelated: Organization.withRelatedProps }
           )
         })
     })
