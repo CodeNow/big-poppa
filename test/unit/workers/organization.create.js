@@ -241,9 +241,9 @@ describe('#organization.create', () => {
     it('should publish an `asg.create` job', done => {
       CreateOrganization(validJob)
         .then(res => {
-          sinon.assert.calledTwice(publishTaskStub)
+          sinon.assert.calledTwice(publishEventStub)
           sinon.assert.calledWithExactly(
-            publishTaskStub,
+            publishEventStub,
             'asg.create',
             {
               githubId: githubOrganizationFixture.id
