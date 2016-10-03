@@ -122,9 +122,9 @@ describe('RabbitMQ', () => {
     it('should publish the task', () => {
       return rabbitMQ.publishASGCreate(validJob)
         .then(() => {
-          sinon.assert.calledOnce(publishTaskStub)
+          sinon.assert.calledOnce(publishEventStub)
           sinon.assert.calledWithExactly(
-            publishTaskStub,
+            publishEventStub,
             'asg.create',
             validJob
           )
