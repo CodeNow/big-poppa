@@ -241,7 +241,7 @@ describe('#organization.create', () => {
     it('should publish an `organization.created` job', done => {
       CreateOrganization(validJob)
         .then(res => {
-          sinon.assert.calledTwice(publishEventStub)
+          sinon.assert.calledOnce(publishEventStub)
           sinon.assert.calledWithExactly(
             publishEventStub,
             'organization.created',
