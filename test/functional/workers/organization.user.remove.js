@@ -18,7 +18,7 @@ const knex = bookshelf.knex
 const User = require('models/user')
 const Organization = require('models/organization')
 
-const RemoveUserFromOrganization = require('workers/organization.user.remove')
+const RemoveUserFromOrganization = require('workers/organization.user.remove').task
 
 describe('Organization.user.remove Functional Test', () => {
   let userGithubId = 1981198

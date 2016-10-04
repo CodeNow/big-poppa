@@ -13,7 +13,7 @@ const githubOrgMembershipFixture = require('../../fixtures/github/org-membership
 const bookshelf = require('models').bookshelf
 const knex = bookshelf.knex
 
-const UserAuthorized = require('workers/user.authorized')
+const UserAuthorized = require('workers/user.authorized').task
 
 describe('user.authorized Functional Test', () => {
   let githubId = 1981198

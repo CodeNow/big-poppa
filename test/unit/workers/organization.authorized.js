@@ -17,7 +17,7 @@ const NotFoundError = require('errors/not-found-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const WorkerError = require('error-cat/errors/worker-error')
 
-const OrganizationAuthorized = require('workers/organization.authorized')
+const OrganizationAuthorized = require('workers/organization.authorized').task
 
 describe('#organization.authorized', () => {
   let orgId = 2343243

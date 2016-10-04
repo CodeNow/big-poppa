@@ -13,7 +13,7 @@ const NotFoundError = require('errors/not-found-error')
 const NoRowsDeletedError = require('errors/no-rows-deleted-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
-const RemoveUserFromOrganization = require('workers/organization.user.remove')
+const RemoveUserFromOrganization = require('workers/organization.user.remove').task
 
 describe('#organization.user.remove', () => {
   let user

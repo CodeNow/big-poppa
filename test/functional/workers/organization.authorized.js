@@ -19,7 +19,7 @@ const bookshelf = require('models').bookshelf
 const rabbitMQ = require('util/rabbitmq')
 const knex = bookshelf.knex
 
-const OrganizationAuthorized = require('workers/organization.authorized')
+const OrganizationAuthorized = require('workers/organization.authorized').task
 
 describe('Organization.authorized Functional Test', () => {
   let githubId = githubOrganizationFixture.id

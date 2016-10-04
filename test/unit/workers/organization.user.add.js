@@ -11,7 +11,7 @@ const Organization = require('models/organization')
 const NotFoundError = require('errors/not-found-error')
 const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
-const AddUserToOrganization = require('workers/organization.user.add')
+const AddUserToOrganization = require('workers/organization.user.add').task
 
 describe('#organization.user.add', () => {
   let user

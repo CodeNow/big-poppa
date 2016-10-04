@@ -11,7 +11,7 @@ const GithubEntityError = require('errors/github-entity-error')
 const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
-const UserAuthorized = require('workers/user.authorized')
+const UserAuthorized = require('workers/user.authorized').task
 
 describe('#user.authorized', () => {
   let accessToken = '282398423230239423'
