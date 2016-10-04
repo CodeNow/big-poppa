@@ -63,6 +63,93 @@ describe('#organization.user.added', () => {
     getEmailStub.restore()
   })
 
+  describe('Validation', () => {
+    it('should not validate if a `organization.githubId` is not passed', done => {
+      delete validJob.organization.githubId
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `organization.id` is not passed', done => {
+      delete validJob.organization.id
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/id/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `organization` is not passed', done => {
+      delete validJob.organization
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/organization/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `user.githubId` is not passed', done => {
+      delete validJob.user.githubId
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `user.id` is not passed', done => {
+      delete validJob.user.id
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/id/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `user` is not passed', done => {
+      delete validJob.user
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/user/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `organization.githubId` is not a number', done => {
+      validJob.organization.githubId = 'asdasdas'
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/a number/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `user.githubId` is not a number', done => {
+      validJob.user.githubId = 'asdasdas'
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/a number/i)
+          done()
+        })
+    })
+
+    it('should validate if a valid job is passed', done => {
+      Joi.validateAsync(validJob, OrganizationUserAddedSchema)
+        .asCallback(done)
+    })
+  })
+
   describe('Errors', () => {
     it('should throw a `WorkerStopError` if a `Organization.fetchById` throws a `NotFoundError`', done => {
       let thrownErr = new NotFoundError('Organization not found')
