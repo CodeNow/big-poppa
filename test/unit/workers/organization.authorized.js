@@ -70,65 +70,6 @@ describe('#organization.authorized', () => {
     publishEventStub.restore()
   })
 
-  describe('Validation', () => {
-    it('should throw a validation error if no `githubId` is passed', done => {
-      OrganizationAuthorized({ hello: 'World' })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if the `githubId` is not a number', done => {
-      OrganizationAuthorized({ githubId: 'hello' })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/githubId/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if no `creator` is passed', done => {
-      OrganizationAuthorized({ githubId: 837 })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/creator/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if no `creator.githubId` is passed', done => {
-      delete validJob.creator.githubId
-      OrganizationAuthorized(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if the `creator.githubId` is not a number', done => {
-      validJob.creator.githubId = 'dfasdfsadf'
-      OrganizationAuthorized(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/githubId/i)
-          done()
-        })
-    })
-
-    it('should not throw a validation error if a valid job is passed', done => {
-      OrganizationAuthorized(validJob)
-        .asCallback(done)
-    })
-  })
-
   describe('Errors', () => {
     it('should throw a `WorkerError` if `User.fetchByGithubId` throws a `NotFoundError`', done => {
       let originalErr = new NotFoundError('hello')

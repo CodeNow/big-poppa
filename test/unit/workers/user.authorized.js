@@ -32,33 +32,6 @@ describe('#user.authorized', () => {
     updateOrCreateByGithubIdStub.restore()
   })
 
-  describe('Validation', () => {
-    it('should throw a validation error if no `githubId` is passed', done => {
-      UserAuthorized({ hello: 'World' })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if the `githubId` is not a number', done => {
-      UserAuthorized({ githubId: 'hello' })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should not throw a validation error if a valid job is passed', done => {
-      UserAuthorized(validJob)
-        .asCallback(done)
-    })
-  })
-
   describe('Errors', () => {
     it('should throw a `WorkerStopError` if a `User.updateOrCreateByGithubIdStub` throws a `GithubEntityError`', done => {
       let originalErr = new GithubEntityError('hello')
