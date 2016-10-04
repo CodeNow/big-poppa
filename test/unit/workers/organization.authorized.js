@@ -223,7 +223,7 @@ describe('#organization.authorized', () => {
     it('should publish an `organization.user.add` job', done => {
       OrganizationAuthorized(validJob)
         .then(res => {
-          sinon.assert.calledTwice(publishTaskStub)
+          sinon.assert.calledOnce(publishTaskStub)
           sinon.assert.calledWithExactly(
             publishTaskStub,
             'organization.user.add',
@@ -231,21 +231,6 @@ describe('#organization.authorized', () => {
               tid: sinon.match.any,
               organizationGithubId: githubId,
               userGithubId: creatorGithubId
-            }
-          )
-        })
-        .asCallback(done)
-    })
-
-    it('should publish an `asg.create` job', done => {
-      OrganizationAuthorized(validJob)
-        .then(res => {
-          sinon.assert.calledTwice(publishTaskStub)
-          sinon.assert.calledWithExactly(
-            publishTaskStub,
-            'asg.create',
-            {
-              githubId: githubOrganizationFixture.id
             }
           )
         })
