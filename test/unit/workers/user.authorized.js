@@ -1,6 +1,7 @@
 'use strict'
 
 const Promise = require('bluebird')
+const Joi = Promise.promisifyAll(require('joi'))
 const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
@@ -12,6 +13,7 @@ const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
 const UserAuthorized = require('workers/user.authorized').task
+const UserAuthorizedSchema = require('workers/user.authorized').jobSchema
 
 describe('#user.authorized', () => {
   let accessToken = '282398423230239423'
@@ -30,6 +32,22 @@ describe('#user.authorized', () => {
 
   afterEach(() => {
     updateOrCreateByGithubIdStub.restore()
+  })
+  describe('Validation', () => {
+    it('should not validate if a `githubId` is not passed', done => {
+      delete validJob.githubId
+      Joi.validateAsync(validJob, UserAuthorizedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
+          done()
+        })
+    })
+
+    it('should validate if a valid job is passed', done => {
+      Joi.validateAsync(validJob, UserAuthorizedSchema)
+        .asCallback(done)
+    })
   })
 
   describe('Errors', () => {

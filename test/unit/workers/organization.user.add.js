@@ -1,6 +1,7 @@
 'use strict'
 
 const Promise = require('bluebird')
+const Joi = Promise.promisifyAll(require('joi'))
 const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
@@ -12,6 +13,7 @@ const NotFoundError = require('errors/not-found-error')
 const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const AddUserToOrganization = require('workers/organization.user.add').task
+const AddUserToOrganizationSchema = require('workers/organization.user.add').jobSchema
 
 describe('#organization.user.add', () => {
   let user
@@ -40,6 +42,22 @@ describe('#organization.user.add', () => {
     fetchOrgByGithubIdStub.restore()
     fetchUserByGithubIdStub.restore()
     addUserStub.restore()
+  })
+  describe('Validation', () => {
+    it('should not validate if a `userGithubId` is not passed', done => {
+      delete validJob.userGithubId
+      Joi.validateAsync(validJob, AddUserToOrganizationSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/userGithubId/i)
+          done()
+        })
+    })
+
+    it('should validate if a valid job is passed', done => {
+      Joi.validateAsync(validJob, AddUserToOrganizationSchema)
+        .asCallback(done)
+    })
   })
 
   describe('Errors', () => {

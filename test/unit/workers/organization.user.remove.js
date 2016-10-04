@@ -1,6 +1,7 @@
 'use strict'
 
 const Promise = require('bluebird')
+const Joi = Promise.promisifyAll(require('joi'))
 const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
@@ -14,6 +15,7 @@ const NoRowsDeletedError = require('errors/no-rows-deleted-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
 const RemoveUserFromOrganization = require('workers/organization.user.remove').task
+const RemoveUserFromOrganizationSchema = require('workers/organization.user.remove').jobSchema
 
 describe('#organization.user.remove', () => {
   let user
@@ -45,6 +47,22 @@ describe('#organization.user.remove', () => {
     fetchUserByGithubIdStub.restore()
     removeUserStub.restore()
     publishEventStub.restore()
+  })
+  describe('Validation', () => {
+    it('should not validate if a `userGithubId` is not passed', done => {
+      delete validJob.userGithubId
+      Joi.validateAsync(validJob, RemoveUserFromOrganizationSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/userGithubId/i)
+          done()
+        })
+    })
+
+    it('should validate if a valid job is passed', done => {
+      Joi.validateAsync(validJob, RemoveUserFromOrganizationSchema)
+        .asCallback(done)
+    })
   })
 
   describe('Errors', () => {
