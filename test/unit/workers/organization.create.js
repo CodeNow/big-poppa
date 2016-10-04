@@ -238,21 +238,6 @@ describe('#organization.create', () => {
         .asCallback(done)
     })
 
-    it('should publish an `asg.create.requested` job', done => {
-      CreateOrganization(validJob)
-        .then(res => {
-          sinon.assert.calledTwice(publishEventStub)
-          sinon.assert.calledWithExactly(
-            publishEventStub,
-            'asg.create.requested',
-            {
-              githubId: githubOrganizationFixture.id
-            }
-          )
-        })
-        .asCallback(done)
-    })
-
     it('should publish an `organization.created` job', done => {
       CreateOrganization(validJob)
         .then(res => {
