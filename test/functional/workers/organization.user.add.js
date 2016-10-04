@@ -19,7 +19,7 @@ const knex = bookshelf.knex
 const User = require('models/user')
 const Organization = require('models/organization')
 
-const AddUserToOrganization = require('workers/organization.user.add')
+const AddUserToOrganization = require('workers/organization.user.add').task
 
 describe('Organization.user.add Functional Test', () => {
   let userGithubId = 1981198

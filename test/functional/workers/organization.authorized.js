@@ -19,9 +19,9 @@ const bookshelf = require('models').bookshelf
 const rabbitMQ = require('util/rabbitmq')
 const knex = bookshelf.knex
 
-const CreateOrganization = require('workers/organization.create')
+const OrganizationAuthorized = require('workers/organization.authorized').task
 
-describe('Organization.create Functional Test', () => {
+describe('Organization.authorized Functional Test', () => {
   let githubId = githubOrganizationFixture.id
   let userGithubId = githubUserFixture.id
   let orgGithubName = githubOrganizationFixture.login.toLowerCase()
@@ -76,7 +76,7 @@ describe('Organization.create Functional Test', () => {
   })
 
   it('should create an organization, and queue creating a relationship', done => {
-    CreateOrganization(job).then((organization) => {
+    OrganizationAuthorized(job).then((organization) => {
       expect(organization.get('githubId')).to.equal(githubId)
       // Check database for entry
       return knex('organizations').where('github_id', githubId)
