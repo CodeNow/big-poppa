@@ -59,6 +59,36 @@ describe('#organization.user.remove', () => {
         })
     })
 
+    it('should not validate if a `userGithubId` is not a number', done => {
+      validJob.userGithubId = 'anton'
+      Joi.validateAsync(validJob, RemoveUserFromOrganizationSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/userGithubId/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `organizationGithubId` is not passed', done => {
+      delete validJob.organizationGithubId
+      Joi.validateAsync(validJob, RemoveUserFromOrganizationSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/organizationGithubId/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `organizationGithubId` is not a number', done => {
+      validJob.organizationGithubId = 'runnable'
+      Joi.validateAsync(validJob, RemoveUserFromOrganizationSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/organizationGithubId/i)
+          done()
+        })
+    })
+
     it('should validate if a valid job is passed', done => {
       Joi.validateAsync(validJob, RemoveUserFromOrganizationSchema)
         .asCallback(done)

@@ -82,6 +82,46 @@ describe('#organization.authorized', () => {
         })
     })
 
+    it('should not validate if a `githubId` is not a number', done => {
+      validJob.githubId = 'anton'
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `creator` is not passed', done => {
+      delete validJob.creator
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/creator/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `creator.githubId` is not passed', done => {
+      delete validJob.creator.githubId
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `creator.githubId` is not a number', done => {
+      validJob.creator.githubId = 'anton'
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
+          done()
+        })
+    })
+
     it('should validate if a valid job is passed', done => {
       Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
         .asCallback(done)
