@@ -1,6 +1,7 @@
 'use strict'
 
 const Promise = require('bluebird')
+const Joi = Promise.promisifyAll(require('joi'))
 const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
@@ -17,9 +18,10 @@ const NotFoundError = require('errors/not-found-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const WorkerError = require('error-cat/errors/worker-error')
 
-const CreateOrganization = require('workers/organization.create')
+const OrganizationAuthorized = require('workers/organization.authorized').task
+const OrganizationAuthorizedSchema = require('workers/organization.authorized').jobSchema
 
-describe('#organization.create', () => {
+describe('#organization.authorized', () => {
   let orgId = 2343243
   let githubId = 123
   let creatorGithubId = 123231
@@ -69,62 +71,59 @@ describe('#organization.create', () => {
     publishTaskStub.restore()
     publishEventStub.restore()
   })
-
   describe('Validation', () => {
-    it('should throw a validation error if no `githubId` is passed', done => {
-      CreateOrganization({ hello: 'World' })
+    it('should not validate if a `githubId` is not passed', done => {
+      delete validJob.githubId
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
         .asCallback(err => {
           expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if the `githubId` is not a number', done => {
-      CreateOrganization({ githubId: 'hello' })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.message).to.match(/githubId/i)
           done()
         })
     })
 
-    it('should throw a validation error if no `creator` is passed', done => {
-      CreateOrganization({ githubId: 837 })
+    it('should not validate if a `githubId` is not a number', done => {
+      validJob.githubId = 'anton'
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
         .asCallback(err => {
           expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
+          expect(err.message).to.match(/githubId/i)
+          done()
+        })
+    })
+
+    it('should not validate if a `creator` is not passed', done => {
+      delete validJob.creator
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
           expect(err.message).to.match(/creator/i)
           done()
         })
     })
 
-    it('should throw a validation error if no `creator.githubId` is passed', done => {
+    it('should not validate if a `creator.githubId` is not passed', done => {
       delete validJob.creator.githubId
-      CreateOrganization(validJob)
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
         .asCallback(err => {
           expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should throw a validation error if the `creator.githubId` is not a number', done => {
-      validJob.creator.githubId = 'dfasdfsadf'
-      CreateOrganization(validJob)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
           expect(err.message).to.match(/githubId/i)
           done()
         })
     })
 
-    it('should not throw a validation error if a valid job is passed', done => {
-      CreateOrganization(validJob)
+    it('should not validate if a `creator.githubId` is not a number', done => {
+      validJob.creator.githubId = 'anton'
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err.message).to.match(/githubId/i)
+          done()
+        })
+    })
+
+    it('should validate if a valid job is passed', done => {
+      Joi.validateAsync(validJob, OrganizationAuthorizedSchema)
         .asCallback(done)
     })
   })
@@ -134,7 +133,7 @@ describe('#organization.create', () => {
       let originalErr = new NotFoundError('hello')
       fetchUserByGithubIdStub.rejects(originalErr)
 
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerError)
@@ -147,7 +146,7 @@ describe('#organization.create', () => {
       let originalErr = new GithubEntityError('hello')
       createStub.rejects(originalErr)
 
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -161,7 +160,7 @@ describe('#organization.create', () => {
       let originalErr = new UniqueError('hello')
       createStub.rejects(originalErr)
 
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .then(res => {
           expect(res).to.exist
           expect(res).to.equal(newOrg)
@@ -175,7 +174,7 @@ describe('#organization.create', () => {
       let originalErr = new Error('hello')
       createStub.rejects(originalErr)
 
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.not.be.an.instanceof(WorkerStopError)
@@ -187,7 +186,7 @@ describe('#organization.create', () => {
 
   describe('Main Functionality', done => {
     it('should call `User.fetchByGithubId`', done => {
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .then(() => {
           sinon.assert.calledOnce(fetchUserByGithubIdStub)
           sinon.assert.calledWithExactly(
@@ -199,7 +198,7 @@ describe('#organization.create', () => {
     })
 
     it('should call `Organization.create`', done => {
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .then(() => {
           sinon.assert.calledOnce(createStub)
           sinon.assert.calledWithExactly(
@@ -213,7 +212,7 @@ describe('#organization.create', () => {
     })
 
     it('should return an organization', done => {
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .then(res => {
           sinon.assert.calledOnce(createStub)
           expect(res).to.equal(newOrg)
@@ -222,7 +221,7 @@ describe('#organization.create', () => {
     })
 
     it('should publish an `organization.user.add` job', done => {
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .then(res => {
           sinon.assert.calledTwice(publishTaskStub)
           sinon.assert.calledWithExactly(
@@ -239,7 +238,7 @@ describe('#organization.create', () => {
     })
 
     it('should publish an `asg.create` job', done => {
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .then(res => {
           sinon.assert.calledTwice(publishTaskStub)
           sinon.assert.calledWithExactly(
@@ -254,7 +253,7 @@ describe('#organization.create', () => {
     })
 
     it('should publish an `organization.created` job', done => {
-      CreateOrganization(validJob)
+      OrganizationAuthorized(validJob)
         .then(res => {
           sinon.assert.calledOnce(publishEventStub)
           sinon.assert.calledWithExactly(
