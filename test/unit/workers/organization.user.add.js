@@ -42,53 +42,6 @@ describe('#organization.user.add', () => {
     addUserStub.restore()
   })
 
-  describe('Validation', () => {
-    it('should not validate if a `organizationGithubId` is not passed', done => {
-      AddUserToOrganization({ userGithubId: userGithubId })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should not validate if a `userGithubId` is not passed', done => {
-      AddUserToOrganization({ organizationGithubId: orgGithubId })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should not validate if a `organizationGithubId` is not a number', done => {
-      AddUserToOrganization({ userGithubId: userGithubId, organizationGithubId: 'werwe' })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should not validate if a `userGithubId` is not a number', done => {
-      AddUserToOrganization({ userGithubId: 'hello', organizationGithubId: orgGithubId })
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
-          done()
-        })
-    })
-
-    it('should validate if a valid job is passed', done => {
-      AddUserToOrganization(validJob)
-        .asCallback(done)
-    })
-  })
-
   describe('Errors', () => {
     it('should throw a `WorkerStopError` if a `Organization.fetchByGithubId` throws a `NotFoundError`', done => {
       let thrownErr = new NotFoundError('Organization not found')

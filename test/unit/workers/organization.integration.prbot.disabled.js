@@ -42,23 +42,6 @@ describe('#organization.integration.prbot.disabled', () => {
     fetchOrgByIdStub.restore()
   })
 
-  describe('Validation', () => {
-    it('should not validate if a `organizationId` is not passed', done => {
-      delete validJob.organization.id
-      Joi.validateAsync(validJob, PrBotDisabledSchema)
-        .asCallback(err => {
-          expect(err).to.exist
-          expect(err.message).to.match(/organization/i)
-          done()
-        })
-    })
-
-    it('should validate if a valid job is passed', done => {
-      Joi.validateAsync(validJob, PrBotDisabledSchema)
-        .asCallback(done)
-    })
-  })
-
   describe('Errors', () => {
     it('should throw a `WorkerStopError` if a `Organization.fetchByGithubId` throws a `NotFoundError`', done => {
       let thrownErr = new NotFoundError('Organization not found')
