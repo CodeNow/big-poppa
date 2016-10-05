@@ -359,7 +359,8 @@ describe('HTTP Organization Functional Test', () => {
               activePeriodEnd: timeCreated
             })
             // A patch should always return an updated org
-            .then(org => {
+            .then(res => {
+              let org = res.model
               expect(org).to.have.property('id')
               expect(org).to.have.property('githubId', githubId)
               expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
@@ -367,6 +368,9 @@ describe('HTTP Organization Functional Test', () => {
               expect(org).to.have.property('activePeriodEnd', time.toISOString())
               expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').toISOString())
               expect(org).to.have.property('firstDockCreated', false)
+              let updates = res.updates
+              expect(updates).to.be.an('object')
+              expect(updates).to.have.all.keys(['githubId', 'stripeCustomerId', 'trialEnd', 'activePeriodEnd', 'updated_at'])
             })
         })
     })
@@ -381,10 +385,13 @@ describe('HTTP Organization Functional Test', () => {
               hasPaymentMethod: true
             })
         })
-        .then(() => agent.getOrganization(orgId))
-        .then(org => {
+        .then(res => {
+          let org = res.model
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('hasPaymentMethod', true)
+          let updates = res.updates
+          expect(updates).to.be.an('object')
+          expect(updates).to.have.all.keys(['hasPaymentMethod', 'updated_at'])
         })
     })
 
@@ -401,11 +408,14 @@ describe('HTTP Organization Functional Test', () => {
               }
             })
         })
-        .then(() => agent.getOrganization(orgId))
-        .then(org => {
+        .then(res => {
+          let org = res.model
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('metadata')
           expect(org).to.have.deep.property('metadata.hasAha', false)
+          let updates = res.updates
+          expect(updates).to.be.an('object')
+          expect(updates).to.have.all.keys(['metadata', 'updated_at'])
         })
     })
 
@@ -438,7 +448,8 @@ describe('HTTP Organization Functional Test', () => {
               }
             })
         })
-        .then(org => {
+        .then(res => {
+          let org = res.model
           expect(org).to.have.deep.property('metadata.hasAha', true) // Updated value
           return agent
             .updateOrganization(orgId, {
