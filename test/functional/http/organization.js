@@ -1,9 +1,11 @@
 'use strict'
 
+const Promise = require('bluebird')
 const BigPoppaClient = require('../../../client')
 const expect = require('chai').expect
 const MockAPI = require('mehpi')
 const moment = require('moment')
+const keypather = require('keypather')()
 
 const testUtil = require('../../util')
 const Organization = require('models/organization')
@@ -44,8 +46,6 @@ describe('HTTP Organization Functional Test', () => {
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
-
-  beforeEach(() => testUtil.truncateAllTables())
 
   beforeEach(() => {
     githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
@@ -419,6 +419,20 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it('should return the correctly updates for two operations', () => {
+      return Promise.all([
+        agent.updateOrganization(orgId, { hasPaymentMethod: true }),
+        agent.updateOrganization(orgId, { hasPaymentMethod: true })
+      ])
+      .spread((res1, res2) => {
+        let check1 = !!keypather.get(res1, 'updates.hasPaymentMethod')
+        let check2 = !!keypather.get(res2, 'updates.hasPaymentMethod')
+        // At least one should be true and one should be false
+        expect(check1 || check2).to.be.true
+        expect(check1 && check2).to.be.false
+      })
+    })
+
     it('should return an error if the property is not a boolean', done => {
       return agent
         .getOrganization(orgId)
@@ -449,6 +463,7 @@ describe('HTTP Organization Functional Test', () => {
             })
         })
         .then(res => {
+          console.log(res.updates)
           let org = res.model
           expect(org).to.have.deep.property('metadata.hasAha', true) // Updated value
           return agent
