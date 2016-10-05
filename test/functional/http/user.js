@@ -114,7 +114,8 @@ describe('HTTP User Functional Test', () => {
     it('should create a new user', () => {
       return agent
         .createOrUpdateUser(userGithubId2, 'abc')
-        .then(user => {
+        .then(res => {
+          let user = res.model
           expect(user).to.be.an('object')
           expect(user.githubId).to.equal(userGithubId2)
           expect(user.accessToken).to.equal('abc')
@@ -125,12 +126,14 @@ describe('HTTP User Functional Test', () => {
       let userId
       return agent
         .createOrUpdateUser(userGithubId2, 'abc')
-        .then(user => {
+        .then(res => {
+          let user = res.model
           userId = user.id
           expect(user.accessToken).to.equal('abc')
           return agent.createOrUpdateUser(userGithubId2, 'efg')
         })
-        .then(user => {
+        .then(res => {
+          let user = res.model
           expect(user.accessToken).to.equal('efg')
           return agent.getUser(userId)
         })

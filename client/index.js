@@ -217,6 +217,6 @@ module.exports = class BigPoppaClient extends ApiClient {
    */
   createOrUpdateUser (githubId, accessToken) {
     return this.postAsync(BigPoppaClient.getOpts('/user/', { githubId, accessToken }))
-      .then(BigPoppaClient.responseHandler)
+      .then(BigPoppaClient.updateResponseHandler)
   }
 }
