@@ -127,6 +127,7 @@ describe('User', () => {
 
       beforeEach(() => {
         userMock = {
+          on: sinon.stub().returnsThis(),
           save: sinon.stub().returnsThis()
         }
         fetchByGithubIdStub = sinon.stub(User, 'fetchByGithubId').resolves(userMock)
@@ -154,15 +155,22 @@ describe('User', () => {
           })
       })
 
+      it('should call `on` if a user is found', () => {
+        return User.updateOrCreateByGithubId(githubId, githubAccessToken)
+          .then(() => {
+            sinon.assert.calledOnce(userMock.on)
+            sinon.assert.calledWithExactly(userMock.on, 'saving', sinon.match.func)
+          })
+      })
+
       it('should save the access token on the user if found', () => {
         return User.updateOrCreateByGithubId(githubId, githubAccessToken)
           .then(() => {
             sinon.assert.calledOnce(userMock.save)
             sinon.assert.calledWithExactly(
               userMock.save,
-              {
-                accessToken: githubAccessToken
-              }
+              { accessToken: githubAccessToken },
+              { patch: true }
             )
           })
       })
@@ -178,10 +186,13 @@ describe('User', () => {
           })
       })
 
-      it('should resolve the saved user object', () => {
+      it('should resolve to the saved user object and the udpates', () => {
         return User.updateOrCreateByGithubId(githubId, githubAccessToken)
-          .then((user) => {
+          .then(res => {
+            let user = res.model
+            let updates = res.updates
             expect(user).to.equal(userMock)
+            expect(updates).to.equal(null)
           })
       })
 
@@ -199,6 +210,16 @@ describe('User', () => {
                 accessToken: githubAccessToken
               }
             )
+          })
+      })
+
+      it('should not call `on` if no user is found', () => {
+        let err = new NotFoundError('User Not Found')
+        fetchByGithubIdStub.onFirstCall().rejects(err)
+
+        return User.updateOrCreateByGithubId(githubId, githubAccessToken)
+          .then(() => {
+            sinon.assert.notCalled(userMock.on)
           })
       })
 
