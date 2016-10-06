@@ -52,12 +52,14 @@ module.exports = class BigPoppaClient extends ApiClient {
    * @return {Object}
    */
   static checkResponseForError (res) {
-    if (res.statusCode >= 400) {
-      throw new BigPoppaClientError(res.body.err, res.body.message, {
-        orignalError: res.body
-      })
-    }
-    return res
+    return Promise.try(() => {
+      if (res.statusCode >= 400) {
+        throw new BigPoppaClientError(res.body.err, res.body.message, {
+          orignalError: res.body
+        })
+      }
+      return res
+    })
   }
 
   /**
@@ -68,7 +70,7 @@ module.exports = class BigPoppaClient extends ApiClient {
    * @returns {Object}
    */
   static responseHandler (res) {
-    return Promise.try(BigPoppaClient.checkResponseForError.bind(null, res))
+    return BigPoppaClient.checkResponseForError(res)
       .get('body')
   }
 
@@ -80,7 +82,7 @@ module.exports = class BigPoppaClient extends ApiClient {
    * @returns {Object}
    */
   static updateResponseHandler (res) {
-    return Promise.try(BigPoppaClient.checkResponseForError.bind(null, res))
+    return BigPoppaClient.checkResponseForError(res)
       .then(res => {
         let body = {
           model: res.body
