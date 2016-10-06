@@ -64,7 +64,7 @@ describe('Organization.user.added Functional Test', () => {
   afterEach(() => rabbitMQ.disconnect())
 
   beforeEach(() => {
-    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent')
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
     orionUserCreateStub = sinon.stub(orion.users, 'create')
   })
   afterEach(() => {

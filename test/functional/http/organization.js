@@ -19,14 +19,15 @@ const rabbitMQ = require('util/rabbitmq')
 const server = require('http/server')
 
 describe('HTTP Organization Functional Test', () => {
-  let userGithubId = 1981198
+  let userGithubId = githubUserFixture.id
   let otherGithubId = 6379413
   let orgGithubId = 2828361
   let orgId
   let orgName
   let userId
   let agent
-  let publishUserAddedToOrganizationStub
+  let publishEventStub
+  let user
 
   before(() => {
     return server.start()
@@ -38,6 +39,8 @@ describe('HTTP Organization Functional Test', () => {
   after(() => {
     return server.stop()
   })
+
+  beforeEach('Truncate All Tables', () => testUtil.truncateAllTables())
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
@@ -53,17 +56,18 @@ describe('HTTP Organization Functional Test', () => {
       status: 200,
       body: githubOrganizationFixture
     })
-    publishUserAddedToOrganizationStub = sinon.stub(rabbitMQ, 'publishUserAddedToOrganization')
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
     return testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
       .then(res => {
         orgId = res.org[res.org.idAttribute]
         orgName = res.org.attributes.name
-        userId = res.user[res.user.idAttribute]
+        user = res.user
+        userId = user[user.idAttribute]
       })
   })
 
   afterEach(() => {
-    publishUserAddedToOrganizationStub.restore()
+    publishEventStub.restore()
   })
 
   describe('GET', () => {
@@ -82,6 +86,9 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('activePeriodEnd')
           expect(org).to.have.property('gracePeriodEnd')
           expect(org).to.have.property('firstDockCreated')
+          expect(org).to.have.property('creator')
+          expect(org.creator).to.be.an('object')
+          expect(org.creator).to.have.property('id')
           expect(org).to.have.property('users')
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
@@ -105,6 +112,9 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('activePeriodEnd')
           expect(org).to.have.property('gracePeriodEnd')
           expect(org).to.have.property('firstDockCreated')
+          expect(org).to.have.property('creator')
+          expect(org.creator).to.be.an('object')
+          expect(org.creator).to.have.property('id')
           expect(org).to.have.property('users')
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
@@ -133,7 +143,7 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
-    it('should return an error if an uncrecognized property is passed', () => {
+    it('should return an error if an unrecognized property is passed', () => {
       return agent
         .getOrganizations({
           thisPropertyDoesntExist: 2343
@@ -146,21 +156,117 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    describe('Time Queries', () => {
+      describe('GET /?trialEnd={ moreThan }', () => {
+        it('should get the org if the trial is more than `trialEndFrom`', () => {
+          const time = moment().subtract(1, 'days')
+          return agent
+            .getOrganizations({
+              'trialEnd': { moreThan: time.toISOString() }
+            })
+            .then(orgs => {
+              expect(orgs).to.be.an.array
+              expect(orgs).to.have.lengthOf(1)
+              let org = orgs[0]
+              expect(org).to.have.property('githubId', orgGithubId)
+            })
+        })
+
+        it('should get the org if the trial is more than `trialEndFrom`', () => {
+          const time = moment().add(7, 'months')
+          return agent
+            .getOrganizations({
+              'trialEnd': { moreThan: time.toISOString() }
+            })
+            .then(body => {
+              expect(body).to.be.an.array
+              expect(body).to.have.lengthOf(0)
+            })
+        })
+      })
+
+      describe('GET /?trialEnd={ lessThan }', () => {
+        it('should not get the org if the trial is not less than `trialEnd`', () => {
+          const time = moment().subtract(1, 'days')
+          return agent
+            .getOrganizations({
+              'trialEnd': { lessThan: time.toISOString() }
+            })
+            .then(orgs => {
+              expect(orgs).to.be.an.array
+              expect(orgs).to.have.lengthOf(0)
+            })
+        })
+
+        it('should get the org if the trial is less than `trialEnd`', () => {
+          const time = moment().add(7, 'months')
+          return agent
+            .getOrganizations({
+              'trialEnd': { lessThan: time.toISOString() }
+            })
+            .then(orgs => {
+              expect(orgs).to.be.an.array
+              expect(orgs).to.have.lengthOf(1)
+              let org = orgs[0]
+              expect(org).to.have.property('githubId', orgGithubId)
+            })
+        })
+
+        it('should get the org if multiple properties are set', () => {
+          const time = moment().add(7, 'months')
+          return agent
+            .getOrganizations({
+              githubId: orgGithubId,
+              name: orgName,
+              'trialEnd': { lessThan: time.toISOString() }
+            })
+            .then(orgs => {
+              expect(orgs).to.be.an.array
+              expect(orgs).to.have.lengthOf(1)
+              let org = orgs[0]
+              expect(org).to.have.property('githubId', orgGithubId)
+            })
+        })
+      })
+
+      describe('Multiple Queries', () => {
+        it('should get the org if multiple properties are set', () => {
+          const lessThan = moment().add(7, 'months')
+          const moreThan = moment().subtract(7, 'months')
+          return agent
+            .getOrganizations({
+              githubId: orgGithubId,
+              name: orgName,
+              'trialEnd': { lessThan, moreThan }
+            })
+            .then(orgs => {
+              expect(orgs).to.be.an.array
+              expect(orgs).to.have.lengthOf(1)
+              let org = orgs[0]
+              expect(org).to.have.property('githubId', orgGithubId)
+            })
+        })
+      })
+    })
+
     describe('GET /?stripeCustomerId', () => {
-      let orgGithubId = 2335750
-      let stripeCustomerId = 'cus_2342o3i23'
+      const stripeOrgGithubId = githubOrganizationFixture2.id
+      const orgGithubName = githubOrganizationFixture2.login.toLowerCase()
+      const stripeCustomerId = 'cus_2342o3i23'
 
       beforeEach('Create organization', () => {
-        githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
+        githubAPI.stub('GET', `/user/${stripeOrgGithubId}?access_token=testing`).returns({
           status: 200,
           body: githubOrganizationFixture2
         })
         return new Organization().save({
-          githubId: orgGithubId,
+          githubId: stripeOrgGithubId,
           trialEnd: new Date(),
           activePeriodEnd: new Date(),
           gracePeriodEnd: new Date(),
-          stripeCustomerId: stripeCustomerId
+          name: orgGithubName,
+          stripeCustomerId: stripeCustomerId,
+          creator: user.get(user.idAttribute)
         })
       })
 
@@ -172,8 +278,34 @@ describe('HTTP Organization Functional Test', () => {
           .then(body => {
             expect(body).to.be.an.array
             expect(body).to.have.lengthOf(1)
-            expect(body[0]).to.have.property('githubId', orgGithubId)
+            expect(body[0]).to.have.property('githubId', stripeOrgGithubId)
           })
+      })
+
+      describe('isNull', () => {
+        it('should return the org when querying orgs with a stripeCustomerId', () => {
+          return agent
+            .getOrganizations({
+              stripeCustomerId: { isNull: false }
+            })
+            .then(body => {
+              expect(body).to.be.an.array
+              expect(body).to.have.lengthOf(1)
+              expect(body[0]).to.have.property('githubId', stripeOrgGithubId)
+            })
+        })
+
+        it('should return a an empty array if passed', () => {
+          return agent
+            .getOrganizations({
+              stripeCustomerId: { isNull: true }
+            })
+            .then(body => {
+              expect(body).to.be.an.array
+              expect(body).to.have.lengthOf(1)
+              expect(body[0]).to.have.property('githubId', orgGithubId)
+            })
+        })
       })
     })
   })
@@ -189,6 +321,9 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('activePeriodEnd')
           expect(org).to.have.property('gracePeriodEnd')
           expect(org).to.have.property('firstDockCreated')
+          expect(org).to.have.property('creator')
+          expect(org.creator).to.be.an('object')
+          expect(org.creator).to.have.property('id')
           expect(org).to.have.property('users')
           expect(org.users).to.be.an('array')
           expect(org.users[0]).to.have.property('id')
@@ -257,11 +392,12 @@ describe('HTTP Organization Functional Test', () => {
       return agent
         .getOrganization(orgId)
         .then(org => {
-          expect(org).to.have.property('metadata', null) // Default value
+          expect(org).to.have.property('metadata')
+          expect(org.metadata).to.deep.equal({ hasAha: true }) // Default value
           return agent
             .updateOrganization(orgId, {
               metadata: {
-                hasAha: true
+                hasAha: false
               }
             })
         })
@@ -269,7 +405,7 @@ describe('HTTP Organization Functional Test', () => {
         .then(org => {
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('metadata')
-          expect(org).to.have.deep.property('metadata.hasAha', true)
+          expect(org).to.have.deep.property('metadata.hasAha', false)
         })
     })
 

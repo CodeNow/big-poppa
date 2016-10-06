@@ -1,6 +1,6 @@
 {
   "name": "big-poppa",
-  "version": "0.9.0",
+  "version": "0.13.5",
   "description": "User management and billing",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "coverage-unit": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/unit",
     "coverage-functional": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-functional -- --recursive test/functional",
     "coverage-integration": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-integration -- --recursive test/integration",
-    "coverage-check": "istanbul check-coverage --statement 98 --functions 98 --branches 97 --lines 98 && echo 'Coverage check successful!'",
+    "coverage-check": "istanbul check-coverage --statement 98 --functions 98 --branches 96 --lines 98 && echo 'Coverage check successful!'",
     "init": "npm run init-db && npm run migrate",
     "test-unit": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/",
     "test-functional": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/functional/",
@@ -22,10 +22,10 @@
     "start-worker": "npm run migrate-dev && NODE_PATH=./lib node lib/workers",
     "start-http": "npm run migrate-dev && NODE_PATH=./lib node lib/http",
     "rollback": "npm run rollback-dev && npm run rollback-test",
-    "migrate-dev": "knex migrate:latest",
-    "rollback-dev": "knex migrate:rollback",
-    "migrate-test": "NODE_ENV=test knex migrate:latest",
-    "rollback-test": "NODE_ENV=test knex migrate:rollback"
+    "migrate-dev": "knex-migrate up",
+    "rollback-dev": "knex-migrate down",
+    "migrate-test": "NODE_ENV=test knex-migrate up",
+    "rollback-test": "NODE_ENV=test knex-migrate down"
   },
   "directories": {
     "test": "test"
@@ -60,12 +60,13 @@
     "joi": "^8.4.2",
     "keypather": "^2.0.0",
     "knex": "^0.11.7",
+    "knex-migrate": "^1.1.2",
     "loadenv": "^2.2.0",
     "lodash": "^4.13.1",
     "moment": "^2.13.0",
+    "newrelic": "^1.30.1",
     "pg": "^6.0.0",
-    "ponos": "^4.0.0",
-    "runnable-hermes": "^6.6.0"
+    "ponos": "^5.6.1"
   },
   "devDependencies": {
     "@runnable/big-poppa-client": "^0.2.0",
@@ -74,6 +75,7 @@
     "mehpi": "git+https://git@github.com/runnable/mehpi.git#384c357ab67fbea59e09ce81e53d2de8348ffa7c",
     "mocha": "^2.5.3",
     "mongodb": "^2.1.17",
+    "request-promise": "^4.1.1",
     "simple-api-client": "^0.6.2",
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",

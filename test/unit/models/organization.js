@@ -135,7 +135,7 @@ describe('Organization', () => {
       let usersStub
       let attachStub
       let collectionStub
-      let publishUserAddedToOrganizationStub
+      let publishEventStub
 
       beforeEach(() => {
         attachStub = sinon.stub().resolves()
@@ -144,14 +144,14 @@ describe('Organization', () => {
         }
         usersStub = sinon.stub(Organization.prototype, 'users').returns(collectionStub)
         sinon.stub(GithubAPI.prototype, 'hasUserOrgMembership').resolves({})
-        publishUserAddedToOrganizationStub = sinon.stub(rabbitMQ, 'publishUserAddedToOrganization')
+        publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
         user = new User({ id: Math.floor(Math.random() * 100) })
       })
 
       afterEach(() => {
         Organization.prototype.users.restore()
         GithubAPI.prototype.hasUserOrgMembership.restore()
-        publishUserAddedToOrganizationStub.restore()
+        publishEventStub.restore()
       })
 
       it('should throw a TypeError if no user is passed', done => {
@@ -209,9 +209,10 @@ describe('Organization', () => {
       it('should publish an event with rabbitMQ', () => {
         org.addUser(user)
           .then(() => {
-            sinon.assert.calledOnce(publishUserAddedToOrganizationStub)
+            sinon.assert.calledOnce(publishEventStub)
             sinon.assert.calledWithExactly(
-              publishUserAddedToOrganizationStub,
+              publishEventStub,
+              'organization.user.added',
               {
                 user: {
                   id: user.id,
@@ -304,9 +305,12 @@ describe('Organization', () => {
     describe('#create', () => {
       let githubId = 123
       let saveStub
+      let user
+      const userId = Math.floor(Math.random() * 100)
 
       beforeEach(() => {
         saveStub = sinon.stub(bookshelf.Model.prototype, 'save').resolves()
+        user = new User({ id: userId })
       })
 
       afterEach(() => {
@@ -314,7 +318,7 @@ describe('Organization', () => {
       })
 
       it('should save the new organization', done => {
-        Organization.create(githubId)
+        Organization.create(githubId, user)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
           })
@@ -322,12 +326,25 @@ describe('Organization', () => {
       })
 
       it('should save the new organization with the github id', done => {
-        Organization.create(githubId)
+        Organization.create(githubId, user)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
             sinon.assert.calledWithExactly(
               saveStub,
               sinon.match.has('githubId', githubId),
+              undefined
+            )
+          })
+          .asCallback(done)
+      })
+
+      it('should save the creator', done => {
+        Organization.create(githubId, user)
+          .then(() => {
+            sinon.assert.calledOnce(saveStub)
+            sinon.assert.calledWithExactly(
+              saveStub,
+              sinon.match.has('creator', userId),
               undefined
             )
           })
@@ -340,7 +357,7 @@ describe('Organization', () => {
         }
         let beforeTime = (new Date()).getTime()
         let beforeThirtyDaysFromToday = moment(beforeTime).add(30, 'days').utc().toDate()
-        Organization.create(githubId)
+        Organization.create(githubId, user)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
             let dateTypeMatch = sinon.match.instanceOf(Date)
@@ -369,7 +386,7 @@ describe('Organization', () => {
 
       it('should call `save` with the passed options', done => {
         let opts = { transacting: {} }
-        Organization.create(githubId, opts)
+        Organization.create(githubId, user, opts)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
             sinon.assert.calledWithExactly(

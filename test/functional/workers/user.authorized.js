@@ -13,9 +13,9 @@ const githubOrgMembershipFixture = require('../../fixtures/github/org-membership
 const bookshelf = require('models').bookshelf
 const knex = bookshelf.knex
 
-const CreateOrUpdateUser = require('workers/user.create-or-update')
+const UserAuthorized = require('workers/user.authorized').task
 
-describe('user.create-or-update Functional Test', () => {
+describe('user.authorized Functional Test', () => {
   let githubId = 1981198
 
   before(done => githubAPI.start(done))
@@ -35,7 +35,7 @@ describe('user.create-or-update Functional Test', () => {
 
   it('should create a user', done => {
     let accessToken = 'asdsadasdasdasdasdsadsad'
-    CreateOrUpdateUser({
+    UserAuthorized({
       accessToken: accessToken,
       githubId: githubId
     }).then((user) => {
@@ -76,7 +76,7 @@ describe('user.create-or-update Functional Test', () => {
 
     it('should update the access token of the user already exists', done => {
       let accessToken = '8992'
-      CreateOrUpdateUser({
+      UserAuthorized({
         accessToken: accessToken,
         githubId: githubId
       }).then((user) => {

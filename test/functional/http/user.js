@@ -7,12 +7,14 @@ const MockAPI = require('mehpi')
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const githubUserFixture = require('../../fixtures/github/user')
+const githubUserFixture2 = require('../../fixtures/github/user2')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const server = require('http/server')
 
 describe('HTTP User Functional Test', () => {
   let userGithubId = 1981198
+  let userGithubId2 = 718305
   let orgGithubId = 2828361
   let userId
   let agent
@@ -41,6 +43,10 @@ describe('HTTP User Functional Test', () => {
     githubAPI.stub('GET', `/user/${orgGithubId}?access_token=testing`).returns({
       status: 200,
       body: githubOrganizationFixture
+    })
+    githubAPI.stub('GET', `/user/${userGithubId2}?access_token=testing`).returns({
+      status: 200,
+      body: githubUserFixture2
     })
     return testUtil.createAttachedUserAndOrg(orgGithubId, userGithubId)
       .then(res => {
@@ -100,6 +106,37 @@ describe('HTTP User Functional Test', () => {
         .getUser(2342)
         .catch(err => {
           expect(err).to.be.an.object
+        })
+    })
+  })
+
+  describe('POST /', () => {
+    it('should create a new user', () => {
+      return agent
+        .createOrUpdateUser(userGithubId2, 'abc')
+        .then(user => {
+          expect(user).to.be.an('object')
+          expect(user.githubId).to.equal(userGithubId2)
+          expect(user.accessToken).to.equal('abc')
+        })
+    })
+
+    it('should update an already existing user', () => {
+      let userId
+      return agent
+        .createOrUpdateUser(userGithubId2, 'abc')
+        .then(user => {
+          userId = user.id
+          expect(user.accessToken).to.equal('abc')
+          return agent.createOrUpdateUser(userGithubId2, 'efg')
+        })
+        .then(user => {
+          expect(user.accessToken).to.equal('efg')
+          return agent.getUser(userId)
+        })
+        .then(user => {
+          expect(user.id).to.equal(userId)
+          expect(user.accessToken).to.equal('efg')
         })
     })
   })

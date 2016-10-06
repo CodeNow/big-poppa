@@ -35,6 +35,7 @@ describe('HTTP /user', () => {
     }
     fetchByIdStub = sinon.stub(User, 'fetchById').resolves(userMock)
     responseStub = {
+      status: sinon.stub().returnsThis(),
       json: sinon.stub()
     }
   })
@@ -72,13 +73,13 @@ describe('HTTP /user', () => {
         })
     })
 
-    it('should pass the query to `where`', () => {
+    it('should pass a function to `query`', () => {
       return UserRouter.get(requestStub, responseStub)
         .then(() => {
           sinon.assert.calledOnce(collectionStub.query)
           sinon.assert.calledWithExactly(
             collectionStub.query,
-            { where: requestStub.query }
+            sinon.match.func
           )
         })
     })
@@ -95,6 +96,19 @@ describe('HTTP /user', () => {
     })
 
     it('should pass the results to `res.json`', () => {
+      return UserRouter.get(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(usersMock.toJSON)
+          sinon.assert.calledOnce(responseStub.json)
+          sinon.assert.calledWithExactly(
+            responseStub.json,
+            [userMockJSON]
+          )
+        })
+    })
+
+    it('should return the results even if there are no orgs', () => {
+      userMockJSON.organizations = null
       return UserRouter.get(requestStub, responseStub)
         .then(() => {
           sinon.assert.calledOnce(usersMock.toJSON)
@@ -208,7 +222,12 @@ describe('HTTP /user', () => {
       return UserRouter.updateOrCreate(requestStub, responseStub)
         .then(() => {
           sinon.assert.calledOnce(userMock.toJSON)
+          sinon.assert.calledOnce(responseStub.status)
           sinon.assert.calledOnce(responseStub.json)
+          sinon.assert.calledWithExactly(
+            responseStub.status,
+            201
+          )
           sinon.assert.calledWithExactly(
             responseStub.json,
             userMockJSON

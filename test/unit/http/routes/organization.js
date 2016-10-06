@@ -220,13 +220,13 @@ describe('HTTP /organization', () => {
         })
     })
 
-    it('should pass the query to `where`', () => {
+    it('should pass a function to `query`', () => {
       return OrganizationRouter.get(requestStub, responseStub)
         .then(() => {
           sinon.assert.calledOnce(collectionStub.query)
           sinon.assert.calledWithExactly(
             collectionStub.query,
-            { where: requestStub.query }
+            sinon.match.func
           )
         })
     })
@@ -237,7 +237,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(collectionStub.fetch)
           sinon.assert.calledWithExactly(
             collectionStub.fetch,
-            { withRelated: 'users' }
+            { withRelated: Organization.withRelatedProps }
           )
         })
     })
@@ -292,7 +292,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledWithExactly(
             fetchByIdStub,
             orgId,
-            { withRelated: 'users' }
+            { withRelated: Organization.withRelatedProps }
           )
         })
     })
@@ -304,7 +304,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledWithExactly(
             fetchByIdStub,
             orgId,
-            { withRelated: 'users' }
+            { withRelated: Organization.withRelatedProps }
           )
         })
     })
@@ -481,7 +481,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(orgMock.fetch)
           sinon.assert.calledWithExactly(
             orgMock.fetch,
-            { withRelated: 'users' }
+            { withRelated: Organization.withRelatedProps }
           )
         })
     })

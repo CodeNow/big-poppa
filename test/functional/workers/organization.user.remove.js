@@ -18,7 +18,7 @@ const knex = bookshelf.knex
 const User = require('models/user')
 const Organization = require('models/organization')
 
-const RemoveUserFromOrganization = require('workers/organization.user.remove')
+const RemoveUserFromOrganization = require('workers/organization.user.remove').task
 
 describe('Organization.user.remove Functional Test', () => {
   let userGithubId = 1981198
@@ -50,7 +50,7 @@ describe('Organization.user.remove Functional Test', () => {
   afterEach(() => rabbitMQ.disconnect())
 
   beforeEach(() => {
-    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent')
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent')
   })
   afterEach(() => {
     publishEventStub.restore()

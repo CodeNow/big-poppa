@@ -1,6 +1,7 @@
 'use strict'
 
 const Promise = require('bluebird')
+const Joi = Promise.promisifyAll(require('joi'))
 const expect = require('chai').expect
 const sinon = require('sinon')
 require('sinon-as-promised')(Promise)
@@ -11,9 +12,10 @@ const GithubEntityError = require('errors/github-entity-error')
 const UniqueError = require('errors/unique-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 
-const CreateOrUpdateUser = require('workers/user.create-or-update')
+const UserAuthorized = require('workers/user.authorized').task
+const UserAuthorizedSchema = require('workers/user.authorized').jobSchema
 
-describe('#user.create-or-update', () => {
+describe('#user.authorized', () => {
   let accessToken = '282398423230239423'
   let newUser
   let validJob
@@ -31,30 +33,29 @@ describe('#user.create-or-update', () => {
   afterEach(() => {
     updateOrCreateByGithubIdStub.restore()
   })
-
   describe('Validation', () => {
-    it('should throw a validation error if no `githubId` is passed', done => {
-      CreateOrUpdateUser({ hello: 'World' })
+    it('should not validate if a `githubId` is not passed', done => {
+      delete validJob.githubId
+      Joi.validateAsync(validJob, UserAuthorizedSchema)
         .asCallback(err => {
           expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
+          expect(err.message).to.match(/githubId/i)
           done()
         })
     })
 
-    it('should throw a validation error if the `githubId` is not a number', done => {
-      CreateOrUpdateUser({ githubId: 'hello' })
+    it('should not validate if a `githubId` is not a number', done => {
+      validJob.githubId = 'anton'
+      Joi.validateAsync(validJob, UserAuthorizedSchema)
         .asCallback(err => {
           expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerStopError)
-          expect(err.message).to.match(/invalid.*job/i)
+          expect(err.message).to.match(/githubId/i)
           done()
         })
     })
 
-    it('should not throw a validation error if a valid job is passed', done => {
-      CreateOrUpdateUser(validJob)
+    it('should validate if a valid job is passed', done => {
+      Joi.validateAsync(validJob, UserAuthorizedSchema)
         .asCallback(done)
     })
   })
@@ -64,7 +65,7 @@ describe('#user.create-or-update', () => {
       let originalErr = new GithubEntityError('hello')
       updateOrCreateByGithubIdStub.rejects(originalErr)
 
-      CreateOrUpdateUser(validJob)
+      UserAuthorized(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -78,7 +79,7 @@ describe('#user.create-or-update', () => {
       let originalErr = new UniqueError('hello')
       updateOrCreateByGithubIdStub.rejects(originalErr)
 
-      CreateOrUpdateUser(validJob)
+      UserAuthorized(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
@@ -92,7 +93,7 @@ describe('#user.create-or-update', () => {
       let originalErr = new Error('hello')
       updateOrCreateByGithubIdStub.rejects(originalErr)
 
-      CreateOrUpdateUser(validJob)
+      UserAuthorized(validJob)
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.not.be.an.instanceof(WorkerStopError)
@@ -104,7 +105,7 @@ describe('#user.create-or-update', () => {
 
   describe('Main Functionality', done => {
     it('should call `updateOrCreateByGithubId`', done => {
-      CreateOrUpdateUser(validJob)
+      UserAuthorized(validJob)
         .then(() => {
           sinon.assert.calledOnce(updateOrCreateByGithubIdStub)
           sinon.assert.calledWithExactly(

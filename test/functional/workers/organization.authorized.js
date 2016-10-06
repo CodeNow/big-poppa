@@ -8,17 +8,23 @@ require('sinon-as-promised')(Promise)
 const testUtil = require('../../util')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
 const MockAPI = require('mehpi')
+// const githubOrganizationFixture = require('../../fixtures/github/organization')
+// const githubOrganizationFixture2 = require('../../fixtures/github/organization-2')
+const githubUserFixture = require('../../fixtures/github/user')
+// const githubOtherUserFixture = require('../../fixtures/github/other-user')
+const githubOrgMembershipFixture = require('../../fixtures/github/org-membership')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
 const bookshelf = require('models').bookshelf
 const rabbitMQ = require('util/rabbitmq')
 const knex = bookshelf.knex
 
-const CreateOrganization = require('workers/organization.create')
+const OrganizationAuthorized = require('workers/organization.authorized').task
 
-describe('Organization.create Functional Test', () => {
-  let githubId = 2828361
-  let userGithubId = 1981198
+describe('Organization.authorized Functional Test', () => {
+  let githubId = githubOrganizationFixture.id
+  let userGithubId = githubUserFixture.id
+  let orgGithubName = githubOrganizationFixture.login.toLowerCase()
   let job
   let publishEventStub
 
@@ -37,10 +43,7 @@ describe('Organization.create Functional Test', () => {
     }
   })
 
-  beforeEach(done => {
-    testUtil.truncateAllTables()
-     .asCallback(done)
-  })
+  beforeEach('Truncate All Tables', () => testUtil.truncateAllTables())
 
   beforeEach(() => {
     githubAPI.stub('GET', `/user/${githubId}?access_token=testing`).returns({
@@ -49,11 +52,23 @@ describe('Organization.create Functional Test', () => {
     })
   })
 
+  beforeEach('Create user', () => {
+    githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
+      status: 200,
+      body: githubUserFixture
+    })
+    githubAPI.stub('GET', `/user/memberships/orgs/${orgGithubName}?access_token=testing`).returns({
+      status: 200,
+      body: githubOrgMembershipFixture
+    })
+    return testUtil.createUser(userGithubId)
+  })
+
   beforeEach(() => rabbitMQ.connect())
   afterEach(() => rabbitMQ.disconnect())
 
   beforeEach(() => {
-    publishEventStub = sinon.stub(rabbitMQ._rabbit, 'publishEvent').resolves()
+    publishEventStub = sinon.stub(rabbitMQ, 'publishEvent').resolves()
   })
 
   afterEach(() => {
@@ -61,7 +76,7 @@ describe('Organization.create Functional Test', () => {
   })
 
   it('should create an organization, and queue creating a relationship', done => {
-    CreateOrganization(job).then((organization) => {
+    OrganizationAuthorized(job).then((organization) => {
       expect(organization.get('githubId')).to.equal(githubId)
       // Check database for entry
       return knex('organizations').where('github_id', githubId)

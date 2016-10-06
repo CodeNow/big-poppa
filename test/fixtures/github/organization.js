@@ -22,20 +22,20 @@ module.exports = {
   'location': 'San Francisco',
   'email': 'info@runnable.com',
   'hireable': null,
-  'bio': 'Sandbox-as-a-service at your service.',
+  'bio': 'Full-stack environments at your service.',
   'public_repos': 276,
   'public_gists': 0,
   'followers': 0,
   'following': 0,
   'created_at': '2012-11-18T17:54:29Z',
-  'updated_at': '2016-07-21T18:57:52Z',
+  'updated_at': '2016-09-02T17:02:45Z',
   'meta': {
     'x-ratelimit-limit': '5000',
-    'x-ratelimit-remaining': '4692',
-    'x-ratelimit-reset': '1471299603',
+    'x-ratelimit-remaining': '4869',
+    'x-ratelimit-reset': '1473722103',
     'x-oauth-scopes': 'admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete_repo, gist, notifications, repo, user',
-    'last-modified': 'Thu, 21 Jul 2016 18:57:52 GMT',
-    'etag': '\'a4989045c3de6b512a7a4988f781086e\'',
+    'last-modified': 'Fri, 02 Sep 2016 17:02:45 GMT',
+    'etag': '\'4089740de430127f468752d77b6fb24f\'',
     'status': '200 OK'
   }
 }

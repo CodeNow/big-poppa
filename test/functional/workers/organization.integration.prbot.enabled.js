@@ -12,27 +12,19 @@ const githubUserFixture = require('../../fixtures/github/user')
 const MockAPI = require('mehpi')
 const githubAPI = new MockAPI(process.env.GITHUB_VARNISH_PORT)
 
-const bookshelf = require('models').bookshelf
 const rabbitMQ = require('util/rabbitmq')
-const knex = bookshelf.knex
-
-const User = require('models/user')
 const Organization = require('models/organization')
 
-const AddUserToOrganization = require('workers/organization.user.add').task
+const PrBotEnabled = require('workers/organization.integration.prbot.enabled').task
 
-describe('Organization.user.add Functional Test', () => {
+describe('Organization.integration.prbot.enabled Functional Test', () => {
   let userGithubId = 1981198
   let orgGithubId = 2828361
   let publishEventStub
-
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
 
-  beforeEach(done => {
-    testUtil.truncateAllTables()
-     .asCallback(done)
-  })
+  beforeEach(() => testUtil.truncateAllTables())
 
   beforeEach(done => {
     let orgGithubName = githubOrganizationFixture.login.toLowerCase()
@@ -62,33 +54,21 @@ describe('Organization.user.add Functional Test', () => {
     publishEventStub.restore()
   })
 
-  it('should add a user to an organization', done => {
-    let userId
-    let orgId
-    Promise.all([
-      User.fetchByGithubId(userGithubId),
-      Organization.fetchByGithubId(orgGithubId)
-    ])
-      .spread((user, organization) => {
-        userId = user.get(user.idAttribute)
-        orgId = organization.get(organization.idAttribute)
-        return knex('organizations_users').where('user_id', userId).count()
+  it('should enable prbot on org', done => {
+    return Organization.fetchByGithubId(orgGithubId)
+      .then(org => {
+        return PrBotEnabled({
+          organization: {
+            id: org.get(org.idAttribute)
+          }
+        })
       })
-      .then(res => {
-        expect(res).to.be.an('array')
-        expect(res[0]).to.be.an('object')
-        expect(res[0].count).to.have.equal('0')
+      .then(() => {
+        return Organization.fetchByGithubId(orgGithubId)
       })
-      .then(() => AddUserToOrganization({
-        userGithubId: userGithubId,
-        organizationGithubId: orgGithubId
-      }))
-      .then(() => knex('organizations_users').where('user_id', userId))
-      .then(res => {
-        expect(res).to.be.an('array')
-        expect(res[0]).to.be.an('object')
-        expect(res[0].organization_id).to.equal(orgId)
-        expect(res[0].user_id).to.equal(userId)
+      .then(org => {
+        expect(org).to.be.an('object')
+        expect(org.get('prBotEnabled')).to.equal(true)
       })
       .asCallback(done)
   })
