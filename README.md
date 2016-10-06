@@ -147,3 +147,24 @@ There are three types of tests in this project:
 4. `npm install` which installs mongoDB from dev dependency (If you get errors connecting to the DB it might be the client version).
 5. Run the following command: `MONGO=MONGO_ENV NODE_PATH=./lib/ node scripts/migrate-user-whitelists-as-orgs.js | bunyan`
 6. Check logs to make sure logs were successfully created
+
+## Migrating from client v0.5 to v1.0
+
+The methods `updateOrganization` and `createOrUpdateUser` instead of just returning
+object for the model now return an object with two properties `model` and `updates`.
+In order to migrate your existing code, just get the model properties from `model`
+from the resolve value.
+
+```
+// Before
+client.updateOrganization({ hello: 'world' })
+	.then(function (model) {  })
+// Now
+client.updateOrganization({ hello: 'world' })
+	.then(function (response) {
+		let model = response.model
+		let updaptes = response.updates
+ 	})
+```
+
+
