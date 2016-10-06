@@ -145,7 +145,8 @@ describe('User', () => {
             sinon.assert.calledTwice(fetchByGithubIdStub)
             sinon.assert.calledWithExactly(
               fetchByGithubIdStub,
-              githubId
+              githubId,
+              { forUpdate: true, transacting: sinon.match.func }
             )
             sinon.assert.calledWithExactly(
               fetchByGithubIdStub,
@@ -170,7 +171,7 @@ describe('User', () => {
             sinon.assert.calledWithExactly(
               userMock.save,
               { accessToken: githubAccessToken },
-              { patch: true }
+              { patch: true, transacting: sinon.match.func }
             )
           })
       })

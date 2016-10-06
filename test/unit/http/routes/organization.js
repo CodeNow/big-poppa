@@ -351,7 +351,8 @@ describe('HTTP /organization', () => {
           sinon.assert.calledTwice(fetchByIdStub)
           sinon.assert.calledWithExactly(
             fetchByIdStub,
-            orgId
+            orgId,
+            { forUpdate: true, transacting: sinon.match.func }
           )
         })
     })
@@ -363,7 +364,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledWithExactly(
             orgMock.save,
             { stripeCustomerId: stripeCustomerId },
-            { patch: true }
+            { patch: true, transacting: sinon.match.func }
           )
         })
     })
@@ -408,7 +409,7 @@ describe('HTTP /organization', () => {
                 hasAha: true
               }
             },
-            { patch: true }
+            { patch: true, transacting: sinon.match.func }
           )
         })
     })
@@ -435,7 +436,7 @@ describe('HTTP /organization', () => {
                 hasAha: true
               }
             },
-            { patch: true }
+            { patch: true, transacting: sinon.match.func }
           )
         })
     })

@@ -413,13 +413,10 @@ describe('HTTP Organization Functional Test', () => {
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('metadata')
           expect(org).to.have.deep.property('metadata.hasAha', false)
-          let updates = res.updates
-          expect(updates).to.be.an('object')
-          expect(updates).to.have.all.keys(['metadata', 'updated_at'])
         })
     })
 
-    it('should return the correctly updates for two operations', () => {
+    it('should return the correctly updates for two operations for `hasPaymentMethod`', () => {
       return Promise.all([
         agent.updateOrganization(orgId, { hasPaymentMethod: true }),
         agent.updateOrganization(orgId, { hasPaymentMethod: true })
@@ -427,6 +424,20 @@ describe('HTTP Organization Functional Test', () => {
       .spread((res1, res2) => {
         let check1 = !!keypather.get(res1, 'updates.hasPaymentMethod')
         let check2 = !!keypather.get(res2, 'updates.hasPaymentMethod')
+        // At least one should be true and one should be false
+        expect(check1 || check2).to.be.true
+        expect(check1 && check2).to.be.false
+      })
+    })
+
+    it('should return the correctly updates for two operations for `stripeCustomerId`', () => {
+      return Promise.all([
+        agent.updateOrganization(orgId, { stripeCustomerId: 'abc' }),
+        agent.updateOrganization(orgId, { stripeCustomerId: 'abc' })
+      ])
+      .spread((res1, res2) => {
+        let check1 = !!keypather.get(res1, 'updates.stripeCustomerId')
+        let check2 = !!keypather.get(res2, 'updates.stripeCustomerId')
         // At least one should be true and one should be false
         expect(check1 || check2).to.be.true
         expect(check1 && check2).to.be.false
