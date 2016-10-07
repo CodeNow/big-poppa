@@ -463,6 +463,33 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it('should not replace the metadata JSON in the db if the property is not specificly specified', () => {
+      return agent.getOrganization(orgId)
+        .then(org => {
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                hasAha: true
+              }
+            })
+        })
+        .then(res => {
+          let org = res.model
+          expect(org).to.have.deep.property('metadata.hasAha', true) // Updated value
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                hasConfirmedSetup: true
+              }
+            })
+        })
+        .then(function (res) {
+          let org = res.model
+          expect(org).to.have.deep.property('metadata.hasAha', true)
+          expect(org).to.have.deep.property('metadata.hasConfirmedSetup', true)
+        })
+    })
+
     it('should not replace the metadata JSON in the db if the value is invalid', () => {
       return agent.getOrganization(orgId)
         .then(org => {
@@ -474,7 +501,6 @@ describe('HTTP Organization Functional Test', () => {
             })
         })
         .then(res => {
-          console.log(res.updates)
           let org = res.model
           expect(org).to.have.deep.property('metadata.hasAha', true) // Updated value
           return agent
