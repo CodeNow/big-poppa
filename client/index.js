@@ -91,6 +91,7 @@ module.exports = class BigPoppaClient extends ApiClient {
           let updates = JSON.parse(res.headers['model-updates'])
           body.updates = updates
         } catch (err) {}
+
         return body
       })
   }
