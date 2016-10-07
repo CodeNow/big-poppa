@@ -310,6 +310,40 @@ describe('HTTP Organization Functional Test', () => {
     })
   })
 
+  describe('GET /?stripeSubscriptionId', () => {
+    const stripeOrgGithubId = githubOrganizationFixture2.id
+    const orgGithubName = githubOrganizationFixture2.login.toLowerCase()
+    const stripeSubscriptionId = 'sub_2342o3i23'
+
+    beforeEach('Create organization', () => {
+      githubAPI.stub('GET', `/user/${stripeOrgGithubId}?access_token=testing`).returns({
+        status: 200,
+        body: githubOrganizationFixture2
+      })
+      return new Organization().save({
+        githubId: stripeOrgGithubId,
+        trialEnd: new Date(),
+        activePeriodEnd: new Date(),
+        gracePeriodEnd: new Date(),
+        name: orgGithubName,
+        stripeSubscriptionId: stripeSubscriptionId,
+        creator: user.get(user.idAttribute)
+      })
+    })
+
+    it('should return a an array with all organizations with a stripeSubscriptionId', () => {
+      return agent
+        .getOrganizations({
+          stripeSubscriptionId: stripeSubscriptionId
+        })
+        .then(body => {
+          expect(body).to.be.an.array
+          expect(body).to.have.lengthOf(1)
+          expect(body[0]).to.have.property('githubId', stripeOrgGithubId)
+        })
+    })
+  })
+
   describe('GET /:id', () => {
     it('should return a 200 for an existing organization', () => {
       return agent
@@ -346,6 +380,7 @@ describe('HTTP Organization Functional Test', () => {
     it('should return a 200 when patching an organization', () => {
       let githubId = 2342342
       let stripeCustomerId = '23423'
+      let stripeSubscriptionId = 'cus_23423423'
       let timeCreated = new Date()
       let time = moment(timeCreated)
       return agent
@@ -355,6 +390,7 @@ describe('HTTP Organization Functional Test', () => {
             .updateOrganization(orgId, {
               githubId: githubId,
               stripeCustomerId: stripeCustomerId,
+              stripeSubscriptionId: stripeSubscriptionId,
               trialEnd: timeCreated,
               activePeriodEnd: timeCreated
             })
@@ -363,6 +399,7 @@ describe('HTTP Organization Functional Test', () => {
               expect(org).to.have.property('id')
               expect(org).to.have.property('githubId', githubId)
               expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
+              expect(org).to.have.property('stripeSubscriptionId', stripeSubscriptionId)
               expect(org).to.have.property('trialEnd', time.toISOString())
               expect(org).to.have.property('activePeriodEnd', time.toISOString())
               expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').toISOString())
