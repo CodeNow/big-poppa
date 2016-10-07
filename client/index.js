@@ -33,15 +33,15 @@ module.exports = class BigPoppaClient extends ApiClient {
    */
   static parseOpts (opts) {
     return '?' + Object.keys(opts)
-    .map(key => {
-      let value = opts[key]
-      let transformedValue = value
-      if (isObject(value)) { // Handle sub queries
-        transformedValue = JSON.stringify(value)
-      }
-      return key + '=' + encodeURIComponent(transformedValue)
-    })
-    .join('&')
+      .map(key => {
+        let value = opts[key]
+        let transformedValue = value
+        if (isObject(value)) { // Handle sub queries
+          transformedValue = JSON.stringify(value)
+        }
+        return key + '=' + encodeURIComponent(transformedValue)
+      })
+      .join('&')
   }
 
   /**
