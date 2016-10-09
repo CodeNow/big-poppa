@@ -35,6 +35,7 @@ describe('HTTP /user', () => {
     }
     fetchByIdStub = sinon.stub(User, 'fetchById').resolves(userMock)
     responseStub = {
+      set: sinon.stub().returnsThis(),
       status: sinon.stub().returnsThis(),
       json: sinon.stub()
     }
@@ -191,15 +192,21 @@ describe('HTTP /user', () => {
   describe('updateOrCreate', () => {
     const githubId = 1234
     const githubAccessToken = 'deadbeef'
+    let updateOrCreateByGithubIdStub
+    let updates
 
     beforeEach(() => {
-      requestStub = {
-        body: {
-          githubId: githubId,
-          accessToken: githubAccessToken
-        }
+      updates = {
+        githubId: githubId,
+        accessToken: githubAccessToken
       }
-      sinon.stub(User, 'updateOrCreateByGithubId').resolves(userMock)
+      requestStub = {
+        body: updates
+      }
+      updateOrCreateByGithubIdStub = sinon.stub(User, 'updateOrCreateByGithubId').resolves({
+        model: userMock,
+        updates: updates
+      })
     })
 
     afterEach(() => {
@@ -209,12 +216,28 @@ describe('HTTP /user', () => {
     it('should call updateOrCreateByGithubId on the user object', () => {
       return UserRouter.updateOrCreate(requestStub, responseStub)
         .then(() => {
-          sinon.assert.calledOnce(User.updateOrCreateByGithubId)
+          sinon.assert.calledOnce(updateOrCreateByGithubIdStub)
           sinon.assert.calledWithExactly(
-            User.updateOrCreateByGithubId,
+            updateOrCreateByGithubIdStub,
             githubId,
             githubAccessToken
           )
+        })
+    })
+
+    it('should call `set` if there are any updates', () => {
+      return UserRouter.updateOrCreate(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(responseStub.set)
+          sinon.assert.calledWithExactly(responseStub.set, 'Model-Updates', JSON.stringify(updates))
+        })
+    })
+
+    it('should not call `set` if there are no updates', () => {
+      updateOrCreateByGithubIdStub.resolves({ model: userMock, updates: null })
+      return UserRouter.updateOrCreate(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.notCalled(responseStub.set)
         })
     })
 

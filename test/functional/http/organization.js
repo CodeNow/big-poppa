@@ -1,9 +1,11 @@
 'use strict'
 
+const Promise = require('bluebird')
 const BigPoppaClient = require('../../../client')
 const expect = require('chai').expect
 const MockAPI = require('mehpi')
 const moment = require('moment')
+const keypather = require('keypather')()
 
 const testUtil = require('../../util')
 const Organization = require('models/organization')
@@ -44,8 +46,6 @@ describe('HTTP Organization Functional Test', () => {
 
   before(done => githubAPI.start(done))
   after(done => githubAPI.stop(done))
-
-  beforeEach(() => testUtil.truncateAllTables())
 
   beforeEach(() => {
     githubAPI.stub('GET', `/user/${userGithubId}?access_token=testing`).returns({
@@ -359,7 +359,8 @@ describe('HTTP Organization Functional Test', () => {
               activePeriodEnd: timeCreated
             })
             // A patch should always return an updated org
-            .then(org => {
+            .then(res => {
+              let org = res.model
               expect(org).to.have.property('id')
               expect(org).to.have.property('githubId', githubId)
               expect(org).to.have.property('stripeCustomerId', stripeCustomerId)
@@ -367,6 +368,9 @@ describe('HTTP Organization Functional Test', () => {
               expect(org).to.have.property('activePeriodEnd', time.toISOString())
               expect(org).to.have.property('gracePeriodEnd', time.clone().add(72, 'hours').toISOString())
               expect(org).to.have.property('firstDockCreated', false)
+              let updates = res.updates
+              expect(updates).to.be.an('object')
+              expect(updates).to.have.all.keys(['githubId', 'stripeCustomerId', 'trialEnd', 'activePeriodEnd', 'updated_at'])
             })
         })
     })
@@ -381,10 +385,13 @@ describe('HTTP Organization Functional Test', () => {
               hasPaymentMethod: true
             })
         })
-        .then(() => agent.getOrganization(orgId))
-        .then(org => {
+        .then(res => {
+          let org = res.model
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('hasPaymentMethod', true)
+          let updates = res.updates
+          expect(updates).to.be.an('object')
+          expect(updates).to.have.all.keys(['hasPaymentMethod', 'updated_at'])
         })
     })
 
@@ -401,12 +408,40 @@ describe('HTTP Organization Functional Test', () => {
               }
             })
         })
-        .then(() => agent.getOrganization(orgId))
-        .then(org => {
+        .then(res => {
+          let org = res.model
           expect(org).to.have.property('id', orgId)
           expect(org).to.have.property('metadata')
           expect(org).to.have.deep.property('metadata.hasAha', false)
         })
+    })
+
+    it('should return the correctly updates for two operations for `hasPaymentMethod`', () => {
+      return Promise.all([
+        agent.updateOrganization(orgId, { hasPaymentMethod: true }),
+        agent.updateOrganization(orgId, { hasPaymentMethod: true })
+      ])
+      .spread((res1, res2) => {
+        let check1 = !!keypather.get(res1, 'updates.hasPaymentMethod')
+        let check2 = !!keypather.get(res2, 'updates.hasPaymentMethod')
+        // At least one should be true and one should be false
+        expect(check1 || check2).to.be.true
+        expect(check1 && check2).to.be.false
+      })
+    })
+
+    it('should return the correctly updates for two operations for `stripeCustomerId`', () => {
+      return Promise.all([
+        agent.updateOrganization(orgId, { stripeCustomerId: 'abc' }),
+        agent.updateOrganization(orgId, { stripeCustomerId: 'abc' })
+      ])
+      .spread((res1, res2) => {
+        let check1 = !!keypather.get(res1, 'updates.stripeCustomerId')
+        let check2 = !!keypather.get(res2, 'updates.stripeCustomerId')
+        // At least one should be true and one should be false
+        expect(check1 || check2).to.be.true
+        expect(check1 && check2).to.be.false
+      })
     })
 
     it('should return an error if the property is not a boolean', done => {
@@ -428,6 +463,33 @@ describe('HTTP Organization Functional Test', () => {
         })
     })
 
+    it('should not replace the metadata JSON in the db if the property is not specificly specified', () => {
+      return agent.getOrganization(orgId)
+        .then(org => {
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                hasAha: true
+              }
+            })
+        })
+        .then(res => {
+          let org = res.model
+          expect(org).to.have.deep.property('metadata.hasAha', true) // Updated value
+          return agent
+            .updateOrganization(orgId, {
+              metadata: {
+                hasConfirmedSetup: true
+              }
+            })
+        })
+        .then(function (res) {
+          let org = res.model
+          expect(org).to.have.deep.property('metadata.hasAha', true)
+          expect(org).to.have.deep.property('metadata.hasConfirmedSetup', true)
+        })
+    })
+
     it('should not replace the metadata JSON in the db if the value is invalid', () => {
       return agent.getOrganization(orgId)
         .then(org => {
@@ -438,7 +500,8 @@ describe('HTTP Organization Functional Test', () => {
               }
             })
         })
-        .then(org => {
+        .then(res => {
+          let org = res.model
           expect(org).to.have.deep.property('metadata.hasAha', true) // Updated value
           return agent
             .updateOrganization(orgId, {

@@ -469,13 +469,16 @@ describe('Base', () => {
       let githubId = 123
       let testModel = {}
       let fetchStub
+      let queryStub
 
       beforeEach(() => {
         fetchStub = sinon.stub(bookshelf.Model.prototype, 'fetch').resolves(testModel)
+        queryStub = sinon.stub(bookshelf.Model.prototype, 'query').returnsThis()
       })
 
       afterEach(() => {
-        bookshelf.Model.prototype.fetch.restore()
+        fetchStub.restore()
+        queryStub.restore()
       })
 
       it('should return the model', done => {
@@ -503,6 +506,23 @@ describe('Base', () => {
             sinon.assert.calledOnce(fetchStub)
             expect(fetchStub.thisValues[0].get('githubId')).to.equal(githubId)
             sinon.assert.calledWithExactly(fetchStub, { require: true, transacting: t })
+          })
+          .asCallback(done)
+      })
+
+      it('should not call `query(onUpdate)` by default', done => {
+        return TestModel.fetchByGithubId(githubId)
+          .then(() => {
+            sinon.assert.notCalled(queryStub)
+          })
+          .asCallback(done)
+      })
+
+      it('should call `query(onUpdate)` if passed the `forUpdate` query', done => {
+        return TestModel.fetchByGithubId(githubId, { forUpdate: true })
+          .then(() => {
+            sinon.assert.calledOnce(queryStub)
+            sinon.assert.calledWithExactly(queryStub, 'forUpdate')
           })
           .asCallback(done)
       })

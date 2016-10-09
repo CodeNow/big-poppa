@@ -8,15 +8,93 @@ const BigPoppaClientError = require('./errors/big-poppa-client-error')
 Promise.promisifyAll(ApiClient)
 Promise.promisifyAll(ApiClient.prototype)
 
-function checkResponseForError (res) {
-  if (res.statusCode >= 400) {
-    throw new BigPoppaClientError(res.body.err, res.body.message, {
-      orignalError: res.body
+module.exports = class BigPoppaClient extends ApiClient {
+
+  /**
+   * Get an opts object to pass to request
+   *
+   * @param {String}   path - URL path
+   * @param {Object}   body - Object with updates to send in the request
+   * @returns {Object}
+   */
+  static getOpts (path, body) {
+    return {
+      json: true,
+      path,
+      body
+    }
+  }
+
+  /**
+   * Parse opts object into a query string
+   *
+   * @param {Object}   opts - Query options to add to the URL
+   * @returns {String}
+   */
+  static parseOpts (opts) {
+    return '?' + Object.keys(opts)
+      .map(key => {
+        let value = opts[key]
+        let transformedValue = value
+        if (isObject(value)) { // Handle sub queries
+          transformedValue = JSON.stringify(value)
+        }
+        return key + '=' + encodeURIComponent(transformedValue)
+      })
+      .join('&')
+  }
+
+  /**
+   * Throw an error if the request is a 400 >= request
+   *
+   * @param {Object}   res - Response object
+   * @throws {Error}   BigPoppaClientError
+   * @return {Object}
+   */
+  static checkResponseForError (res) {
+    return Promise.try(() => {
+      if (res.statusCode >= 400) {
+        throw new BigPoppaClientError(res.body.err, res.body.message, {
+          orignalError: res.body
+        })
+      }
+      return res
     })
   }
-}
 
-module.exports = class BigPoppaClient extends ApiClient {
+  /**
+   * Check if response is a 400 response and return the body
+   *
+   * @param {Object}   res - Response object
+   * @throws {Error}   BigPoppaClientError
+   * @returns {Object}
+   */
+  static responseHandler (res) {
+    return BigPoppaClient.checkResponseForError(res)
+      .get('body')
+  }
+
+  /**
+   * Check if response is a 400 response and return the body and updates
+   *
+   * @param {Object}   res - Response object
+   * @throws {Error}   BigPoppaClientError
+   * @returns {Object}
+   */
+  static updateResponseHandler (res) {
+    return BigPoppaClient.checkResponseForError(res)
+      .then(res => {
+        let body = {
+          model: res.body
+        }
+        try {
+          let updates = JSON.parse(res.headers['model-updates'])
+          body.updates = updates
+        } catch (err) {}
+
+        return body
+      })
+  }
 
   /**
    * Given an internal orgId, fetch the matching org
@@ -31,12 +109,8 @@ module.exports = class BigPoppaClient extends ApiClient {
       return Promise.reject(new Error('missing orgId'))
     }
     var path = '/organization/' + encodeURIComponent(orgId)
-    return this.getAsync({
-      path: path,
-      json: true
-    })
-      .tap(checkResponseForError)
-      .get('body')
+    return this.getAsync(BigPoppaClient.getOpts(path))
+      .then(BigPoppaClient.responseHandler)
   }
 
   /**
@@ -53,23 +127,10 @@ module.exports = class BigPoppaClient extends ApiClient {
   getOrganizations (opts) {
     var path = '/organization/'
     if (opts) {
-      path += '?' + Object.keys(opts)
-        .map(key => {
-          let value = opts[key]
-          let transformedValue = value
-          if (isObject(value)) { // Handle sub queries
-            transformedValue = JSON.stringify(value)
-          }
-          return key + '=' + encodeURIComponent(transformedValue)
-        })
-        .join('&')
+      path += BigPoppaClient.parseOpts(opts)
     }
-    return this.getAsync({
-      path: path,
-      json: true
-    })
-      .tap(checkResponseForError)
-      .get('body')
+    return this.getAsync(BigPoppaClient.getOpts(path))
+      .then(BigPoppaClient.responseHandler)
   }
 
   /**
@@ -87,13 +148,8 @@ module.exports = class BigPoppaClient extends ApiClient {
       return Promise.reject(new Error('missing orgId'))
     }
     var path = '/organization/' + encodeURIComponent(orgId)
-    return this.patchAsync({
-      body: updates,
-      path: path,
-      json: true
-    })
-      .tap(checkResponseForError)
-      .get('body')
+    return this.patchAsync(BigPoppaClient.getOpts(path, updates))
+      .then(BigPoppaClient.updateResponseHandler)
   }
 
   /**
@@ -110,12 +166,8 @@ module.exports = class BigPoppaClient extends ApiClient {
       return Promise.reject(new Error('missing userId'))
     }
     var path = '/user/' + encodeURIComponent(userId)
-    return this.getAsync({
-      path: path,
-      json: true
-    })
-      .tap(checkResponseForError)
-      .get('body')
+    return this.getAsync(BigPoppaClient.getOpts(path))
+      .then(BigPoppaClient.responseHandler)
   }
 
   /**
@@ -130,15 +182,11 @@ module.exports = class BigPoppaClient extends ApiClient {
    */
   getUsers (opts) {
     var path = '/user/'
-    if (opts && opts.githubId) {
-      path += '?githubId=' + encodeURIComponent(opts.githubId)
+    if (opts) {
+      path += BigPoppaClient.parseOpts(opts)
     }
-    return this.getAsync({
-      path: path,
-      json: true
-    })
-      .tap(checkResponseForError)
-      .get('body')
+    return this.getAsync(BigPoppaClient.getOpts(path))
+      .then(BigPoppaClient.responseHandler)
   }
 
   /**
@@ -156,13 +204,8 @@ module.exports = class BigPoppaClient extends ApiClient {
       return Promise.reject(new Error('missing userId'))
     }
     var path = '/organization/' + encodeURIComponent(orgId) + '/add'
-    return this.patchAsync({
-      body: { user: { id: userId } },
-      path: path,
-      json: true
-    })
-      .tap(checkResponseForError)
-      .get('body')
+    return this.patchAsync(BigPoppaClient.getOpts(path, { user: { id: userId } }))
+      .then(BigPoppaClient.responseHandler)
   }
 
   /**
@@ -175,13 +218,7 @@ module.exports = class BigPoppaClient extends ApiClient {
    * @resolves {User} updated user
    */
   createOrUpdateUser (githubId, accessToken) {
-    var path = '/user/'
-    return this.postAsync({
-      path: path,
-      body: { githubId: githubId, accessToken: accessToken },
-      json: true
-    })
-      .tap(checkResponseForError)
-      .get('body')
+    return this.postAsync(BigPoppaClient.getOpts('/user/', { githubId, accessToken }))
+      .then(BigPoppaClient.updateResponseHandler)
   }
 }

@@ -30,6 +30,7 @@ describe('HTTP /organization', () => {
       users: []
     }
     orgMock = {
+      on: sinon.stub(),
       save: sinon.stub().returnsThis(),
       addUser: sinon.stub().returnsThis(),
       fetch: sinon.stub().returnsThis(),
@@ -350,7 +351,8 @@ describe('HTTP /organization', () => {
           sinon.assert.calledTwice(fetchByIdStub)
           sinon.assert.calledWithExactly(
             fetchByIdStub,
-            orgId
+            orgId,
+            { forUpdate: true, transacting: sinon.match.func }
           )
         })
     })
@@ -361,7 +363,8 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(orgMock.save)
           sinon.assert.calledWithExactly(
             orgMock.save,
-            { stripeCustomerId: stripeCustomerId }
+            { stripeCustomerId: stripeCustomerId },
+            { patch: true, transacting: sinon.match.func }
           )
         })
     })
@@ -405,7 +408,8 @@ describe('HTTP /organization', () => {
               metadata: {
                 hasAha: true
               }
-            }
+            },
+            { patch: true, transacting: sinon.match.func }
           )
         })
     })
@@ -431,7 +435,8 @@ describe('HTTP /organization', () => {
                 testMetadataProperty: true,
                 hasAha: true
               }
-            }
+            },
+            { patch: true, transacting: sinon.match.func }
           )
         })
     })
