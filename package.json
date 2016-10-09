@@ -1,6 +1,6 @@
 {
   "name": "big-poppa",
-  "version": "0.13.6",
+  "version": "0.14.0",
   "description": "User management and billing",
   "main": "index.js",
   "scripts": {
