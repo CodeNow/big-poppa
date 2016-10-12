@@ -81,7 +81,6 @@
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
     "standard": "^7.1.2",
-    "stripe": "^4.11.0",
     "superagent": "^2.1.0",
     "superagent-promise-plugin": "^3.2.0",
     "supertest": "^1.2.0",
