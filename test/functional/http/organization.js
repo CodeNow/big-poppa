@@ -407,7 +407,14 @@ describe('HTTP Organization Functional Test', () => {
               expect(org).to.have.property('firstDockCreated', false)
               let updates = res.updates
               expect(updates).to.be.an('object')
-              expect(updates).to.have.all.keys(['githubId', 'stripeCustomerId', 'trialEnd', 'activePeriodEnd', 'updated_at'])
+              expect(updates).to.have.all.keys([
+                'githubId',
+                'stripeCustomerId',
+                'stripeSubscriptionId',
+                'trialEnd',
+                'activePeriodEnd',
+                'updated_at'
+              ])
             })
         })
     })
