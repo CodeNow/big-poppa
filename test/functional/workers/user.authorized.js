@@ -38,7 +38,8 @@ describe('user.authorized Functional Test', () => {
     UserAuthorized({
       accessToken: accessToken,
       githubId: githubId
-    }).then((user) => {
+    }).then(res => {
+      let user = res.model
       expect(user.get('githubId')).to.equal(githubId)
       // Check database for entry
       return knex('users').where('github_id', githubId)
@@ -79,7 +80,8 @@ describe('user.authorized Functional Test', () => {
       UserAuthorized({
         accessToken: accessToken,
         githubId: githubId
-      }).then((user) => {
+      }).then(res => {
+        let user = res.model
         expect(user.get('githubId')).to.equal(githubId)
         // Check database for entry
         return knex('users').where('github_id', githubId)
