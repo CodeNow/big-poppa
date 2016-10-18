@@ -11,28 +11,6 @@ exports.up = function (knex, Promise) {
     log.trace('Add `stripe_subscription_id` field')
     table.string(NEW_PROPERTY).unique()
   })
-  .then(function () {
-    // Add subscription IDs to all organizations
-    return knex.select('*').from(TABLE_NAME)
-        .innerJoin('users', `${TABLE_NAME}.creator`, 'user.id')
-  })
-  .then(function (organizations) {
-    return Promise.all(organizations.map(function (org) {
-      return stripe.customers.retrieve(org.stripe_customer_id)
-      .then(function (stripeCustomer) {
-        var subscriptions = stripeCustomer.subscriptions.data
-        if (subscriptions.length > 1) {
-          throw new Error('Ambigious amount of subscriptions for customer (more than 1)')
-        }
-        let updates = {}
-        updates[NEW_PROPERTY] = subscriptions[0].id
-        log.trace({ updates, org }, 'Updating organization')
-        return knex(TABLE_NAME)
-        .where('id', org.id)
-        .update(updates)
-      })
-    }))
-  })
   log.trace(modifyTable.toString())
   return modifyTable
 }

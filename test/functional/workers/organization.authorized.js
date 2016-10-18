@@ -97,15 +97,15 @@ describe('Organization.authorized Functional Test', () => {
 
     it('should  create an organization with a personal account and queue creating the relationship', done => {
       OrganizationAuthorized(job).then((organization) => {
-        expect(organization.get('githubId')).to.equal(githubId)
+        expect(organization.get('githubId')).to.equal(userGithubId)
         // Check database for entry
-        return knex('organizations').where('github_id', githubId)
+        return knex('organizations').where('github_id', userGithubId)
       })
         .then(res => {
           expect(res).to.have.lengthOf(1)
           expect(res[0]).to.be.an('object')
-          expect(res[0].name).to.equal(githubOrganizationFixture.login)
-          expect(res[0].lower_name).to.equal(githubOrganizationFixture.login.toLowerCase())
+          expect(res[0].name).to.equal(githubUserFixture.login)
+          expect(res[0].lower_name).to.equal(githubUserFixture.login.toLowerCase())
         })
         .asCallback(done)
     })

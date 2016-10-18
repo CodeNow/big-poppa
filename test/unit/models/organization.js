@@ -14,18 +14,25 @@ const rabbitMQ = require('util/rabbitmq')
 
 const GithubAPI = require('util/github')
 const GithubEntityNotFoundError = require('errors/github-entity-not-found-error')
+const GithubEntityTypeError = require('errors/github-entity-type-error')
 const githubOrganizationFixture = require('../../fixtures/github/organization')
+const githubUserFixture = require('../../fixtures/github/user')
 
 describe('Organization', () => {
   describe('Prototype Methods', () => {
     let org
     let baseModel
+    let setStub
 
     beforeEach(() => {
+      setStub = sinon.stub()
       org = new Organization()
       baseModel = {
-        set: sinon.stub()
+        set: setStub
       }
+    })
+    afterEach(() => {
+      setStub.reset()
     })
 
     describe('#initialize', () => {
@@ -84,17 +91,22 @@ describe('Organization', () => {
       let belongsToManyStub
       let githubId = 123456
       let getOrganizationStub
+      let getUserStub
       let attrs
+      const orgName = githubOrganizationFixture.login
+      const userName = githubUserFixture.login
 
       beforeEach(() => {
         belongsToManyStub = sinon.stub(Organization.prototype, 'belongsToMany')
         attrs = { githubId: githubId }
         getOrganizationStub = sinon.stub(GithubAPI.prototype, 'getOrganization').resolves(githubOrganizationFixture)
+        getUserStub = sinon.stub(GithubAPI.prototype, 'getUser').resolves(githubUserFixture)
       })
 
       afterEach(() => {
         belongsToManyStub.restore()
         getOrganizationStub.restore()
+        getUserStub.restore()
       })
 
       it('should call `belongsToMany`', () => {
@@ -111,6 +123,44 @@ describe('Organization', () => {
         org.validateCreate(baseModel, attrs)
           .then(() => {
             sinon.assert.calledOnce(GithubAPI.prototype.getOrganization)
+          })
+          .asCallback(done)
+      })
+
+      it('should check if the github id is for a user/personal account if github user is not an org', done => {
+        const thrownErrr = new GithubEntityTypeError()
+        getOrganizationStub.rejects(thrownErrr)
+
+        org.validateCreate(baseModel, attrs)
+          .then(() => {
+            sinon.assert.calledOnce(getUserStub)
+          })
+          .asCallback(done)
+      })
+
+      it('should set the organiztion with a name', done => {
+        org.validateCreate(baseModel, attrs)
+          .then(() => {
+            sinon.assert.calledOnce(setStub)
+            sinon.assert.calledWith(
+              setStub,
+              { name: orgName }
+            )
+          })
+          .asCallback(done)
+      })
+
+      it('should set the organiztion with name and `isPersonalAccount` if its a user account', done => {
+        const thrownErrr = new GithubEntityTypeError()
+        getOrganizationStub.rejects(thrownErrr)
+
+        org.validateCreate(baseModel, attrs)
+          .then(() => {
+            sinon.assert.calledOnce(setStub)
+            sinon.assert.calledWith(
+              setStub,
+              { name: userName, isPersonalAccount: true }
+            )
           })
           .asCallback(done)
       })
