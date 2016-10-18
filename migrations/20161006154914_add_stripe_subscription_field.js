@@ -1,7 +1,6 @@
 'use strict'
 
 require('loadenv')()
-const stripe = require('stripe')(process.env.STRIPE_API_KEY)
 const log = require('../lib/util/logger').child({ module: 'migrations/add_stripe_subscription_field' })
 
 const TABLE_NAME = 'organizations'
@@ -14,7 +13,8 @@ exports.up = function (knex, Promise) {
   })
   .then(function () {
     // Add subscription IDs to all organizations
-    return knex.select('*').from(TABLE_NAME).whereNotNull('stripe_customer_id')
+    return knex.select('*').from(TABLE_NAME)
+        .innerJoin('users', `${TABLE_NAME}.creator`, 'user.id')
   })
   .then(function (organizations) {
     return Promise.all(organizations.map(function (org) {
