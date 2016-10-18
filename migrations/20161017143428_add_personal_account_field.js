@@ -8,7 +8,11 @@ const NEW_PROPERTY = 'is_personal_account'
 
 exports.up = function (knex, Promise) {
   var modifyTable = knex.schema.table(TABLE_NAME, function addField (table) {
-    log.trace('Add `stripe_subscription_id` field')
+    log.trace(`Add '${NEW_PROPERTY}' field`)
+    /**
+     * All organizations add this point should not be personal accounts
+     * since them being github organizations was enforced by the code
+     */
     table.boolean(NEW_PROPERTY).defaultTo(false).notNullable()
   })
   log.trace(modifyTable.toString())
