@@ -21,6 +21,8 @@ const User = require('models/user')
 const Organization = require('models/organization')
 
 const ValidationError = require('errors/validation-error')
+const WorkerStopError = require('error-cat/errors/worker-stop-error')
+
 const AddUserToOrganization = require('workers/organization.user.add').task
 
 describe('Organization.user.add Functional Test', () => {
@@ -165,7 +167,8 @@ describe('Organization.user.add Functional Test', () => {
           organizationGithubId: userGithubId
         }))
         .catch(err => {
-          expect(err).to.be.an.instanceOf(ValidationError)
+          expect(err).to.be.an.instanceOf(WorkerStopError)
+          expect(err.data.err).to.be.an.instanceOf(ValidationError)
           expect(err.message).to.match(/github.*user.*allowed/)
         })
         .asCallback(done)
