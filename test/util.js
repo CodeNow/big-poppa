@@ -16,7 +16,6 @@ module.exports = class TestUtil {
       .then(() => {
         return Promise.all([
           // Cannot truncate because of foreign key constraint
-          knex('organizations_users').del(),
           knex('organizations').del(),
           knex('users').del()
         ])
