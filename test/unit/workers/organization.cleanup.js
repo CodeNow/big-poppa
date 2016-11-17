@@ -26,7 +26,7 @@ describe('#organization.cleanup', () => {
   let orgSaveStub
 
   beforeEach(() => {
-    org = new Organization({ id: 3, lowerName: 'p4l-deeznutz', isActive: true })
+    org = new Organization({ id: 3, lowerName: 'p4l-prafultest', isActive: true })
 
     validJob = {}
     transaction = {}
