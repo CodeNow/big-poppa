@@ -48,8 +48,7 @@ describe('#organization.cleanup', () => {
   })
 
   describe('Validation', () => {
-    it('should validate if a valid job is passed', () =>
-      Joi.validateAsync(validJob, OrganizationCleanupSchema))
+    it('should validate if a valid job is passed', () => Joi.validateAsync(validJob, OrganizationCleanupSchema))
   })
 
   describe('Errors', () => {
@@ -68,11 +67,6 @@ describe('#organization.cleanup', () => {
   })
 
   describe('Main Functionality', () => {
-    beforeEach(function () {
-      return org.set({
-        prBotEnabled: true
-      })
-    })
     it('should only find orgs that begin with "p4l-*"', () => {
       return OrganizationCleanupWorker(validJob)
         .then(() => {
