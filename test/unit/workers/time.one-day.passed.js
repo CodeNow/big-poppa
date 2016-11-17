@@ -13,15 +13,14 @@ const PublishDailyTasksSchema = require('workers/time.one-day.passed').jobSchema
 
 describe('#time.one-day.passed', () => {
   let validJob
-  let rabbitMQStub
 
   beforeEach(() => {
     validJob = {}
-    rabbitMQStub = sinon.stub(rabbitMQ.prototype, 'publishTask').resolves()
+    sinon.stub(rabbitMQ, 'publishTask').resolves()
   })
 
   afterEach(() => {
-    rabbitMQStub.restore()
+    rabbitMQ.publishTask.restore()
   })
 
   describe('Validation', () => {
@@ -31,7 +30,7 @@ describe('#time.one-day.passed', () => {
 
   describe('Errors', () => {
     it('should throw `WorkerStopError` if `rabbitMQ.publishTask` does not resolve', done => {
-      rabbitMQStub.rejects()
+      rabbitMQ.publishTask.rejects()
 
       PublishDailyTasksWorker(validJob)
         .asCallback(err => {
@@ -46,8 +45,9 @@ describe('#time.one-day.passed', () => {
     it('should publish a task using rabbitMQ', () => {
       return PublishDailyTasksWorker(validJob)
         .then(() => {
-          sinon.assert.calledOnce(rabbitMQStub)
+          sinon.assert.calledOnce(rabbitMQ.publishTask)
           sinon.assert.calledWith(
+            rabbitMQ.publishTask,
             'organization.cleanup',
             {}
           )
