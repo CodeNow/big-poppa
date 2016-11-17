@@ -48,14 +48,12 @@ describe('#organization.cleanup', () => {
   })
 
   describe('Validation', () => {
-    it('should validate if a valid job is passed', done => {
-      Joi.validateAsync(validJob, OrganizationCleanupSchema)
-        .asCallback(done)
-    })
+    it('should validate if a valid job is passed', () =>
+      Joi.validateAsync(validJob, OrganizationCleanupSchema))
   })
 
   describe('Errors', () => {
-    it('should throw a `WorkerStopError` if a `Organization.collection.query.fetch` throws a `NotFoundError`', done => {
+    it('should throw `WorkerStopError` if `Organization.collection.query.fetch` throws `NotFoundError`', done => {
       let thrownErr = new NotFoundError('Organization not found')
       fetchStub.rejects(thrownErr)
 
