@@ -185,6 +185,14 @@ describe('HTTP /organization', () => {
       expect(obj.allowed).to.equal(false)
     })
 
+    it('should return `allowed` false if `isPermanentlyBanned` is true', () => {
+      Object.assign(originalObject, {
+      isPermanentlyBanned: true
+    })
+    let obj = OrganizationRouter.transformSingleOrg(originalObject)
+    expect(obj.allowed).to.equal(false)
+    })
+
     it('should return `allowed` false if is_active is false', () => {
       Object.assign({}, {
         trialEnd: now.clone().subtract(1, 'minute').toISOString(),
