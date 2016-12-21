@@ -14,6 +14,7 @@ module.exports = class TestUtil {
   static truncateAllTables () {
     return knex('organizations_users').truncate()
       .then(() => {
+        console.log('truncating organizations_users 12-20')
         return Promise.all([
           // Cannot truncate because of foreign key constraint
           knex('organizations').del(),
