@@ -174,6 +174,16 @@ describe('HTTP /organization', () => {
       expect(obj.allowed).to.equal(true)
     })
 
+    it('should return `allowed` true if `isPermanentlyBanned` is false', () => {
+      Object.assign(originalObject, {
+        isPermanentlyBanned: false,
+        trialEnd: now.clone().subtract(1, 'minute').toISOString(),
+        activePeriodEnd: now.clone().add(1, 'minute').toISOString()
+      })
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.allowed).to.equal(true)
+    })
+
     it('should return `allowed` false if both `isInActivePeriod` and `isInTrial` are false', () => {
       Object.assign(originalObject, {
         trialEnd: now.clone().subtract(1, 'minute').toISOString(),
@@ -187,10 +197,10 @@ describe('HTTP /organization', () => {
 
     it('should return `allowed` false if `isPermanentlyBanned` is true', () => {
       Object.assign(originalObject, {
-      isPermanentlyBanned: true
-    })
-    let obj = OrganizationRouter.transformSingleOrg(originalObject)
-    expect(obj.allowed).to.equal(false)
+        isPermanentlyBanned: true
+      })
+      let obj = OrganizationRouter.transformSingleOrg(originalObject)
+      expect(obj.allowed).to.equal(false)
     })
 
     it('should return `allowed` false if is_active is false', () => {
