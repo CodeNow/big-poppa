@@ -19,6 +19,7 @@
     "init-db": "createuser -s -d big_poppa; createdb big_poppa; createdb big_poppa_test",
     "drop-db": "dropdb big_poppa && dropdb big_poppa_test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
+    "script": "node lib/script.js",
     "start-worker": "npm run migrate-dev && NODE_PATH=./lib node lib/workers",
     "start-http": "npm run migrate-dev && NODE_PATH=./lib node lib/http",
     "rollback": "npm run rollback-dev && npm run rollback-test",
@@ -47,7 +48,7 @@
   "author": "",
   "dependencies": {
     "101": "^1.6.1",
-    "@runnable/orion": "^1.3.1",
+    "@runnable/orion": "^1.4.1",
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "bookshelf": "^0.9.5",
