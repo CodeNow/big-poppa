@@ -45,7 +45,7 @@ describe('#time.one-day.passed', () => {
     it('should publish a task using rabbitMQ', () => {
       return PublishDailyTasksWorker(validJob)
         .then(() => {
-          sinon.assert.calledOnce(rabbitMQ.publishTask)
+          sinon.assert.calledTwice(rabbitMQ.publishTask)
           sinon.assert.calledWith(
             rabbitMQ.publishTask,
             'organization.cleanup',
