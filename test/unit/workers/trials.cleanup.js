@@ -12,6 +12,7 @@ const bookshelf = require('models').bookshelf
 const Organization = require('models/organization')
 
 const NotFoundError = require('errors/not-found-error')
+const WorkerError = require('error-cat/errors/worker-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const TrialsCleanupWorker = require('workers/trials.cleanup').task
 const TrialsCleanupSchema = require('workers/trials.cleanup').jobSchema
@@ -32,13 +33,7 @@ describe('#trials.cleanup', () => {
 
     companies = {
       companies: [ {
-        type: 'company',
-        company_id: 'fakeorg',
-        id: '582f554f509d0e1234e8c14f',
-        app_id: 'xs5g95pd',
         name: 'fakeorg',
-        tags: { type: 'tag.list', tags: [] },
-        segments: { type: 'segment.list', segments: [] },
         custom_attributes: { github_id: 10871234 }
       } ],
       pages: {
@@ -77,6 +72,28 @@ describe('#trials.cleanup', () => {
         .asCallback(err => {
           expect(err).to.exist
           expect(err).to.be.an.instanceof(WorkerStopError)
+          done()
+        })
+    })
+
+    it('should throw `WorkerError` if Intercom returns a company with missing orgId', done => {
+      let badCompanies = {
+        companies: [ {
+          name: 'fakeorg',
+          custom_attributes: { github_id: null }
+        } ],
+        pages: {
+          page: 1,
+          total_pages: 1
+        }
+      }
+
+      companiesStub.resolves(badCompanies)
+
+      TrialsCleanupWorker(validJob)
+        .asCallback(err => {
+          expect(err).to.exist
+          expect(err).to.be.an.instanceof(WorkerError)
           done()
         })
     })
