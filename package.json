@@ -19,7 +19,6 @@
     "init-db": "createuser -s -d big_poppa; createdb big_poppa; createdb big_poppa_test",
     "drop-db": "dropdb big_poppa && dropdb big_poppa_test",
     "migrate": "npm run migrate-dev && npm run migrate-test",
-    "script": "node lib/script.js",
     "start-worker": "npm run migrate-dev && NODE_PATH=./lib node lib/workers",
     "start-http": "npm run migrate-dev && NODE_PATH=./lib node lib/http",
     "rollback": "npm run rollback-dev && npm run rollback-test",
