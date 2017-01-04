@@ -12,7 +12,6 @@ const bookshelf = require('models').bookshelf
 const Organization = require('models/organization')
 
 const NotFoundError = require('errors/not-found-error')
-const WorkerError = require('error-cat/errors/worker-error')
 const WorkerStopError = require('error-cat/errors/worker-stop-error')
 const TrialsCleanupWorker = require('workers/trials.cleanup').task
 const TrialsCleanupSchema = require('workers/trials.cleanup').jobSchema
@@ -76,7 +75,7 @@ describe('#trials.cleanup', () => {
         })
     })
 
-    it('should throw `WorkerError` if Intercom returns a company with missing orgId', done => {
+    it('should not throw `WorkerError` if Intercom returns a company with missing orgId', done => {
       let badCompanies = {
         companies: [ {
           name: 'fakeorg',
@@ -92,8 +91,7 @@ describe('#trials.cleanup', () => {
 
       TrialsCleanupWorker(validJob)
         .asCallback(err => {
-          expect(err).to.exist
-          expect(err).to.be.an.instanceof(WorkerError)
+          expect(err).to.not.exist
           done()
         })
     })
