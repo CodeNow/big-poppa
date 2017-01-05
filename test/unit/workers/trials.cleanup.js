@@ -46,8 +46,8 @@ describe('#trials.cleanup', () => {
     transactionStub = sinon.stub(bookshelf, 'transaction', (cb) => {
       return Promise.resolve(cb(transaction))
     })
-    fetchOrgByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves({ org })
-    orgSaveStub = sinon.stub(Organization.prototype, 'save').resolves()
+    fetchOrgByGithubIdStub = sinon.stub(Organization, 'fetchByGithubId').resolves(org)
+    orgSaveStub = sinon.stub(Organization.prototype, 'save').resolves(org)
 
     companiesStub = sinon.stub(orion.companies, 'listBy').resolves(companies)
   })
