@@ -1,0 +1,5 @@
+FROM rabbitmq:3.4.3-management
+
+ADD [".", "/arithmancy"]
+WORKDIR /arithmancy
+ADD ./rabbitmq.config /etc/rabbitmq/rabbitmq.config

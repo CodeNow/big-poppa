@@ -1,0 +1,15 @@
+FROM node:4.4.7
+
+ENV NPM_TOKEN=c76363e9-78e0-4667-82ac-e2ac01efcfe2
+
+RUN apt-get update && apt-get install postgresql-client -y
+
+ADD ./package.json /big-poppa/package.json
+WORKDIR /big-poppa
+
+RUN echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
+RUN npm install
+ADD [".", "/big-poppa"]
+
+CMD sleep 20; npm run migrate-test && npm test
+

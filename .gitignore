@@ -6,3 +6,4 @@ coverage
 coverage-unit
 coverage-functional
 coverage-integration
+.idea/
