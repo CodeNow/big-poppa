@@ -12,4 +12,3 @@ RUN npm install
 ADD [".", "/big-poppa"]
 
 CMD sleep 20; npm run migrate-test && npm test
-
