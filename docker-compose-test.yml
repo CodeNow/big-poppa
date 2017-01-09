@@ -8,7 +8,6 @@ services:
       - 'pg'
       - 'rabbit'
     environment:
-      - PG_USER=big_poppa
       - POSTGRES_POOL_MIN=1
       - POSTGRES_POOL_MAX=20
       - POSTGRES_CONNECT_STRING=postgres://big_poppa@pg/big_poppa
