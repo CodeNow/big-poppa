@@ -1,0 +1,25 @@
+version: '2'
+services:
+  big-poppa-test:
+    build:
+      context: .
+      dockerfile: Dockerfile_test
+    links:
+      - 'pg'
+      - 'rabbit'
+    environment:
+      - POSTGRES_POOL_MIN=1
+      - POSTGRES_POOL_MAX=20
+      - POSTGRES_CONNECT_STRING=postgres://big_poppa@pg/big_poppa
+      - RABBITMQ_HOSTNAME=rabbit
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=5WE5wsEQmfw9sLsppJ4CEq9Auea8mPC4kgVt3xYqKxbYHPfP
+      - RABBITMQ_PASSWORD=h7n972sPLs5tWGCWe6QPSCnaxDWjvnpEFEA9c9mBqauH3f22
+  pg:
+    build:
+      context: .
+      dockerfile: env-config/Dockerfile_pg
+  rabbit:
+    build:
+      context: ./env-config
+      dockerfile: Dockerfile_rabbitmq
