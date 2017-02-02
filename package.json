@@ -1,6 +1,6 @@
 {
   "name": "big-poppa",
-  "version": "0.17.3",
+  "version": "0.18.0",
   "description": "User management and billing",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,9 @@
     "migrate-dev": "knex-migrate up",
     "rollback-dev": "knex-migrate down",
     "migrate-test": "NODE_ENV=test knex-migrate up",
-    "rollback-test": "NODE_ENV=test knex-migrate down"
+    "rollback-test": "NODE_ENV=test knex-migrate down",
+    "compose-test-up": "docker-compose -f docker-compose-test.yml up --build",
+    "compose-test-down": "docker-compose -f docker-compose-test.yml down"
   },
   "directories": {
     "test": "test"
@@ -47,7 +49,7 @@
   "author": "",
   "dependencies": {
     "101": "^1.6.1",
-    "@runnable/orion": "^1.3.1",
+    "@runnable/orion": "^1.4.1",
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "bookshelf": "^0.9.5",
@@ -73,7 +75,7 @@
     "@runnable/big-poppa-client": "^0.2.0",
     "debug": "^2.2.0",
     "istanbul": "^0.4.4",
-    "mehpi": "git+ssh://git@github.com:Runnable/mehpi.git#v2.0.1",
+    "mehpi": "https://github.com/Runnable/mehpi.git#v2.0.1",
     "mocha": "^2.5.3",
     "mongodb": "^2.1.17",
     "request-promise": "^4.1.1",

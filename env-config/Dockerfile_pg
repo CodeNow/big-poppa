@@ -1,0 +1,9 @@
+# Change version to desired: (i.e. 9.3, 9.4, 9.5)
+FROM runnable/postgres:9.4
+
+# Set recommended environment variables
+ENV POSTGRES_USER big_poppa
+ENV POSTGRES_DB big_poppa
+
+# Run the initialization script
+RUN gosu postgres /init.sh
