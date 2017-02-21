@@ -163,7 +163,7 @@ describe('Organization', () => {
           sinon.assert.calledOnce(setStub)
           sinon.assert.calledWith(
             setStub,
-            { name: userName, isPersonalAccount: true, prBotEnabled: true }
+            { name: userName, isPersonalAccount: true, prBotEnabled: true, firstDockCreated: true }
           )
         })
         .asCallback(done)
