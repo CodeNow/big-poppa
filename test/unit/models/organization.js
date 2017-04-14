@@ -37,6 +37,7 @@ describe('Organization', () => {
     })
     afterEach(() => {
       setStub.reset()
+      process.env.ON_PREM = false
     })
 
     describe('#initialize', () => {
@@ -477,6 +478,22 @@ describe('Organization', () => {
               saveStub,
               sinon.match.object,
               opts
+            )
+          })
+          .asCallback(done)
+      })
+
+      it('should set first dock created true if on_prem', done => {
+        process.env.ON_PREM = true
+        let oneYearFromNow = moment().add(1, 'year').utc().toDate()
+        Organization.create(githubId, user)
+          .then(() => {
+            sinon.assert.calledOnce(saveStub)
+            sinon.assert.calledWithExactly(
+              saveStub,
+              sinon.match.has('firstDockCreated', true)
+                .and(sinon.match.has('activePeriodEnd', oneYearFromNow)),
+              undefined
             )
           })
           .asCallback(done)
