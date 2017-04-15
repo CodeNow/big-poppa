@@ -218,10 +218,10 @@ describe('HTTP /organization', () => {
     })
 
     it('should return `isOnPrem` true if `process.env.ON_PREM` is true', () => {
-      process.env.ON_PREM = true
+      process.env.ON_PREM = 'true'
       let obj = OrganizationRouter.transformSingleOrg(originalObject)
       expect(obj.isOnPrem).to.equal(true)
-      process.env.ON_PREM = false
+      process.env.ON_PREM = 'false'
     })
   })
 

@@ -37,7 +37,7 @@ describe('Organization', () => {
     })
     afterEach(() => {
       setStub.reset()
-      process.env.ON_PREM = false
+      process.env.ON_PREM = 'false'
     })
 
     describe('#initialize', () => {
@@ -484,7 +484,7 @@ describe('Organization', () => {
       })
 
       it('should set first dock created true if on_prem', done => {
-        process.env.ON_PREM = true
+        process.env.ON_PREM = 'true'
         let oneYearFromNow = moment().add(1, 'year').utc().toDate()
         Organization.create(githubId, user)
           .then(() => {
