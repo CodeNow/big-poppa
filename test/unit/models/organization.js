@@ -37,11 +37,7 @@ describe('Organization', () => {
     })
     afterEach(() => {
       setStub.reset()
-<<<<<<< HEAD
       process.env.ON_PREM = 'false'
-=======
-      process.env.ON_PREM = false
->>>>>>> origin/master
     })
 
     describe('#initialize', () => {
