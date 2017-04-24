@@ -4,7 +4,7 @@ require('loadenv')()
 const log = require('../lib/util/logger').child({ module: 'migrations/add_private_registry' })
 
 const TABLE_NAME = 'organizations'
-const NEW_PROPERTY = 'privateRegistryUrl'
+const NEW_PROPERTY = 'private_registry_url'
 
 exports.up = function (knex, Promise) {
   var modifyTable = knex.schema.table(TABLE_NAME, function addField (table) {
