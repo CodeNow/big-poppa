@@ -8,10 +8,11 @@ const expect = require('chai').expect
 const express = require('express')
 const moment = require('moment')
 
+const DockerRegistry = require('util/docker-registry')
 const NotFoundError = require('errors/not-found-error')
 const Organization = require('models/organization')
-const User = require('models/user')
 const OrganizationRouter = require('http/routes/organization')
+const User = require('models/user')
 
 describe('HTTP /organization', () => {
   let collectionConstructorStub
@@ -369,10 +370,15 @@ describe('HTTP /organization', () => {
     let stripeCustomerId = 234
 
     beforeEach(() => {
+      sinon.stub(DockerRegistry, 'validateCredentials').resolves()
       requestStub = {
         params: { id: orgId },
         body: { stripeCustomerId: stripeCustomerId }
       }
+    })
+
+    afterEach(() => {
+      DockerRegistry.validateCredentials.restore()
     })
 
     it('should fetch with `fetchById`', () => {
@@ -465,6 +471,29 @@ describe('HTTP /organization', () => {
                 testMetadataProperty: true,
                 hasAha: true
               }
+            },
+            { patch: true, transacting: sinon.match.func }
+          )
+        })
+    })
+
+    it('should validate credentials when patching docker url', () => {
+      requestStub.body = {
+        privateRegistryUrl: 'https://example.com',
+        privateRegistryUsername: 'username',
+        privateRegistryPassword: 'password'
+      }
+
+      return OrganizationRouter.patchOne(requestStub, responseStub)
+        .then(() => {
+          sinon.assert.calledOnce(DockerRegistry.validateCredentials)
+          sinon.assert.calledWithExactly(DockerRegistry.validateCredentials, 'https://example.com', 'username', 'password')
+          sinon.assert.calledOnce(orgMock.save)
+          sinon.assert.calledWithExactly(
+            orgMock.save,
+            {
+              privateRegistryUrl: 'https://example.com',
+              privateRegistryUsername: 'username'
             },
             { patch: true, transacting: sinon.match.func }
           )
