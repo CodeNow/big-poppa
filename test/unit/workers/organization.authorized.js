@@ -26,6 +26,7 @@ describe('#organization.authorized', () => {
   let githubId = 123
   let creatorGithubId = 123231
   let creatorUsername = 'thejsj'
+  let isPersonalAccount = false
 
   let newOrg
   let user
@@ -51,6 +52,7 @@ describe('#organization.authorized', () => {
       id: orgId,
       githubId: githubOrganizationFixture.id,
       name: githubOrganizationFixture.login,
+      isPersonalAccount,
       get: sinon.spy(function (key) {
         return newOrg[key]
       })
@@ -248,7 +250,8 @@ describe('#organization.authorized', () => {
               organization: {
                 id: orgId,
                 githubId: githubOrganizationFixture.id,
-                name: githubOrganizationFixture.login
+                name: githubOrganizationFixture.login,
+                isPersonalAccount
               },
               creator: {
                 githubId: creatorGithubId,
