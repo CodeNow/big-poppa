@@ -485,14 +485,14 @@ describe('Organization', () => {
 
       it('should set first dock created true if on_prem', done => {
         process.env.ON_PREM = 'true'
-        let oneYearFromNow = moment().add(1, 'year').utc().toDate()
+        let oneYearFromNow = moment().add(1, 'year').utc()
         Organization.create(githubId, user)
           .then(() => {
             sinon.assert.calledOnce(saveStub)
+            expect(oneYearFromNow.isSame(saveStub.args[0][0].activePeriodEnd, 'minutes')).to.equal(true)
             sinon.assert.calledWithExactly(
               saveStub,
-              sinon.match.has('firstDockCreated', true)
-                .and(sinon.match.has('activePeriodEnd', oneYearFromNow)),
+              sinon.match.has('firstDockCreated', true),
               undefined
             )
           })
