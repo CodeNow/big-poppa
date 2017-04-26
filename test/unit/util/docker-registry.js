@@ -13,16 +13,16 @@ describe('DockerRegistry', () => {
     const username = 'username'
     const password = 'password'
     beforeEach((done) => {
-      sinon.stub(dockerRegistryClient, 'login').yields({})
+      sinon.stub(dockerRegistryClient, 'login').yields(null, {})
       done()
     })
     it('should trigger login on docker registry client', (done) => {
       DockerRegistry.validateCredentials(url, username, password)
-        .then(() => {
+        .tap(() => {
           sinon.assert.calledOnce(dockerRegistryClient.login)
           sinon.assert.calledWith(dockerRegistryClient.login, {
             index: url,
-            log: sinon.match.object(),
+            log: sinon.match.object,
             password,
             username
           })
