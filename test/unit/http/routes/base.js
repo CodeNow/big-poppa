@@ -7,11 +7,13 @@ const expect = require('chai').expect
 
 const Joi = Promise.promisifyAll(require('joi'))
 
-const NotFoundError = require('errors/not-found-error')
-const GithubEntityError = require('errors/github-entity-error')
-const NotNullError = require('errors/not-null-error')
-const UniqueError = require('errors/unique-error')
 const ForeignKeyError = require('errors/foreign-key-error')
+const GithubEntityError = require('errors/github-entity-error')
+const NotFoundError = require('errors/not-found-error')
+const NotNullError = require('errors/not-null-error')
+const RegistryDoesNotSupportLoginError = require('errors/registry-does-not-support-login-error')
+const UnauthorizedError = require('errors/unauthorized-error')
+const UniqueError = require('errors/unique-error')
 
 const BaseRouter = require('http/routes/base')
 
@@ -180,7 +182,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 400,
           message: sinon.match(/unique.*error/i),
-          err: err
+          err
         }
       )
     })
@@ -196,7 +198,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 400,
           message: sinon.match(/github.*error/i),
-          err: err
+          err
         }
       )
     })
@@ -212,7 +214,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 400,
           message: sinon.match(/notnull.*error/i),
-          err: err
+          err
         }
       )
     })
@@ -228,7 +230,7 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 400,
           message: sinon.match(/foreignkey.*error/i),
-          err: err
+          err
         }
       )
     })
@@ -244,7 +246,39 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 404,
           message: sinon.match(/not.*found/i),
-          err: err
+          err
+        }
+      )
+    })
+
+    it('should throw a 401 error if there is no an unauthorized error', () => {
+      let err = new UnauthorizedError('You are unauthorized')
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 401)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          statusCode: 401,
+          message: sinon.match(/unauthorized/i),
+          err
+        }
+      )
+    })
+
+    it('should throw a 404 error if the registry does not support login', () => {
+      let err = new RegistryDoesNotSupportLoginError('Registry does not support login')
+      BaseRouter.errorHandler(responseStub, err)
+      sinon.assert.calledOnce(responseStub.status)
+      sinon.assert.calledWithExactly(responseStub.status, 404)
+      sinon.assert.calledOnce(responseStub.json)
+      sinon.assert.calledWithExactly(
+        responseStub.json,
+        {
+          statusCode: 404,
+          message: sinon.match(/Registry.*login/i),
+          err
         }
       )
     })
