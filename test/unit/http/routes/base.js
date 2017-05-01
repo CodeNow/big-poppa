@@ -271,7 +271,7 @@ describe('HTTP Base Router', () => {
       let err = new RegistryDoesNotSupportLoginError('Registry does not support login')
       BaseRouter.errorHandler(responseStub, err)
       sinon.assert.calledOnce(responseStub.status)
-      sinon.assert.calledWithExactly(responseStub.status, 401)
+      sinon.assert.calledWithExactly(responseStub.status, 404)
       sinon.assert.calledOnce(responseStub.json)
       sinon.assert.calledWithExactly(
         responseStub.json,
