@@ -4,7 +4,7 @@ const DockerRegistry = require('util/docker-registry')
 const dockerRegistryClient = require('docker-registry-client')
 const expect = require('chai').expect
 const Promise = require('bluebird')
-const RegistryDoesNotSupportLoginError =  require('errors/registry-does-not-support-login-error')
+const RegistryDoesNotSupportLoginError = require('errors/registry-does-not-support-login-error')
 const sinon = require('sinon')
 const UnauthorizedError = require('errors/unauthorized-error')
 

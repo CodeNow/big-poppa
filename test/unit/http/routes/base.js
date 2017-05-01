@@ -11,7 +11,7 @@ const ForeignKeyError = require('errors/foreign-key-error')
 const GithubEntityError = require('errors/github-entity-error')
 const NotFoundError = require('errors/not-found-error')
 const NotNullError = require('errors/not-null-error')
-const RegistryDoesNotSupportLoginError =  require('errors/registry-does-not-support-login-error')
+const RegistryDoesNotSupportLoginError = require('errors/registry-does-not-support-login-error')
 const UnauthorizedError = require('errors/unauthorized-error')
 const UniqueError = require('errors/unique-error')
 
