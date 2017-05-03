@@ -500,7 +500,7 @@ describe('Organization', () => {
           .asCallback(done)
       })
     })
-    describe('#validateDockerRegistryCredentials', () => {
+    describe('#processDockerRegistryCredentials', () => {
       let validateCredentialsStub
       let rabbitStub
       let org
@@ -524,7 +524,7 @@ describe('Organization', () => {
       })
 
       it('should call validateCredentials with the right stuff', done => {
-        Organization.validateDockerRegistryCredentials(orgId, opts)
+        Organization.processDockerRegistryCredentials(orgId, opts)
           .then(() => {
             sinon.assert.calledOnce(validateCredentialsStub)
             sinon.assert.calledWithExactly(
@@ -538,7 +538,7 @@ describe('Organization', () => {
       })
 
       it('should call publishEvent with the right stuff', done => {
-        Organization.validateDockerRegistryCredentials(orgId, opts)
+        Organization.processDockerRegistryCredentials(orgId, opts)
           .then(() => {
             sinon.assert.calledOnce(validateCredentialsStub)
             sinon.assert.calledWithExactly(
@@ -554,7 +554,7 @@ describe('Organization', () => {
       })
 
       it('should delete the password from the optsr', done => {
-        Organization.validateDockerRegistryCredentials(org, opts)
+        Organization.processDockerRegistryCredentials(org, opts)
           .then(() => {
             expect(opts.privateRegistryPassword).to.not.exist
           })
@@ -564,7 +564,7 @@ describe('Organization', () => {
       describe('Skip on missing fields', () => {
         it('should skip everything if privateRegistryUrl is missing', done => {
           delete opts.privateRegistryUrl
-          Organization.validateDockerRegistryCredentials(org, opts)
+          Organization.processDockerRegistryCredentials(org, opts)
             .then(() => {
               sinon.assert.notCalled(validateCredentialsStub)
             })
@@ -572,7 +572,7 @@ describe('Organization', () => {
         })
         it('should skip everything if privateRegistryUsername is missing', done => {
           delete opts.privateRegistryUsername
-          Organization.validateDockerRegistryCredentials(org, opts)
+          Organization.processDockerRegistryCredentials(org, opts)
             .then(() => {
               sinon.assert.notCalled(validateCredentialsStub)
             })
@@ -580,7 +580,7 @@ describe('Organization', () => {
         })
         it('should skip everything if privateRegistryPassword is missing', done => {
           delete opts.privateRegistryPassword
-          Organization.validateDockerRegistryCredentials(org, opts)
+          Organization.processDockerRegistryCredentials(org, opts)
             .then(() => {
               sinon.assert.notCalled(validateCredentialsStub)
             })

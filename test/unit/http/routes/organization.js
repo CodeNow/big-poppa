@@ -369,7 +369,7 @@ describe('HTTP /organization', () => {
     let stripeCustomerId = 234
 
     beforeEach(() => {
-      sinon.stub(Organization, 'validateDockerRegistryCredentials').resolves()
+      sinon.stub(Organization, 'processDockerRegistryCredentials').resolves()
       requestStub = {
         params: { id: orgId },
         body: { stripeCustomerId: stripeCustomerId }
@@ -377,7 +377,7 @@ describe('HTTP /organization', () => {
     })
 
     afterEach(() => {
-      Organization.validateDockerRegistryCredentials.restore()
+      Organization.processDockerRegistryCredentials.restore()
     })
 
     it('should fetch with `fetchById`', () => {
@@ -485,15 +485,16 @@ describe('HTTP /organization', () => {
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
-          sinon.assert.calledOnce(Organization.validateDockerRegistryCredentials)
-          sinon.assert.calledWithExactly(Organization.validateDockerRegistryCredentials, requestStub.params.id, requestStub.body)
+          sinon.assert.calledOnce(Organization.processDockerRegistryCredentials)
+          sinon.assert.calledWithExactly(
+            Organization.processDockerRegistryCredentials,
+            requestStub.params.id,
+            requestStub.body
+          )
           sinon.assert.calledOnce(orgMock.save)
           sinon.assert.calledWithExactly(
             orgMock.save,
-            {
-              privateRegistryUrl: 'https://example.com',
-              privateRegistryUsername: 'username'
-            },
+            requestStub.body,
             { patch: true, transacting: sinon.match.func }
           )
         })
