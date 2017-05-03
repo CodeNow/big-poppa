@@ -8,7 +8,6 @@ const expect = require('chai').expect
 const express = require('express')
 const moment = require('moment')
 
-const DockerRegistry = require('util/docker-registry')
 const NotFoundError = require('errors/not-found-error')
 const Organization = require('models/organization')
 const OrganizationRouter = require('http/routes/organization')
@@ -370,7 +369,7 @@ describe('HTTP /organization', () => {
     let stripeCustomerId = 234
 
     beforeEach(() => {
-      sinon.stub(DockerRegistry, 'validateCredentials').resolves()
+      sinon.stub(Organization, 'validateDockerRegistryCredentials').resolves()
       requestStub = {
         params: { id: orgId },
         body: { stripeCustomerId: stripeCustomerId }
@@ -378,7 +377,7 @@ describe('HTTP /organization', () => {
     })
 
     afterEach(() => {
-      DockerRegistry.validateCredentials.restore()
+      Organization.validateDockerRegistryCredentials.restore()
     })
 
     it('should fetch with `fetchById`', () => {
@@ -486,8 +485,8 @@ describe('HTTP /organization', () => {
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
-          sinon.assert.calledOnce(DockerRegistry.validateCredentials)
-          sinon.assert.calledWithExactly(DockerRegistry.validateCredentials, 'https://example.com', 'username', 'password')
+          sinon.assert.calledOnce(Organization.validateDockerRegistryCredentials)
+          sinon.assert.calledWithExactly(Organization.validateDockerRegistryCredentials, requestStub.params.id, requestStub.body)
           sinon.assert.calledOnce(orgMock.save)
           sinon.assert.calledWithExactly(
             orgMock.save,
