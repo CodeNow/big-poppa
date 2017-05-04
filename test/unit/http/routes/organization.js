@@ -482,6 +482,12 @@ describe('HTTP /organization', () => {
         privateRegistryUsername: 'username',
         privateRegistryPassword: 'password'
       }
+      const body = {
+        privateRegistryUrl: 'https://example.com',
+        privateRegistryUsername: 'username'
+      }
+
+      sinon.stub(Organization, 'processDockerRegistryCredentials').resolves(body)
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
@@ -494,7 +500,7 @@ describe('HTTP /organization', () => {
           sinon.assert.calledOnce(orgMock.save)
           sinon.assert.calledWithExactly(
             orgMock.save,
-            requestStub.body,
+            body,
             { patch: true, transacting: sinon.match.func }
           )
         })
