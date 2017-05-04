@@ -7,6 +7,7 @@ const expect = require('chai').expect
 
 const bookshelf = require('models').bookshelf
 const BaseModel = require('models/base')
+const DockerRegistry = require('util/docker-registry')
 const moment = require('moment')
 const Organization = require('models/organization')
 const User = require('models/user')
@@ -497,6 +498,91 @@ describe('Organization', () => {
             )
           })
           .asCallback(done)
+      })
+    })
+    describe('#processDockerRegistryCredentials', () => {
+      let validateCredentialsStub
+      let rabbitStub
+      let org
+      const orgId = Math.floor(Math.random() * 100)
+      const password = 'asdasdasdasdasd'
+      let opts
+
+      beforeEach(() => {
+        validateCredentialsStub = sinon.stub(DockerRegistry, 'validateCredentials').resolves()
+        rabbitStub = sinon.stub(rabbitMQ, 'publishOrgRegistryPasswordSubmitted').resolves()
+        opts = {
+          privateRegistryUrl: 'asdasdasd',
+          privateRegistryUsername: 'sadfsdfsdfdsf',
+          privateRegistryPassword: password
+        }
+      })
+
+      afterEach(() => {
+        validateCredentialsStub.restore()
+        rabbitStub.restore()
+      })
+
+      it('should call validateCredentials with the right stuff', done => {
+        Organization.processDockerRegistryCredentials(orgId, opts)
+          .then(() => {
+            sinon.assert.calledOnce(validateCredentialsStub)
+            sinon.assert.calledWithExactly(
+              validateCredentialsStub,
+              opts.privateRegistryUrl,
+              opts.privateRegistryUsername,
+              password
+            )
+          })
+          .asCallback(done)
+      })
+
+      it('should call publishEvent with the right stuff', done => {
+        Organization.processDockerRegistryCredentials(orgId, opts)
+          .then(() => {
+            sinon.assert.calledOnce(validateCredentialsStub)
+            sinon.assert.calledWithExactly(
+              rabbitStub,
+              orgId,
+              password
+            )
+          })
+          .asCallback(done)
+      })
+
+      it('should delete the password from the optsr', done => {
+        Organization.processDockerRegistryCredentials(org, opts)
+          .then(() => {
+            expect(opts.privateRegistryPassword).to.not.exist
+          })
+          .asCallback(done)
+      })
+
+      describe('Skip on missing fields', () => {
+        it('should skip everything if privateRegistryUrl is missing', done => {
+          delete opts.privateRegistryUrl
+          Organization.processDockerRegistryCredentials(org, opts)
+            .then(() => {
+              sinon.assert.notCalled(validateCredentialsStub)
+            })
+            .asCallback(done)
+        })
+        it('should skip everything if privateRegistryUsername is missing', done => {
+          delete opts.privateRegistryUsername
+          Organization.processDockerRegistryCredentials(org, opts)
+            .then(() => {
+              sinon.assert.notCalled(validateCredentialsStub)
+            })
+            .asCallback(done)
+        })
+        it('should skip everything if privateRegistryPassword is missing', done => {
+          delete opts.privateRegistryPassword
+          Organization.processDockerRegistryCredentials(org, opts)
+            .then(() => {
+              sinon.assert.notCalled(validateCredentialsStub)
+            })
+            .asCallback(done)
+        })
       })
     })
   })

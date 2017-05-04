@@ -8,7 +8,6 @@ const expect = require('chai').expect
 const express = require('express')
 const moment = require('moment')
 
-const DockerRegistry = require('util/docker-registry')
 const NotFoundError = require('errors/not-found-error')
 const Organization = require('models/organization')
 const OrganizationRouter = require('http/routes/organization')
@@ -370,15 +369,15 @@ describe('HTTP /organization', () => {
     let stripeCustomerId = 234
 
     beforeEach(() => {
-      sinon.stub(DockerRegistry, 'validateCredentials').resolves()
       requestStub = {
         params: { id: orgId },
         body: { stripeCustomerId: stripeCustomerId }
       }
+      sinon.stub(Organization, 'processDockerRegistryCredentials').resolves(requestStub.body)
     })
 
     afterEach(() => {
-      DockerRegistry.validateCredentials.restore()
+      Organization.processDockerRegistryCredentials.restore()
     })
 
     it('should fetch with `fetchById`', () => {
@@ -434,6 +433,7 @@ describe('HTTP /organization', () => {
           hasAha: true
         }
       }
+      Organization.processDockerRegistryCredentials.resolves(requestStub.body)
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
@@ -456,6 +456,7 @@ describe('HTTP /organization', () => {
           hasAha: true
         }
       }
+      Organization.processDockerRegistryCredentials.resolves(requestStub.body)
 
       orgMock.attributes.metadata = {
         testMetadataProperty: true
@@ -483,18 +484,25 @@ describe('HTTP /organization', () => {
         privateRegistryUsername: 'username',
         privateRegistryPassword: 'password'
       }
+      const body = {
+        privateRegistryUrl: 'https://example.com',
+        privateRegistryUsername: 'username'
+      }
+
+      Organization.processDockerRegistryCredentials.resolves(body)
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
-          sinon.assert.calledOnce(DockerRegistry.validateCredentials)
-          sinon.assert.calledWithExactly(DockerRegistry.validateCredentials, 'https://example.com', 'username', 'password')
+          sinon.assert.calledOnce(Organization.processDockerRegistryCredentials)
+          sinon.assert.calledWithExactly(
+            Organization.processDockerRegistryCredentials,
+            requestStub.params.id,
+            requestStub.body
+          )
           sinon.assert.calledOnce(orgMock.save)
           sinon.assert.calledWithExactly(
             orgMock.save,
-            {
-              privateRegistryUrl: 'https://example.com',
-              privateRegistryUsername: 'username'
-            },
+            body,
             { patch: true, transacting: sinon.match.func }
           )
         })
