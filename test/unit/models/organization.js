@@ -510,7 +510,7 @@ describe('Organization', () => {
 
       beforeEach(() => {
         validateCredentialsStub = sinon.stub(DockerRegistry, 'validateCredentials').resolves()
-        rabbitStub = sinon.stub(rabbitMQ, 'publishEvent').resolves()
+        rabbitStub = sinon.stub(rabbitMQ, 'publishOrgRegistryPasswordSubmitted').resolves()
         opts = {
           privateRegistryUrl: 'asdasdasd',
           privateRegistryUsername: 'sadfsdfsdfdsf',
@@ -543,11 +543,8 @@ describe('Organization', () => {
             sinon.assert.calledOnce(validateCredentialsStub)
             sinon.assert.calledWithExactly(
               rabbitStub,
-              'org.registry.password.submitted',
-              sinon.match({
-                orgId: orgId,
-                password: password
-              })
+              orgId,
+              password
             )
           })
           .asCallback(done)
