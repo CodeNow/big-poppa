@@ -369,11 +369,11 @@ describe('HTTP /organization', () => {
     let stripeCustomerId = 234
 
     beforeEach(() => {
-      sinon.stub(Organization, 'processDockerRegistryCredentials').resolves()
       requestStub = {
         params: { id: orgId },
         body: { stripeCustomerId: stripeCustomerId }
       }
+      sinon.stub(Organization, 'processDockerRegistryCredentials').resolves(requestStub.body)
     })
 
     afterEach(() => {
@@ -433,6 +433,7 @@ describe('HTTP /organization', () => {
           hasAha: true
         }
       }
+      Organization.processDockerRegistryCredentials.resolves(requestStub.body)
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
@@ -455,6 +456,7 @@ describe('HTTP /organization', () => {
           hasAha: true
         }
       }
+      Organization.processDockerRegistryCredentials.resolves(requestStub.body)
 
       orgMock.attributes.metadata = {
         testMetadataProperty: true
@@ -487,7 +489,7 @@ describe('HTTP /organization', () => {
         privateRegistryUsername: 'username'
       }
 
-      sinon.stub(Organization, 'processDockerRegistryCredentials').resolves(body)
+      Organization.processDockerRegistryCredentials.resolves(body)
 
       return OrganizationRouter.patchOne(requestStub, responseStub)
         .then(() => {
