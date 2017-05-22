@@ -4,9 +4,7 @@ const DockerRegistry = require('util/docker-registry')
 const dockerRegistryClient = require('docker-registry-client')
 const expect = require('chai').expect
 const Promise = require('bluebird')
-const RegistryDoesNotSupportLoginError = require('errors/registry-does-not-support-login-error')
 const sinon = require('sinon')
-const UnauthorizedError = require('errors/unauthorized-error')
 
 require('sinon-as-promised')(Promise)
 
@@ -37,26 +35,6 @@ describe('DockerRegistry', () => {
           })
         })
         .asCallback(done)
-    })
-    it('should handle registry authentication failures', (done) => {
-      dockerRegistryClient.login.yields(null, {}, {
-        statusCode: 401
-      })
-      DockerRegistry.validateCredentials(url, username, password)
-        .asCallback((err) => {
-          expect(err).to.be.instanceOf(UnauthorizedError)
-          done()
-        })
-    })
-    it('should handle registry unsupported failures', (done) => {
-      dockerRegistryClient.login.yields(null, {}, {
-        statusCode: 404
-      })
-      DockerRegistry.validateCredentials(url, username, password)
-        .asCallback((err) => {
-          expect(err).to.be.instanceOf(RegistryDoesNotSupportLoginError)
-          done()
-        })
     })
     it('should handle generic errors', (done) => {
       const myError = new Error('GENERIC ERROR')
