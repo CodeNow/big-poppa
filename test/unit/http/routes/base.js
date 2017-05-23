@@ -11,7 +11,6 @@ const ForeignKeyError = require('errors/foreign-key-error')
 const GithubEntityError = require('errors/github-entity-error')
 const NotFoundError = require('errors/not-found-error')
 const NotNullError = require('errors/not-null-error')
-const RegistryDoesNotSupportLoginError = require('errors/registry-does-not-support-login-error')
 const UnauthorizedError = require('errors/unauthorized-error')
 const UniqueError = require('errors/unique-error')
 
@@ -262,22 +261,6 @@ describe('HTTP Base Router', () => {
         {
           statusCode: 401,
           message: sinon.match(/unauthorized/i),
-          err
-        }
-      )
-    })
-
-    it('should throw a 404 error if the registry does not support login', () => {
-      let err = new RegistryDoesNotSupportLoginError('Registry does not support login')
-      BaseRouter.errorHandler(responseStub, err)
-      sinon.assert.calledOnce(responseStub.status)
-      sinon.assert.calledWithExactly(responseStub.status, 404)
-      sinon.assert.calledOnce(responseStub.json)
-      sinon.assert.calledWithExactly(
-        responseStub.json,
-        {
-          statusCode: 404,
-          message: sinon.match(/Registry.*login/i),
           err
         }
       )
