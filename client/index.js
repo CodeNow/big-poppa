@@ -55,7 +55,8 @@ module.exports = class BigPoppaClient extends ApiClient {
     return Promise.try(() => {
       if (res.statusCode >= 400) {
         throw new BigPoppaClientError(res.body.err, res.body.message, {
-          orignalError: res.body
+          originalError: res.body,
+          statusCode: res.statusCode
         })
       }
       return res
