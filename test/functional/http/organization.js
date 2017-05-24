@@ -500,9 +500,9 @@ describe('HTTP Organization Functional Test', () => {
             })
         })
         .asCallback(err => {
-          expect(err).to.have.deep.property('data.orignalError.statusCode', 400)
-          expect(err.data.orignalError.message).match(/validation.*error/i)
-          expect(err.data.orignalError.message).match(/metadata.*aha.*boolean/i)
+          expect(err).to.have.deep.property('data.originalError.statusCode', 400)
+          expect(err.data.originalError.message).match(/validation.*error/i)
+          expect(err.data.originalError.message).match(/metadata.*aha.*boolean/i)
           done()
         })
     })

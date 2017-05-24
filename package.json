@@ -55,6 +55,7 @@
     "bookshelf": "^0.9.5",
     "bunyan": "^1.8.1",
     "chai": "^3.5.0",
+    "continuation-local-storage": "^3.2.0",
     "debug": "^2.2.0",
     "docker-registry-client": "^3.2.6",
     "error-cat": "^3.0.0",
@@ -79,6 +80,7 @@
     "mehpi": "https://github.com/Runnable/mehpi.git#v2.0.1",
     "mocha": "^2.5.3",
     "mongodb": "^2.1.17",
+    "pre-commit": "^1.2.2",
     "request-promise": "^4.1.1",
     "simple-api-client": "^0.6.2",
     "sinon": "^1.17.4",
@@ -88,5 +90,8 @@
     "superagent-promise-plugin": "^3.2.0",
     "supertest": "^1.2.0",
     "supertest-as-promised": "^3.2.0"
-  }
+  },
+  "pre-commit": [
+    "lint"
+  ]
 }
